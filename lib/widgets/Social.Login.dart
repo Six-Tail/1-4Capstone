@@ -11,7 +11,7 @@ class SocialLogin extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     // Calculate the size for the icons based on the screen width
-    final iconSize = screenWidth * 0.1; // Adjust the factor as needed
+    final iconSize = screenWidth * 0.14; // Adjust the factor as needed
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -26,7 +26,7 @@ class SocialLogin extends StatelessWidget {
                 }
               },
               child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                margin: const EdgeInsets.symmetric(horizontal: 20.0),
                 width: iconSize,
                 height: iconSize,
                 decoration: const BoxDecoration(
@@ -52,7 +52,7 @@ class SocialLogin extends StatelessWidget {
                 }
               },
               child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                margin: const EdgeInsets.symmetric(horizontal: 20.0),
                 width: iconSize,
                 height: iconSize,
                 decoration: const BoxDecoration(
@@ -78,7 +78,7 @@ class SocialLogin extends StatelessWidget {
                 }
               },
               child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                margin: const EdgeInsets.symmetric(horizontal: 20.0),
                 width: iconSize,
                 height: iconSize,
                 decoration: const BoxDecoration(
@@ -105,10 +105,10 @@ class SocialLogin extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.black26,
-            fontSize: 15,
+            fontSize: 13,
             fontFamily: 'Roboto',
             fontWeight: FontWeight.w700,
-            height: 1.5, // Changed from 0.09 to 1.5 for proper line height
+            height: 1, // Changed from 0.09 to 1.5 for proper line height
             letterSpacing: 0.25,
           ),
         ),

@@ -1,13 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; // Import GetX package
 import 'package:todobest_home/utils/Main.Colors.dart';
-import 'package:todobest_home/screen/Login.Screen.dart';
 
-import '../screen/Login.Screen.dart'; // Import your LoginScreen
-
-class LoginButton extends StatelessWidget {
-  const LoginButton({super.key});
+class LoginScreenButton extends StatelessWidget {
+  const LoginScreenButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +15,6 @@ class LoginButton extends StatelessWidget {
         if (kDebugMode) {
           print('Login');
         }
-        Get.to(() => const LoginScreen()); // Navigate to LoginScreen
       },
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
@@ -35,7 +30,7 @@ class LoginButton extends StatelessWidget {
           ),
         ),
         child: Text(
-          '기존 계정으로 로그인',
+          '로그인',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: MainColors.textColor,

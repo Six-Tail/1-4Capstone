@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:todobest_home/screen/Loading.Screen.dart';
+import 'package:todobest_home/screen/First.Screen.dart';
 
 void main() {
   runApp(const App());
@@ -13,7 +13,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return const GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoadingScreen(),
+      home: FirstScreen(),
     );
   }
 }

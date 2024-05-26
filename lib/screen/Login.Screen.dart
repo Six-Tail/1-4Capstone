@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:todobest_home/utils/Main.Colors.dart';
-import 'package:todobest_home/widgets/Login.Button.dart';
-import 'package:todobest_home/widgets/Sign-Up.Button.dart';
-import 'package:todobest_home/widgets/Social.Login.dart';
+import 'package:todobest_home/widgets/Login.TextBox.dart';
+import 'package:todobest_home/widgets/LoginScreen.Button.dart';
+import 'package:todobest_home/widgets/SignUp.TextBox.dart';
 
-class FirstScreen extends StatelessWidget {
-  const FirstScreen({super.key});
+import '../widgets/Social.Login.dart';
+
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,6 +15,10 @@ class FirstScreen extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('로그인 화면'),
+        backgroundColor: MainColors.mainColor,
+      ),
       backgroundColor: MainColors.mainColor,
       body: SingleChildScrollView(
         child: SafeArea(
@@ -22,7 +28,7 @@ class FirstScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(100.0),
+                  padding: const EdgeInsets.all(45.0),
                   alignment: Alignment.center,
                   child: Text(
                     'ToDoBest',
@@ -33,19 +39,10 @@ class FirstScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text(
-                  '환영합니다!',
-                  style: TextStyle(
-                    color: const Color(0xFF171D1B),
-                    fontSize: screenWidth * 0.08,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.05),
-                const SignUpButton(),
-                SizedBox(height: screenHeight * 0.02),
-                const LoginButton(),
+                SizedBox(height: screenHeight * 0.03),
+                const LoginTextBox(),
+                SizedBox(height: screenHeight * 0.01),
+                const LoginScreenButton(),
                 SizedBox(height: screenHeight * 0.03),
                 Column(
                   children: [

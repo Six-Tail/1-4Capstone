@@ -1,13 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; // Import GetX package
 import 'package:todobest_home/utils/Main.Colors.dart';
-import 'package:todobest_home/screen/Login.Screen.dart';
 
-import '../screen/Login.Screen.dart'; // Import your LoginScreen
-
-class LoginButton extends StatelessWidget {
-  const LoginButton({super.key});
+class SignUpScreenButton extends StatelessWidget {
+  const SignUpScreenButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +13,8 @@ class LoginButton extends StatelessWidget {
     return InkWell(
       onTap: () {
         if (kDebugMode) {
-          print('Login');
+          print('Sign-Up');
         }
-        Get.to(() => const LoginScreen()); // Navigate to LoginScreen
       },
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
@@ -28,20 +23,23 @@ class LoginButton extends StatelessWidget {
         height: screenHeight * 0.068,
         width: screenWidth * 0.8,
         decoration: ShapeDecoration(
-          color: Colors.white,
+          gradient: const LinearGradient(
+            begin: Alignment(0.98, -0.18),
+            end: Alignment(-0.98, 0.18),
+            colors: [Color(0xFFFBDD94), Color(0xFFFDB082), Color(0xFFE05C41)],
+          ),
           shape: RoundedRectangleBorder(
-            side: const BorderSide(width: 3, color: Color(0xFFFDB082)),
             borderRadius: BorderRadius.circular(33),
           ),
         ),
         child: Text(
-          '기존 계정으로 로그인',
+          '새로운 계정 만들기',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: MainColors.textColor,
+            color: MainColors.mainColor,
             fontSize: screenHeight * 0.022,
             fontFamily: 'Roboto',
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.25,
           ),
         ),

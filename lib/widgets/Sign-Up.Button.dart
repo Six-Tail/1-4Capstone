@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:todobest_home/screen/Sign-Up.Screen.dart';
 import 'package:todobest_home/utils/Main.Colors.dart';
 
 class SignUpButton extends StatelessWidget {
@@ -15,7 +18,10 @@ class SignUpButton extends StatelessWidget {
         if (kDebugMode) {
           print('Sign-Up');
         }
+        Get.to(() => const SignUpScreen());
       },
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
       child: Container(
         alignment: Alignment.center,
         height: screenHeight * 0.068,
