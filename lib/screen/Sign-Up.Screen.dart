@@ -63,6 +63,7 @@ class SignUpScreen extends StatelessWidget {
                 fontSize: screenWidth * 0.03,
               ),
             ),
+            SizedBox(width: screenWidth * 0.01),
             GestureDetector(
               onTap: () {
                 if (kDebugMode) {
@@ -71,11 +72,18 @@ class SignUpScreen extends StatelessWidget {
                 Get.to(() => const LoginScreen()); // Navigate to LoginScreen
               },
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 10.0),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: MainColors.textColor,
+                      width: 2.0
+                    )
+                  )
+                ),
                 child: Row(
                   children: [
                     Text(
-                      ' 기존 계정으로 로그인',
+                      '기존 계정으로 로그인',
                       style: TextStyle(
                         color: MainColors.textColor,
                         fontWeight: FontWeight.w700,
