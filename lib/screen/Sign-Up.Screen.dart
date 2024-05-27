@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/utils/Main.Colors.dart';
+import 'package:todobest_home/widgets/AppIcon.small.dart';
 import 'package:todobest_home/widgets/SignUp.TextBox.dart';
 import 'package:todobest_home/widgets/SingUpScreen.Button.dart';
 
@@ -28,21 +29,11 @@ class SignUpScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(45.0),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'ToDoBest',
-                    style: TextStyle(
-                      color: MainColors.textColor,
-                      fontSize: screenWidth * 0.1,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.04),
+                const AppIconSmall(),
+                SizedBox(height: screenHeight * 0.06),
                 const SignUpTextBox(),
-                SizedBox(height: screenHeight * 0.1),
+                SizedBox(height: screenHeight * 0.16),
                 const SignUpScreenButton(),
               ],
             ),
@@ -57,7 +48,7 @@ class SignUpScreen extends StatelessWidget {
             Text(
               '이미 계정이 있으신가요?',
               style: TextStyle(
-                color: Color(0x7F747775),
+                color: const Color(0x7F747775),
                 fontWeight: FontWeight.w700,
                 fontFamily: 'Roboto',
                 fontSize: screenWidth * 0.03,

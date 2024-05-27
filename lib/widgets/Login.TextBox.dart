@@ -12,9 +12,6 @@ class _LoginTextBoxState extends State<LoginTextBox> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Padding(
       padding: const EdgeInsets.all(30.0),
       child: Column(
@@ -27,7 +24,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
               hintText: '이메일',
               enabledBorder: UnderlineInputBorder(
                 borderSide:
-                BorderSide(width: 4.0, color: Colors.grey), // 밑줄의 굵기와 색상 설정
+                    BorderSide(width: 4.0, color: Colors.grey), // 밑줄의 굵기와 색상 설정
               ),
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
@@ -42,7 +39,8 @@ class _LoginTextBoxState extends State<LoginTextBox> {
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.vpn_key),
               suffixIcon: IconButton(
-                icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
+                icon: Icon(
+                    _obscureText ? Icons.visibility_off : Icons.visibility),
                 onPressed: () {
                   setState(() {
                     _obscureText = !_obscureText;
@@ -52,7 +50,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
               hintText: '비밀번호',
               enabledBorder: const UnderlineInputBorder(
                 borderSide:
-                BorderSide(width: 4.0, color: Colors.grey), // 밑줄의 굵기와 색상 설정
+                    BorderSide(width: 4.0, color: Colors.grey), // 밑줄의 굵기와 색상 설정
               ),
               focusedBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(

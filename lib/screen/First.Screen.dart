@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todobest_home/utils/Main.Colors.dart';
+import 'package:todobest_home/widgets/App.Icon.dart';
 import 'package:todobest_home/widgets/Login.Button.dart';
 import 'package:todobest_home/widgets/Sign-Up.Button.dart';
 import 'package:todobest_home/widgets/Social.Login.dart';
@@ -21,18 +22,9 @@ class FirstScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(100.0),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'ToDoBest',
-                    style: TextStyle(
-                      color: MainColors.textColor,
-                      fontSize: screenWidth * 0.1,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                SizedBox(height: screenHeight * 0.1),
+                const AppIcon(),
+                SizedBox(height: screenHeight * 0.02),
                 Text(
                   '환영합니다!',
                   style: TextStyle(
