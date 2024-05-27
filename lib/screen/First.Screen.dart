@@ -24,7 +24,7 @@ class FirstScreen extends StatelessWidget {
               children: [
                 SizedBox(height: screenHeight * 0.1),
                 const AppIcon(),
-                SizedBox(height: screenHeight * 0.02),
+                SizedBox(height: screenHeight * 0.042),
                 Text(
                   '환영합니다!',
                   style: TextStyle(

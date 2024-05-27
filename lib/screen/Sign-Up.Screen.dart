@@ -18,7 +18,6 @@ class SignUpScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('회원가입 화면'),
         backgroundColor: MainColors.mainColor,
       ),
       backgroundColor: MainColors.mainColor,
@@ -33,7 +32,7 @@ class SignUpScreen extends StatelessWidget {
                 const AppIconSmall(),
                 SizedBox(height: screenHeight * 0.06),
                 const SignUpTextBox(),
-                SizedBox(height: screenHeight * 0.16),
+                SizedBox(height: screenHeight * 0.1),
                 const SignUpScreenButton(),
               ],
             ),
