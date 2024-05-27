@@ -16,7 +16,6 @@ class LoginScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('로그인 화면'),
         backgroundColor: MainColors.mainColor,
       ),
       backgroundColor: MainColors.mainColor,
@@ -27,7 +26,7 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: screenHeight * 0.035),
+                SizedBox(height: screenHeight * 0.027),
                 const AppIcon(),
                 SizedBox(height: screenHeight * 0.01),
                 const LoginTextBox(),

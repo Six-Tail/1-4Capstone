@@ -13,15 +13,13 @@ class SignUpButton extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         if (kDebugMode) {
           print('Sign-Up');
         }
         Get.to(() => const SignUpScreen());
       },
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
       child: Container(
         alignment: Alignment.center,
         height: screenHeight * 0.068,
