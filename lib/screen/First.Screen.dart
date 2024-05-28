@@ -38,7 +38,7 @@ class FirstScreen extends StatelessWidget {
                 const SignUpButton(),
                 SizedBox(height: screenHeight * 0.02),
                 const LoginButton(),
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.035),
                 Column(
                   children: [
                     Container(

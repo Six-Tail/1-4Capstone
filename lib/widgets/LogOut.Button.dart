@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:todobest_home/screen/Login.Screen.dart';
+import 'package:todobest_home/screen/First.Screen.dart';
 
 class LogOutButton extends StatefulWidget {
   const LogOutButton({super.key});
@@ -22,7 +22,7 @@ class _LogOutButtonState extends State<LogOutButton> {
       onPressed: () async {
         await _signOut();
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          MaterialPageRoute(builder: (context) => const FirstScreen()),
         );
       },
       child: const Text('Log Out'),
