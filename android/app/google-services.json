@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "49491866019",
+    "project_id": "to-do-best-72308",
+    "storage_bucket": "to-do-best-72308.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49491866019:android:747dc0a50581b5a2dd2a16",
+        "android_client_info": {
+          "package_name": "com.example.todobest_home"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApBJ3XkCBYPSLcc4PugxjWAdeNyqfEWHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
