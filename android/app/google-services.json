@@ -12,7 +12,20 @@
           "package_name": "com.example.todobest_home"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "49491866019-k3v15lk3tlkf1kh8dtqdrthu52rjeol8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.todobest_home",
+            "certificate_hash": "df95c4fe99238afdfc45f67503027fef5f52072e"
+          }
+        },
+        {
+          "client_id": "49491866019-fln0pqo435dvmv0hmmv48sj3qhc2uhqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyApBJ3XkCBYPSLcc4PugxjWAdeNyqfEWHM"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "49491866019-fln0pqo435dvmv0hmmv48sj3qhc2uhqq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "49491866019-4ntd7fb8uc0s6trao9hq37bag1ikgcph.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.todobestHome"
+              }
+            }
+          ]
         }
       }
     }

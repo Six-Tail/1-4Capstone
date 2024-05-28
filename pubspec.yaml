@@ -41,6 +41,8 @@ dependencies:
   google_fonts: ^6.2.1
   firebase_core: ^2.31.1
   flutter_launcher_icons: ^0.13.1
+  firebase_auth: ^4.19.6
+  google_sign_in: ^6.2.1
 
 dev_dependencies:
   flutter_test:
