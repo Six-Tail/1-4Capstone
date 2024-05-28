@@ -16,7 +16,6 @@ class _CalenderScreenState extends State<CalenderScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getCurrentUser();
   }
