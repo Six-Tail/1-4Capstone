@@ -21,6 +21,8 @@ class _LoginTextBoxState extends State<LoginTextBox> {
 
   String userEmail = '';
   String userPassword = '';
+  String _errorMessage = '';
+  bool _hasError = false;
 
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
@@ -55,19 +57,13 @@ class _LoginTextBoxState extends State<LoginTextBox> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              //이메일 텍스트 박스
+              // 이메일 텍스트 박스
               Container(
                 height: 70,
                 child: TextFormField(
                   keyboardType: TextInputType.emailAddress,
                   key: const ValueKey(1),
                   focusNode: _emailFocusNode,
-                  validator: (value) {
-                    if (value!.isEmpty || !value.contains('@')) {
-                      return '올바른 이메일 주소를 입력하세요.';
-                    }
-                    return null;
-                  },
                   onSaved: (value) {
                     userEmail = value!;
                   },
@@ -77,31 +73,31 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                   onFieldSubmitted: (_) {
                     FocusScope.of(context).requestFocus(_passwordFocusNode);
                   },
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.email),
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.email),
                     hintText: '이메일',
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.grey),
+                      borderSide: BorderSide(
+                        width: 4.0,
+                        color: _hasError ? Colors.red : Colors.grey,
+                      ),
                     ),
                     focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.black),
+                      borderSide: BorderSide(
+                        width: 4.0,
+                        color: _hasError ? Colors.red : Colors.black,
+                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 10.0),
-              //비밀번호 텍스트 박스
+              // 비밀번호 텍스트 박스
               Container(
                 height: 70,
                 child: TextFormField(
                   key: const ValueKey(2),
                   focusNode: _passwordFocusNode,
-                  validator: (value) {
-                    if (value!.isEmpty || value.length < 6) {
-                      return '비밀번호는 6자 이상이어야 합니다.';
-                    }
-                    return null;
-                  },
                   onSaved: (value) {
                     userPassword = value!;
                   },
@@ -125,46 +121,53 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                       },
                     ),
                     hintText: '비밀번호',
-                    enabledBorder: const UnderlineInputBorder(
+                    enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(
-                          width: 4.0, color: Colors.grey), // 밑줄의 굵기와 색상 설정
+                        width: 4.0,
+                        color: _hasError ? Colors.red : Colors.grey,
+                      ),
                     ),
-                    focusedBorder: const UnderlineInputBorder(
+                    focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(
-                          width: 4.0,
-                          color: Colors.black), // 포커스된 밑줄의 굵기와 색상 설정
+                        width: 4.0,
+                        color: _hasError ? Colors.red : Colors.black,
+                      ),
                     ),
                   ),
                 ),
               ),
               SizedBox(height: screenHeight * 0.02),
+              // Error message display
+              if (_errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    _errorMessage,
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
               GestureDetector(
                 onTap: () async {
-                  if (isSignupScreen) {
-                    _tryValidation();
+                  _tryValidation();
 
-                    try {
-                      final newUser =
-                          await _authentication.signInWithEmailAndPassword(
-                        email: userEmail,
-                        password: userPassword,
-                      );
+                  try {
+                    final newUser =
+                    await _authentication.signInWithEmailAndPassword(
+                      email: userEmail,
+                      password: userPassword,
+                    );
 
-                      if (newUser.user != null) {
-                        Get.to(() => const CalenderScreen());
-                      }
-                    } catch (e) {
-                      if (kDebugMode) {
-                        print(e);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text('Please check your email and password'),
-                            backgroundColor: Colors.blue,
-                          ),
-                        );
-                      }
+                    if (newUser.user != null) {
+                      Get.to(() => const CalenderScreen());
                     }
+                  } catch (e) {
+                    if (kDebugMode) {
+                      print(e);
+                    }
+                    setState(() {
+                      _errorMessage = '아이디 또는 비밀번호가 일치하지 않습니다.';
+                      _hasError = true;
+                    });
                   }
                 },
                 child: Container(
@@ -174,8 +177,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                   decoration: ShapeDecoration(
                     color: Colors.white,
                     shape: RoundedRectangleBorder(
-                      side:
-                          const BorderSide(width: 3, color: Color(0xFFFDB082)),
+                      side: const BorderSide(width: 3, color: Color(0xFFFDB082)),
                       borderRadius: BorderRadius.circular(33),
                     ),
                   ),
@@ -191,7 +193,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

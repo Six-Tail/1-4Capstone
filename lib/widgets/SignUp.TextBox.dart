@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/screen/Login.Screen.dart';
-
 import '../utils/Main.Colors.dart';
 
 class SignUpTextBox extends StatefulWidget {
@@ -24,16 +23,22 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
   String userPassword = '';
   String confirmPassword = '';
 
+  bool isEmailValid = false;
+  bool isPasswordValid = false;
+  bool isConfirmPasswordValid = false;
+  bool isNameValid = false;
+
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
   final FocusNode _nameFocusNode = FocusNode();
 
-  void _tryValidation() {
+  bool _tryValidation() {
     final isValid = _formKey.currentState!.validate();
     if (isValid) {
       _formKey.currentState!.save();
     }
+    return isValid;
   }
 
   @override
@@ -43,6 +48,41 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
     _confirmPasswordFocusNode.dispose();
     _nameFocusNode.dispose();
     super.dispose();
+  }
+
+  InputDecoration _buildInputDecoration(
+      {required String hintText,
+        required Icon prefixIcon,
+        required bool isValid}) {
+    return InputDecoration(
+      prefixIcon: prefixIcon,
+      hintText: hintText,
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(
+          width: 4.0,
+          color: isValid ? Colors.green : Colors.grey,
+        ),
+      ),
+      focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(
+          width: 4.0,
+          color: isValid ? Colors.green : Colors.black,
+        ),
+      ),
+      errorBorder: const UnderlineInputBorder(
+        borderSide: BorderSide(
+          width: 4.0,
+          color: Colors.red,
+        ),
+      ),
+      focusedErrorBorder: const UnderlineInputBorder(
+        borderSide: BorderSide(
+          width: 4.0,
+          color: Colors.red,
+        ),
+      ),
+      suffixIcon: isValid ? const Icon(Icons.check, color: Colors.green) : null,
+    );
   }
 
   @override
@@ -62,7 +102,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // 이메일 텍스트 박스
-              Container(
+              SizedBox(
                 height: 70, // Fixed height for consistency
                 child: TextFormField(
                   keyboardType: TextInputType.emailAddress,
@@ -70,149 +110,169 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                   focusNode: _emailFocusNode,
                   validator: (value) {
                     if (value!.isEmpty || !value.contains('@')) {
+                      setState(() {
+                        isEmailValid = false;
+                      });
                       return '올바른 이메일 주소를 입력하세요.';
                     }
+                    setState(() {
+                      isEmailValid = true;
+                    });
                     return null;
                   },
                   onSaved: (value) {
                     userEmail = value!;
                   },
                   onChanged: (value) {
-                    userEmail = value;
+                    setState(() {
+                      userEmail = value;
+                      isEmailValid = value.isNotEmpty && value.contains('@');
+                    });
                   },
                   onFieldSubmitted: (_) {
                     FocusScope.of(context).requestFocus(_passwordFocusNode);
                   },
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.email),
+                  decoration: _buildInputDecoration(
                     hintText: '이메일',
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.grey),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.black),
-                    ),
+                    prefixIcon: const Icon(Icons.email),
+                    isValid: isEmailValid,
                   ),
                 ),
               ),
               const SizedBox(height: 10.0),
               // 비밀번호 텍스트 박스
-              Container(
+              SizedBox(
                 height: 70, // Fixed height for consistency
                 child: TextFormField(
                   key: const ValueKey(3),
                   focusNode: _passwordFocusNode,
                   validator: (value) {
                     if (value!.isEmpty || value.length < 6) {
+                      setState(() {
+                        isPasswordValid = false;
+                      });
                       return '비밀번호는 6자 이상이어야 합니다.';
                     }
+                    setState(() {
+                      isPasswordValid = true;
+                    });
                     return null;
                   },
                   onSaved: (value) {
                     userPassword = value!;
                   },
                   onChanged: (value) {
-                    userPassword = value;
+                    setState(() {
+                      userPassword = value;
+                      isPasswordValid = value.isNotEmpty && value.length >= 6;
+                    });
                   },
                   onFieldSubmitted: (_) {
                     FocusScope.of(context)
                         .requestFocus(_confirmPasswordFocusNode);
                   },
                   obscureText: _obscureText,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.vpn_key),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureText
-                          ? Icons.visibility_off
-                          : Icons.visibility),
-                      onPressed: () {
-                        setState(() {
-                          _obscureText = !_obscureText;
-                        });
-                      },
-                    ),
+                  decoration: _buildInputDecoration(
                     hintText: '비밀번호',
-                    enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.grey),
-                    ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.black),
+                    prefixIcon: const Icon(Icons.vpn_key),
+                    isValid: isPasswordValid,
+                  ).copyWith(
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                              _obscureText ? Icons.visibility_off : Icons.visibility),
+                          onPressed: () {
+                            setState(() {
+                              _obscureText = !_obscureText;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 10.0),
               // 비밀번호 확인 텍스트 박스
-              Container(
+              SizedBox(
                 height: 70, // Fixed height for consistency
                 child: TextFormField(
                   key: const ValueKey(4),
                   focusNode: _confirmPasswordFocusNode,
                   validator: (value) {
                     if (value!.isEmpty || value != userPassword) {
+                      setState(() {
+                        isConfirmPasswordValid = false;
+                      });
                       return '비밀번호가 일치하지 않습니다.';
                     }
+                    setState(() {
+                      isConfirmPasswordValid = true;
+                    });
                     return null;
                   },
                   onSaved: (value) {
                     confirmPassword = value!;
                   },
                   onChanged: (value) {
-                    confirmPassword = value;
+                    setState(() {
+                      confirmPassword = value;
+                      isConfirmPasswordValid =
+                          value.isNotEmpty && value == userPassword;
+                    });
                   },
                   onFieldSubmitted: (_) {
                     FocusScope.of(context).requestFocus(_nameFocusNode);
                   },
                   obscureText: _obscureText,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.vpn_key),
+                  decoration: _buildInputDecoration(
                     hintText: '비밀번호 확인',
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.grey),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.black),
-                    ),
+                    prefixIcon: const Icon(Icons.vpn_key),
+                    isValid: isConfirmPasswordValid,
                   ),
                 ),
               ),
               const SizedBox(height: 10.0),
               // 닉네임 텍스트 박스
-              Container(
+              SizedBox(
                 height: 70, // Fixed height for consistency
                 child: TextFormField(
                   key: const ValueKey(1),
                   focusNode: _nameFocusNode,
                   validator: (value) {
-                    if (value!.isEmpty || value.length < 3) {
-                      return '닉네임은 3자 이상이어야 합니다.';
+                    if (value!.isEmpty || value.length < 2) {
+                      setState(() {
+                        isNameValid = false;
+                      });
+                      return '닉네임은 2자 이상이어야 합니다.';
                     }
+                    setState(() {
+                      isNameValid = true;
+                    });
                     return null;
                   },
                   onSaved: (value) {
                     userName = value!;
                   },
                   onChanged: (value) {
-                    userName = value;
+                    setState(() {
+                      userName = value;
+                      isNameValid = value.isNotEmpty && value.length >= 2;
+                    });
                   },
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.person),
+                  decoration: _buildInputDecoration(
                     hintText: '닉네임',
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.grey),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(width: 4.0, color: Colors.black),
-                    ),
+                    prefixIcon: const Icon(Icons.person),
+                    isValid: isNameValid,
                   ),
                 ),
               ),
               SizedBox(height: screenHeight * 0.06),
               GestureDetector(
                 onTap: () async {
-                  if (isSignupScreen) {
-                    _tryValidation();
-
+                  if (isSignupScreen && _tryValidation()) {
                     try {
                       final newUser = await _authentication
                           .createUserWithEmailAndPassword(
@@ -226,13 +286,6 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                     } catch (e) {
                       if (kDebugMode) {
                         print(e);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content:
-                              Text('Please check you email and password'),
-                          backgroundColor: Colors.blue,
-                          ),
-                        );
                       }
                     }
                   }
