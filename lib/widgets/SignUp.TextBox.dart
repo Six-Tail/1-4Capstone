@@ -36,7 +36,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
   bool _tryValidation() {
     final isValid = _formKey.currentState!.validate();
     if (isValid) {
-      _formKey.currentState!.save();
+      _formKey.currentState!.save(); // 이 부분에서 상태를 저장합니다.
     }
     return isValid;
   }
@@ -50,23 +50,25 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
     super.dispose();
   }
 
-  InputDecoration _buildInputDecoration(
-      {required String hintText,
-        required Icon prefixIcon,
-        required bool isValid}) {
+  InputDecoration _buildInputDecoration({
+    required String hintText,
+    required Icon prefixIcon,
+    required bool? isValid,
+    required String value,
+  }) {
     return InputDecoration(
       prefixIcon: prefixIcon,
       hintText: hintText,
       enabledBorder: UnderlineInputBorder(
         borderSide: BorderSide(
           width: 4.0,
-          color: isValid ? Colors.green : Colors.grey,
+          color: isValid == true ? Colors.green : Colors.grey,
         ),
       ),
       focusedBorder: UnderlineInputBorder(
         borderSide: BorderSide(
           width: 4.0,
-          color: isValid ? Colors.green : Colors.black,
+          color: isValid == true ? Colors.green : Colors.black,
         ),
       ),
       errorBorder: const UnderlineInputBorder(
@@ -81,7 +83,13 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
           color: Colors.red,
         ),
       ),
-      suffixIcon: isValid ? const Icon(Icons.check, color: Colors.green) : null,
+      suffixIcon: value.isNotEmpty
+          ? isValid == null
+              ? null
+              : isValid
+                  ? const Icon(Icons.check, color: Colors.green)
+                  : const Icon(Icons.clear, color: Colors.red)
+          : null,
     );
   }
 
@@ -98,6 +106,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
         padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -109,7 +118,9 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                   key: const ValueKey(2),
                   focusNode: _emailFocusNode,
                   validator: (value) {
-                    if (value!.isEmpty || !value.contains('@')) {
+                    if (value!.isEmpty ||
+                        !RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value)) {
                       setState(() {
                         isEmailValid = false;
                       });
@@ -126,7 +137,9 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                   onChanged: (value) {
                     setState(() {
                       userEmail = value;
-                      isEmailValid = value.isNotEmpty && value.contains('@');
+                      isEmailValid = value.isNotEmpty &&
+                          RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(value);
                     });
                   },
                   onFieldSubmitted: (_) {
@@ -136,6 +149,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                     hintText: '이메일',
                     prefixIcon: const Icon(Icons.email),
                     isValid: isEmailValid,
+                    value: userEmail,
                   ),
                 ),
               ),
@@ -176,13 +190,15 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                     hintText: '비밀번호',
                     prefixIcon: const Icon(Icons.vpn_key),
                     isValid: isPasswordValid,
+                    value: userPassword,
                   ).copyWith(
                     suffixIcon: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(
-                              _obscureText ? Icons.visibility_off : Icons.visibility),
+                          icon: Icon(_obscureText
+                              ? Icons.visibility_off
+                              : Icons.visibility),
                           onPressed: () {
                             setState(() {
                               _obscureText = !_obscureText;
@@ -231,6 +247,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                     hintText: '비밀번호 확인',
                     prefixIcon: const Icon(Icons.vpn_key),
                     isValid: isConfirmPasswordValid,
+                    value: confirmPassword,
                   ),
                 ),
               ),
@@ -266,6 +283,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                     hintText: '닉네임',
                     prefixIcon: const Icon(Icons.person),
                     isValid: isNameValid,
+                    value: userName,
                   ),
                 ),
               ),
@@ -274,8 +292,8 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                 onTap: () async {
                   if (isSignupScreen && _tryValidation()) {
                     try {
-                      final newUser = await _authentication
-                          .createUserWithEmailAndPassword(
+                      final newUser =
+                          await _authentication.createUserWithEmailAndPassword(
                         email: userEmail,
                         password: userPassword,
                       );
