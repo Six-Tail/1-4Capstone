@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/screen/Login.Screen.dart';
+
 import '../utils/Main.Colors.dart';
 
 class SignUpTextBox extends StatefulWidget {
@@ -27,16 +28,19 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
   bool isPasswordValid = false;
   bool isConfirmPasswordValid = false;
   bool isNameValid = false;
+  bool isEmailInUse = false;
 
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
   final FocusNode _nameFocusNode = FocusNode();
 
+  bool _showErrors = false;
+
   bool _tryValidation() {
     final isValid = _formKey.currentState!.validate();
     if (isValid) {
-      _formKey.currentState!.save(); // 이 부분에서 상태를 저장합니다.
+      _formKey.currentState!.save();
     }
     return isValid;
   }
@@ -55,6 +59,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
     required Icon prefixIcon,
     required bool? isValid,
     required String value,
+    bool showErrorIcon = false,
   }) {
     return InputDecoration(
       prefixIcon: prefixIcon,
@@ -85,10 +90,12 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
       ),
       suffixIcon: value.isNotEmpty
           ? isValid == null
-              ? null
-              : isValid
-                  ? const Icon(Icons.check, color: Colors.green)
-                  : const Icon(Icons.clear, color: Colors.red)
+          ? null
+          : isValid
+          ? const Icon(Icons.check, color: Colors.green)
+          : showErrorIcon
+          ? const Icon(Icons.clear, color: Colors.red)
+          : null
           : null,
     );
   }
@@ -106,7 +113,9 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
         padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
+          autovalidateMode: _showErrors
+              ? AutovalidateMode.onUserInteraction
+              : AutovalidateMode.disabled,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -121,14 +130,21 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                     if (value!.isEmpty ||
                         !RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
                             .hasMatch(value)) {
-                      setState(() {
+                      Future.microtask(() => setState(() {
                         isEmailValid = false;
-                      });
+                        isEmailInUse = false;
+                      }));
                       return '올바른 이메일 주소를 입력하세요.';
+                    } else if (isEmailInUse) {
+                      Future.microtask(() => setState(() {
+                        isEmailValid = false;
+                      }));
+                      return '이미 가입된 이메일 주소입니다. 다른 이메일을 입력하여 주세요';
                     }
-                    setState(() {
+                    Future.microtask(() => setState(() {
                       isEmailValid = true;
-                    });
+                      isEmailInUse = false;
+                    }));
                     return null;
                   },
                   onSaved: (value) {
@@ -137,6 +153,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                   onChanged: (value) {
                     setState(() {
                       userEmail = value;
+                      isEmailInUse = false;
                       isEmailValid = value.isNotEmpty &&
                           RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
                               .hasMatch(value);
@@ -150,6 +167,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                     prefixIcon: const Icon(Icons.email),
                     isValid: isEmailValid,
                     value: userEmail,
+                    showErrorIcon: isEmailInUse,
                   ),
                 ),
               ),
@@ -162,14 +180,14 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                   focusNode: _passwordFocusNode,
                   validator: (value) {
                     if (value!.isEmpty || value.length < 6) {
-                      setState(() {
+                      Future.microtask(() => setState(() {
                         isPasswordValid = false;
-                      });
+                      }));
                       return '비밀번호는 6자 이상이어야 합니다.';
                     }
-                    setState(() {
+                    Future.microtask(() => setState(() {
                       isPasswordValid = true;
-                    });
+                    }));
                     return null;
                   },
                   onSaved: (value) {
@@ -219,14 +237,14 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                   focusNode: _confirmPasswordFocusNode,
                   validator: (value) {
                     if (value!.isEmpty || value != userPassword) {
-                      setState(() {
+                      Future.microtask(() => setState(() {
                         isConfirmPasswordValid = false;
-                      });
+                      }));
                       return '비밀번호가 일치하지 않습니다.';
                     }
-                    setState(() {
+                    Future.microtask(() => setState(() {
                       isConfirmPasswordValid = true;
-                    });
+                    }));
                     return null;
                   },
                   onSaved: (value) {
@@ -260,14 +278,14 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                   focusNode: _nameFocusNode,
                   validator: (value) {
                     if (value!.isEmpty || value.length < 2) {
-                      setState(() {
+                      Future.microtask(() => setState(() {
                         isNameValid = false;
-                      });
+                      }));
                       return '닉네임은 2자 이상이어야 합니다.';
                     }
-                    setState(() {
+                    Future.microtask(() => setState(() {
                       isNameValid = true;
-                    });
+                    }));
                     return null;
                   },
                   onSaved: (value) {
@@ -290,10 +308,14 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
               SizedBox(height: screenHeight * 0.06),
               GestureDetector(
                 onTap: () async {
+                  setState(() {
+                    _showErrors = true;
+                  });
+
                   if (isSignupScreen && _tryValidation()) {
                     try {
                       final newUser =
-                          await _authentication.createUserWithEmailAndPassword(
+                      await _authentication.createUserWithEmailAndPassword(
                         email: userEmail,
                         password: userPassword,
                       );
@@ -302,8 +324,17 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                         Get.to(() => const LoginScreen());
                       }
                     } catch (e) {
-                      if (kDebugMode) {
-                        print(e);
+                      if (e is FirebaseAuthException &&
+                          e.code == 'email-already-in-use') {
+                        setState(() {
+                          isEmailInUse = true;
+                          isEmailValid = false;
+                        });
+                        _emailFocusNode.requestFocus();
+                      } else {
+                        if (kDebugMode) {
+                          print(e);
+                        }
                       }
                     }
                   }

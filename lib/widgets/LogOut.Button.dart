@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:todobest_home/screen/First.Screen.dart';
 
 class LogOutButton extends StatefulWidget {
@@ -12,8 +14,35 @@ class LogOutButton extends StatefulWidget {
 
 class _LogOutButtonState extends State<LogOutButton> {
   Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
-    await GoogleSignIn().signOut();
+    bool logoutSuccessful = true;
+
+    try {
+      await FirebaseAuth.instance.signOut();
+      logoutSuccessful = true;
+      print('파이어베이스 로그아웃 성공');
+    } catch (error) {
+      print('파이어베이스 로그아웃 실패 $error');
+    }
+
+    try {
+      await GoogleSignIn().signOut();
+      logoutSuccessful = true;
+      print('구글 로그아웃 성공');
+    } catch (error) {
+      print('구글 로그아웃 실패 $error');
+    }
+
+    try {
+      await UserApi.instance.logout();
+      logoutSuccessful = true;
+      print('카카오 로그아웃 성공, SDK에서 토큰 삭제');
+    } catch (error) {
+      print('카카오 로그아웃 실패, SDK에서 토큰 삭제 $error');
+    }
+
+    if (logoutSuccessful) {
+      Get.to(() => const FirstScreen());
+    }
   }
 
   @override
@@ -21,9 +50,6 @@ class _LogOutButtonState extends State<LogOutButton> {
     return ElevatedButton(
       onPressed: () async {
         await _signOut();
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const FirstScreen()),
-        );
       },
       child: const Text('Log Out'),
     );

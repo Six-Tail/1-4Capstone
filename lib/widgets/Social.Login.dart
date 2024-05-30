@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:todobest_home/screen/Calender.Screen.dart';
 
 class SocialLogin extends StatefulWidget {
@@ -28,82 +30,31 @@ class _SocialLoginState extends State<SocialLogin> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: () {
-                if (kDebugMode) {
-                  signInWithGoogle();
-                  print('google');
-                }
+              onTap: () async {
+                await signInWithGoogle();
               },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20.0),
-                width: iconSize,
-                height: iconSize,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 0.6,
-                    ),
-                  ],
-                ),
-                child: SvgPicture.asset(
-                  'assets/images/google.svg',
-                  fit: BoxFit.cover,
-                ),
+              child: SocialIcon(
+                assetName: 'assets/images/google.svg',
+                iconSize: iconSize,
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                await signInWithKakao();
+              },
+              child: SocialIcon(
+                assetName: 'assets/images/kakao.svg',
+                iconSize: iconSize,
               ),
             ),
             GestureDetector(
               onTap: () {
-                if (kDebugMode) {
-                  print('kakao');
-                }
+                // Add your Naver login functionality here
+                print('naver');
               },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20.0),
-                width: iconSize,
-                height: iconSize,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 0.6,
-                    ),
-                  ],
-                ),
-                child: SvgPicture.asset(
-                  'assets/images/kakao.svg',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                if (kDebugMode) {
-                  print('naver');
-                }
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20.0),
-                width: iconSize,
-                height: iconSize,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 0.6,
-                    ),
-                  ],
-                ),
-                child: SvgPicture.asset(
-                  'assets/images/naver.svg',
-                  fit: BoxFit.cover,
-                ),
+              child: SocialIcon(
+                assetName: 'assets/images/naver.svg',
+                iconSize: iconSize,
               ),
             ),
           ],
@@ -118,38 +69,115 @@ class _SocialLoginState extends State<SocialLogin> {
             fontFamily: 'Roboto',
             fontWeight: FontWeight.w700,
             height: 1,
-            // Changed from 0.09 to 1.5 for proper line height
             letterSpacing: 0.25,
           ),
         ),
       ],
     );
   }
-  void signInWithGoogle() async {
-    // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+  void navigatorToMainPage() {
+    Get.to(() => const CalenderScreen());
+  }
 
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
+  Future<void> signInWithKakao() async {
+    // 카카오톡 실행 가능 여부 확인
+    // 카카오톡 실행이 가능하면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
+    if (await isKakaoTalkInstalled()) {
+      try {
+        await UserApi.instance.loginWithKakaoTalk().then((value) {
+          print('value from kakao $value');
+          navigatorToMainPage();
+        });
+        print('카카오톡으로 로그인 성공');
+      } catch (error) {
+        print('카카오톡으로 로그인 실패 $error');
+
+        // 사용자가 카카오톡 설치 후 디바이스 권한 요청 화면에서 로그인을 취소한 경우,
+        // 의도적인 로그인 취소로 보고 카카오계정으로 로그인 시도 없이 로그인 취소로 처리 (예: 뒤로 가기)
+        if (error is PlatformException && error.code == 'CANCELED') {
+          return;
+        }
+
+        // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인
+        try {
+          await UserApi.instance.loginWithKakaoAccount().then((value) {
+            print('value from kakao $value');
+            navigatorToMainPage();
+          });
+          print('카카오계정으로 로그인 성공');
+        } catch (error) {
+          print('카카오계정으로 로그인 실패 $error');
+        }
+      }
+    } else {
+      try {
+        var provider = OAuthProvider("oidc.todobest");
+        OAuthToken token = await UserApi.instance.loginWithKakaoAccount();
+        var credential = provider.credential(
+          idToken: token.idToken,
+          accessToken: token.accessToken,
+        );
+        FirebaseAuth.instance.signInWithCredential(credential);
+        navigatorToMainPage();
+        print('카카오계정으로 로그인 성공');
+      } catch (error) {
+        print('카카오계정으로 로그인 실패 $error');
+      }
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      if (googleAuth == null) return;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      navigatorToMainPage();
+      print('Google 로그인 성공');
+    } catch (error) {
+      print('Google 로그인 실패 $error');
+    }
+  }
+}
+
+class SocialIcon extends StatelessWidget {
+  final String assetName;
+  final double iconSize;
+
+  const SocialIcon({
+    required this.assetName,
+    required this.iconSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20.0),
+      width: iconSize,
+      height: iconSize,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            offset: Offset(0, 2),
+            blurRadius: 0.6,
+          ),
+        ],
+      ),
+      child: SvgPicture.asset(
+        assetName,
+        fit: BoxFit.cover,
+      ),
     );
-
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential).then((value) {
-      if (kDebugMode) {
-        print(value.user?.email);
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const CalenderScreen(),
-        ));
-      }
-    }).onError((error, stackTrace){
-      if (kDebugMode) {
-        print("error $error");
-      }
-    });
   }
 }
