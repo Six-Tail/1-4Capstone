@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
@@ -24,6 +25,13 @@ class _LogOutButtonState extends State<LogOutButton> {
       print('파이어베이스 로그아웃 실패 $error');
     }
 
+    try {
+      await FlutterNaverLogin.logOut();
+      logoutSuccessful = true;
+      print('네이버 로그아웃 성공');
+    } catch (error) {
+      print('네이버 로그아웃 실패 $error');
+    }
     try {
       await GoogleSignIn().signOut();
       logoutSuccessful = true;

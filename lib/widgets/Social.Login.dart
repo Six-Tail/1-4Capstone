@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -48,7 +49,8 @@ class _SocialLoginState extends State<SocialLogin> {
               ),
             ),
             GestureDetector(
-              onTap: () {
+              onTap: () async {
+                await signInWithNaver();
                 // Add your Naver login functionality here
                 print('naver');
               },
@@ -80,6 +82,20 @@ class _SocialLoginState extends State<SocialLogin> {
     Get.to(() => const CalenderScreen());
   }
 
+
+  Future<void> signInWithNaver() async {
+    final NaverLoginResult result = await FlutterNaverLogin.logIn();
+    NaverAccessToken res = await FlutterNaverLogin.currentAccessToken;
+    //setState(() {
+    var accesToken = res.accessToken;
+    var tokenType = res.tokenType;
+    //);
+
+    print("accesToken $accesToken");
+    print("accesToken $tokenType");
+
+    navigatorToMainPage();
+  }
   Future<void> signInWithKakao() async {
     // 카카오톡 실행 가능 여부 확인
     // 카카오톡 실행이 가능하면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인

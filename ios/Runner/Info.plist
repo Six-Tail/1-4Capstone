@@ -24,12 +24,45 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- http allows configurations -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>naver.com</key>
+			<dict>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>naver.net</key>
+			<dict>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+	    <string>naversearchapp</string>
+	    <string>naversearchthirdlogin</string>
 		<string>kakaokompassauth</string>
 		<string>kakaolink</string>
 		<string>kakaoplus</string>
 	</array>
+	<key>naverServiceAppUrlScheme</key>
+    <string>todobesturlscheme</string>
+    <key>naverConsumerKey</key>
+    <string>3zEWgueywUQAaMf0tcK7</string>
+    <key>naverConsumerSecret</key>
+    <string>7CEkrMVPW3</string>
+    <key>naverServiceAppName</key>
+    <string>ToDoBest</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -60,6 +93,7 @@
 			<array>
 				<string>com.googleusercontent.apps.49491866019-4ntd7fb8uc0s6trao9hq37bag1ikgcph</string>
 				<string>kakao12983a04412626098bd000dd862a742b</string>
+				<string>todobesturlscheme</string>
 			</array>
 		</dict>
 	</array>
