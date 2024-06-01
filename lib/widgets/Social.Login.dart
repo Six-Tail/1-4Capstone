@@ -112,8 +112,8 @@ class _SocialLoginState extends State<SocialLogin> {
       }
     } else {
       try {
-        var provider = OAuthProvider("oidc.todobest");
         OAuthToken token = await UserApi.instance.loginWithKakaoAccount();
+        var provider = OAuthProvider('oidc.todobest');
         var credential = provider.credential(
           idToken: token.idToken,
           accessToken: token.accessToken,

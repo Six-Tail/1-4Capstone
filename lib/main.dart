@@ -20,18 +20,16 @@ void main() async {
       "### App Info : [App Name]$appName, [Package Name]$packageName, [Version]$version, [Build Number]$buildNumber");
   }
 
+  //firebase login
+  await Firebase.initializeApp();
+  print('카카오 해시키 ${await KakaoSdk.origin}');
+
   //kako login
   // runApp() 호출 전 Flutter SDK 초기화
   KakaoSdk.init(
     nativeAppKey: '12983a04412626098bd000dd862a742b',
     javaScriptAppKey: '75a73786836d92e7d0ba16f757d36355',
-    loggingEnabled: true,
   );
-
-  //firebase login
-  await Firebase.initializeApp();
-  print('카카오 해시키 ${await KakaoSdk.origin}');
-
   runApp(const SplashScreen());
 }
 
