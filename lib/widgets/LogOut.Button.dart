@@ -26,7 +26,7 @@ class _LogOutButtonState extends State<LogOutButton> {
     }
 
     try {
-      await FlutterNaverLogin.logOut();
+      await FlutterNaverLogin.logOutAndDeleteToken();
       logoutSuccessful = true;
       print('네이버 로그아웃 성공');
     } catch (error) {

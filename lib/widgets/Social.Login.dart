@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +10,8 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:todobest_home/screen/Calender.Screen.dart';
+import 'package:uni_links2/uni_links.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SocialLogin extends StatefulWidget {
   const SocialLogin({super.key});
@@ -16,6 +21,18 @@ class SocialLogin extends StatefulWidget {
 }
 
 class _SocialLoginState extends State<SocialLogin> {
+
+  @override
+  void initState() {
+    super.initState();
+    initUniLinks();
+
+  }
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -84,18 +101,45 @@ class _SocialLoginState extends State<SocialLogin> {
 
 
   Future<void> signInWithNaver() async {
-    final NaverLoginResult result = await FlutterNaverLogin.logIn();
-    NaverAccessToken res = await FlutterNaverLogin.currentAccessToken;
-    //setState(() {
-    var accesToken = res.accessToken;
-    var tokenType = res.tokenType;
-    //);
-
-    print("accesToken $accesToken");
-    print("accesToken $tokenType");
-
-    navigatorToMainPage();
+    String clientID = '3zEWgueywUQAaMf0tcK7';
+    String redirectUri = 'https://us-central1-to-do-best-72308.cloudfunctions.net/naverLoginCallback';
+    String state = base64Url.encode(List<int>.generate(16, (_) => Random().nextInt(255)));
+    Uri url = Uri.parse('https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=$clientID&redirect_uri=$redirectUri&state=$state');
+    print("네이버 로그인 열기 & 클라우드 함수 호출");
+    await launchUrl(url);
   }
+
+  Future<void> initUniLinks() async {
+    final initialLink = await getInitialLink();
+    if (initialLink != null) _handleDeepLink(initialLink);
+
+    linkStream.listen((String? link) {
+      _handleDeepLink(link!);
+    }, onError: (err, stacktrace) {
+      print("딥링크 에러 $err\n$stacktrace");
+    });
+  }
+
+  Future<void> _handleDeepLink(String link) async {
+    print("딥링크 열기 $link");
+    final Uri uri = Uri.parse(link);
+
+    if (uri.authority == 'login-callback') {
+      String? firebaseToken = uri.queryParameters['firebaseToken'];
+      String? name = uri.queryParameters['name'];
+      String? profileImage = uri.queryParameters['profileImage'];
+
+      print("name $name");
+
+      await FirebaseAuth.instance.signInWithCustomToken(firebaseToken!).then((value) =>
+          navigatorToMainPage()
+      ).onError((error, stackTrace) {
+        print("error $error");
+      });
+
+    }
+  }
+
   Future<void> signInWithKakao() async {
     // 카카오톡 실행 가능 여부 확인
     // 카카오톡 실행이 가능하면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
@@ -147,7 +191,7 @@ class _SocialLoginState extends State<SocialLogin> {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
+      await googleUser?.authentication;
 
       if (googleAuth == null) return;
 

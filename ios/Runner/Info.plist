@@ -89,11 +89,15 @@
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>ToDoBesturlscheme</string>
+
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.49491866019-4ntd7fb8uc0s6trao9hq37bag1ikgcph</string>
 				<string>kakao12983a04412626098bd000dd862a742b</string>
 				<string>todobesturlscheme</string>
+				<string>todobestnaverauthcallbackscheme</string>
 			</array>
 		</dict>
 	</array>
