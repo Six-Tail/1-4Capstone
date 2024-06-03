@@ -21,7 +21,6 @@ class SocialLogin extends StatefulWidget {
 }
 
 class _SocialLoginState extends State<SocialLogin> {
-  StreamSubscription<String?>? _linkSubscription; // _linkSubscription 필드 추가
 
   @override
   void initState() {

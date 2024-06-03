@@ -41,6 +41,7 @@ class _LogOutButtonState extends State<LogOutButton> {
         print('네이버 로그아웃 실패 $error');
       }
     }
+
     try {
       await GoogleSignIn().signOut();
       logoutSuccessful = true;
