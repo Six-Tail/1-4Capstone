@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -8,7 +9,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todobest_home/screen/Calender.Screen.dart';
 import 'package:uni_links2/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,25 +21,17 @@ class SocialLogin extends StatefulWidget {
 }
 
 class _SocialLoginState extends State<SocialLogin> {
+  StreamSubscription<String?>? _linkSubscription; // _linkSubscription 필드 추가
+
   @override
   void initState() {
     super.initState();
-    checkAutoLogin();
+    initUniLinks();
   }
 
-  void checkAutoLogin() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // 자동 로그인 여부를 확인하고, 자동 로그인이 설정되어 있으면 로그인을 시도합니다.
-    if (prefs.getBool('isAutoLogin') ?? false) {
-      String? provider = prefs.getString('provider');
-      if (provider == 'google') {
-        await signInWithGoogle();
-      } else if (provider == 'kakao') {
-        await signInWithKakao();
-      } else if (provider == 'naver') {
-        await signInWithNaver();
-      }
-    }
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
