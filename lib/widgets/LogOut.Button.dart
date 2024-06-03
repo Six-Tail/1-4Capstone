@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
@@ -20,32 +21,48 @@ class _LogOutButtonState extends State<LogOutButton> {
     try {
       await FirebaseAuth.instance.signOut();
       logoutSuccessful = true;
-      print('파이어베이스 로그아웃 성공');
+      if (kDebugMode) {
+        print('파이어베이스 로그아웃 성공');
+      }
     } catch (error) {
-      print('파이어베이스 로그아웃 실패 $error');
+      if (kDebugMode) {
+        print('파이어베이스 로그아웃 실패 $error');
+      }
     }
 
     try {
       await FlutterNaverLogin.logOutAndDeleteToken();
       logoutSuccessful = true;
-      print('네이버 로그아웃 성공');
+      if (kDebugMode) {
+        print('네이버 로그아웃 성공');
+      }
     } catch (error) {
-      print('네이버 로그아웃 실패 $error');
+      if (kDebugMode) {
+        print('네이버 로그아웃 실패 $error');
+      }
     }
     try {
       await GoogleSignIn().signOut();
       logoutSuccessful = true;
-      print('구글 로그아웃 성공');
+      if (kDebugMode) {
+        print('구글 로그아웃 성공');
+      }
     } catch (error) {
-      print('구글 로그아웃 실패 $error');
+      if (kDebugMode) {
+        print('구글 로그아웃 실패 $error');
+      }
     }
 
     try {
       await UserApi.instance.logout();
       logoutSuccessful = true;
-      print('카카오 로그아웃 성공, SDK에서 토큰 삭제');
+      if (kDebugMode) {
+        print('카카오 로그아웃 성공, SDK에서 토큰 삭제');
+      }
     } catch (error) {
-      print('카카오 로그아웃 실패, SDK에서 토큰 삭제 $error');
+      if (kDebugMode) {
+        print('카카오 로그아웃 실패, SDK에서 토큰 삭제 $error');
+      }
     }
 
     if (logoutSuccessful) {

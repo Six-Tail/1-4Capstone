@@ -58,7 +58,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // 이메일 텍스트 박스
-              Container(
+              SizedBox(
                 height: 70,
                 child: TextFormField(
                   keyboardType: TextInputType.emailAddress,
@@ -93,7 +93,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
               ),
               const SizedBox(height: 10.0),
               // 비밀번호 텍스트 박스
-              Container(
+              SizedBox(
                 height: 70,
                 child: TextFormField(
                   key: const ValueKey(2),
@@ -143,7 +143,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Text(
                     _errorMessage,
-                    style: TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
               GestureDetector(

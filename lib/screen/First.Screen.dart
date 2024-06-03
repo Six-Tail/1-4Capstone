@@ -1,12 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todobest_home/utils/Main.Colors.dart';
 import 'package:todobest_home/widgets/App.Icon.dart';
 import 'package:todobest_home/widgets/Login.Button.dart';
 import 'package:todobest_home/widgets/Sign-Up.Button.dart';
 import 'package:todobest_home/widgets/Social.Login.dart';
+import 'package:todobest_home/screen/Calender.Screen.dart';
 
-class FirstScreen extends StatelessWidget {
-  const FirstScreen({super.key});
+class FirstScreen extends StatefulWidget {
+  const FirstScreen({Key? key});
+
+  @override
+  State<FirstScreen> createState() => _FirstScreenState();
+}
+
+class _FirstScreenState extends State<FirstScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 화면이 처음 로드될 때 자동 로그인을 체크합니다.
+    checkAutoLogin();
+  }
+
+  void checkAutoLogin() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // SharedPreferences에서 자동 로그인 여부를 확인하고, 설정된 경우 캘린더 화면으로 이동합니다.
+    if (prefs.getBool('isAutoLogin') ?? false) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const CalenderScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
