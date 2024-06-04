@@ -12,6 +12,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   final bool _isLogin = false;
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
