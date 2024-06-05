@@ -1,0 +1,22 @@
+name: your_project_name
+description: A new Flutter project.
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.17.0 <3.0.0' # 또는 프로젝트에 맞는 SDK 버전으로 설정
+
+dependencies:
+  flutter:
+    sdk: flutter
+  image_picker: ^0.8.4+4 # 최신 버전을 사용하세요.
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/avatar.png
