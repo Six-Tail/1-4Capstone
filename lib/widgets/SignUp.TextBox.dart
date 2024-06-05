@@ -344,15 +344,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                   height: screenHeight * 0.068,
                   width: screenWidth * 0.8,
                   decoration: ShapeDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment(0.98, -0.18),
-                      end: Alignment(-0.98, 0.18),
-                      colors: [
-                        Color(0xFFFBDD94),
-                        Color(0xFFFDB082),
-                        Color(0xFFE05C41)
-                      ],
-                    ),
+                    gradient: MainColors.theme1Gradient,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(33),
                     ),
