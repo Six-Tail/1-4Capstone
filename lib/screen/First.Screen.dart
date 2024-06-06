@@ -1,5 +1,6 @@
+// First.Screen.dart
 import 'package:flutter/material.dart';
-import 'package:todobest_home/utils/Main.Colors.dart';
+import 'package:todobest_home/utils/Themes.Colors.dart';
 import 'package:todobest_home/widgets/App.Icon.dart';
 import 'package:todobest_home/widgets/Login.Button.dart';
 import 'package:todobest_home/widgets/Sign-Up.Button.dart';
@@ -14,7 +15,7 @@ class FirstScreen extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: MainColors.mainColor,
+      backgroundColor: Theme1Colors.mainColor,
       body: SingleChildScrollView(
         child: SafeArea(
           child: SizedBox(
@@ -28,7 +29,7 @@ class FirstScreen extends StatelessWidget {
                 Text(
                   '환영합니다!',
                   style: TextStyle(
-                    color: const Color(0xFF171D1B),
+                    color: Theme1Colors.textColor,
                     fontSize: screenWidth * 0.08,
                     fontFamily: 'Roboto',
                     fontWeight: FontWeight.w900,

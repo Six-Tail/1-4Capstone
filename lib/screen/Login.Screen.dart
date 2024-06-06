@@ -1,7 +1,8 @@
+// Login.Screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/screen/First.Screen.dart';
-import 'package:todobest_home/utils/Main.Colors.dart';
+import 'package:todobest_home/utils/Themes.Colors.dart';
 import 'package:todobest_home/widgets/App.Icon.dart';
 import 'package:todobest_home/widgets/Login.TextBox.dart';
 
@@ -26,7 +27,7 @@ class LoginScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           scrolledUnderElevation: 0,
-          backgroundColor: MainColors.mainColor,
+          backgroundColor: Theme1Colors.mainColor,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -34,7 +35,7 @@ class LoginScreen extends StatelessWidget {
             },
           ),
         ),
-        backgroundColor: MainColors.mainColor,
+        backgroundColor: Theme1Colors.mainColor,
         body: SafeArea(
           child: SingleChildScrollView(
             child: SizedBox(

@@ -1,8 +1,9 @@
+// Login.Button.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; // Import GetX package
-import 'package:todobest_home/utils/Main.Colors.dart';
 import 'package:todobest_home/screen/Login.Screen.dart';
+import 'package:todobest_home/utils/Themes.Colors.dart';
 
 class LoginButton extends StatelessWidget {
   const LoginButton({super.key});
@@ -26,7 +27,7 @@ class LoginButton extends StatelessWidget {
         decoration: ShapeDecoration(
           color: Colors.white,
           shape: RoundedRectangleBorder(
-            side: const BorderSide(width: 3, color: Color(0xFFFDB082)),
+            side: BorderSide(width: 3, color: Theme1Colors.textColor),
             borderRadius: BorderRadius.circular(33),
           ),
         ),
@@ -34,7 +35,7 @@ class LoginButton extends StatelessWidget {
           '기존 계정으로 로그인',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: MainColors.textColor,
+            color: Theme1Colors.textColor,
             fontSize: screenHeight * 0.022,
             fontFamily: 'Roboto',
             fontWeight: FontWeight.w600,

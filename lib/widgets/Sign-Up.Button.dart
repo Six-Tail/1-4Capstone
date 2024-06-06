@@ -1,8 +1,9 @@
+// Sign-Up.Button.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/screen/Sign-Up.Screen.dart';
-import 'package:todobest_home/utils/Main.Colors.dart';
+import 'package:todobest_home/utils/Themes.Colors.dart';
 
 class SignUpButton extends StatelessWidget {
   const SignUpButton({super.key});
@@ -24,7 +25,7 @@ class SignUpButton extends StatelessWidget {
         height: screenHeight * 0.068,
         width: screenWidth * 0.8,
         decoration: ShapeDecoration(
-          gradient: MainColors.theme1Gradient,
+          gradient: Theme1Colors.theme1Gradient,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(33),
           ),
@@ -33,7 +34,7 @@ class SignUpButton extends StatelessWidget {
             '새로운 계정 만들기',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: MainColors.mainColor,
+            color: Theme1Colors.mainColor,
             fontSize: screenHeight * 0.022,
             fontFamily: 'Roboto',
             fontWeight: FontWeight.w700,

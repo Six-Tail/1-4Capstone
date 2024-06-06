@@ -1,10 +1,10 @@
+// Sign-Up.TextBox.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/screen/Login.Screen.dart';
-
-import '../utils/Main.Colors.dart';
+import 'package:todobest_home/utils/Themes.Colors.dart';
 
 class SignUpTextBox extends StatefulWidget {
   const SignUpTextBox({super.key});
@@ -344,7 +344,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                   height: screenHeight * 0.068,
                   width: screenWidth * 0.8,
                   decoration: ShapeDecoration(
-                    gradient: MainColors.theme1Gradient,
+                    gradient: Theme1Colors.theme1Gradient,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(33),
                     ),
@@ -353,7 +353,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                     '새로운 계정 만들기',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: MainColors.mainColor,
+                      color: Theme1Colors.mainColor,
                       fontSize: screenHeight * 0.022,
                       fontFamily: 'Roboto',
                       fontWeight: FontWeight.w700,

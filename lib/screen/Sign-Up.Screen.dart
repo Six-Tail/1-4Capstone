@@ -1,8 +1,9 @@
+// Sign-Up.Screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:todobest_home/utils/Main.Colors.dart';
+import 'package:todobest_home/utils/Themes.Colors.dart';
 import 'package:todobest_home/widgets/AppIcon.small.dart';
-import 'package:todobest_home/widgets/SignUp.TextBox.dart';
+import 'package:todobest_home/widgets/Sign-Up.TextBox.dart';
 
 import 'First.Screen.dart';
 import 'Login.Screen.dart';
@@ -26,7 +27,7 @@ class SignUpScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           scrolledUnderElevation: 0,
-          backgroundColor: MainColors.mainColor,
+          backgroundColor: Theme1Colors.mainColor,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -34,7 +35,7 @@ class SignUpScreen extends StatelessWidget {
             },
           ),
         ),
-        backgroundColor: MainColors.mainColor,
+        backgroundColor: Theme1Colors.mainColor,
         body: SafeArea(
           child: SingleChildScrollView(
             child: SizedBox(
@@ -53,7 +54,7 @@ class SignUpScreen extends StatelessWidget {
           ),
         ),
         bottomNavigationBar: BottomAppBar(
-          color: MainColors.mainColor,
+          color: Theme1Colors.mainColor,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -75,13 +76,13 @@ class SignUpScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                       border: Border(
                           bottom: BorderSide(
-                              color: MainColors.textColor, width: 2.0))),
+                              color: Theme1Colors.textColor, width: 2.0))),
                   child: Row(
                     children: [
                       Text(
                         '기존 계정으로 로그인',
                         style: TextStyle(
-                          color: MainColors.textColor,
+                          color: Theme1Colors.textColor,
                           fontWeight: FontWeight.w700,
                           fontFamily: 'Roboto',
                           fontSize: screenWidth * 0.03,
