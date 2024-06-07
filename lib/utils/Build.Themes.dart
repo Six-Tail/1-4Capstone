@@ -1,9 +1,9 @@
 // Build.Themes.dart
 import 'package:flutter/material.dart';
-import '../utils/Themes.Colors.dart';
+import 'Themes.Colors.dart';
 
-ThemeData buildTheme1() {
-  return ThemeData(
+class AppThemes {
+  static final ThemeData theme1 = ThemeData(
     primaryColor: Theme1Colors.mainColor,
     hintColor: Theme1Colors.textColor,
     scaffoldBackgroundColor: Theme1Colors.mainColor,
@@ -14,14 +14,11 @@ ThemeData buildTheme1() {
       color: Theme1Colors.mainColor,
       titleTextStyle: TextStyle(
         color: Theme1Colors.textColor,
-        fontSize: 20,
       ),
     ),
   );
-}
 
-ThemeData buildTheme2() {
-  return ThemeData(
+  static final ThemeData theme2 = ThemeData(
     primaryColor: Theme2Colors.mainColor,
     hintColor: Theme2Colors.textColor,
     scaffoldBackgroundColor: Theme2Colors.mainColor,
@@ -32,14 +29,11 @@ ThemeData buildTheme2() {
       color: Theme2Colors.mainColor,
       titleTextStyle: TextStyle(
         color: Theme2Colors.textColor,
-        fontSize: 20,
       ),
     ),
   );
-}
 
-ThemeData buildTheme3() {
-  return ThemeData(
+  static final ThemeData theme3 = ThemeData(
     primaryColor: Theme3Colors.mainColor,
     hintColor: Theme3Colors.textColor,
     scaffoldBackgroundColor: Theme3Colors.mainColor,
@@ -50,14 +44,11 @@ ThemeData buildTheme3() {
       color: Theme3Colors.mainColor,
       titleTextStyle: TextStyle(
         color: Theme3Colors.textColor,
-        fontSize: 20,
       ),
     ),
   );
-}
 
-ThemeData buildTheme4() {
-  return ThemeData(
+  static final ThemeData theme4 = ThemeData(
     primaryColor: Theme4Colors.mainColor,
     hintColor: Theme4Colors.textColor,
     scaffoldBackgroundColor: Theme4Colors.mainColor,
@@ -68,7 +59,6 @@ ThemeData buildTheme4() {
       color: Theme4Colors.mainColor,
       titleTextStyle: TextStyle(
         color: Theme4Colors.textColor,
-        fontSize: 20,
       ),
     ),
   );
