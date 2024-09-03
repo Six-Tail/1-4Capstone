@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../utils/CalenderNavi.dart';
-import 'Week.Screen.dart';
+import 'utils/CalenderNavi.dart';
+import 'screen/Week.Screen.dart';
 
-class CalenderScreen extends StatefulWidget {
-  const CalenderScreen({super.key});
-
+class HomePage extends StatefulWidget {
   @override
-  _CalenderScreenState createState() => _CalenderScreenState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _CalenderScreenState extends State<CalenderScreen> {
+class _HomePageState extends State<HomePage> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -55,7 +53,7 @@ class _CalenderScreenState extends State<CalenderScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'ToDoBest',
           style: TextStyle(fontSize: 26), // 글자 크기 키움
         ),
@@ -67,7 +65,7 @@ class _CalenderScreenState extends State<CalenderScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications),
+            icon: Icon(Icons.notifications),
             onPressed: () {},
           ),
         ],
@@ -107,7 +105,7 @@ class _CalenderScreenState extends State<CalenderScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         backgroundColor: appBarColor, // AppBar 배경색과 동일하게 설정
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
