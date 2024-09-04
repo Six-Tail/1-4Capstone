@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import '../screen/Calender.Screen.dart';
-import 'Board.Data.dart';
-import 'Components.dart';
+import 'package:todobest_home/screen/Calender.Screen.dart';
 import 'WritePost.Screen.dart';
 import 'FreeBoard.Screen.dart';
 import 'GoalshareBoard.Screen.dart';
@@ -35,9 +32,9 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('게시판'),
+        title: const Text('게시판'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Get.to(() => CalenderScreen());
           },
@@ -64,13 +61,13 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       );
                     },
                     child: Container(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isHotSelected ? Colors.brown.shade100 : Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.grey),
                       ),
-                      child: Column(
+                      child: const Column(
                         children: [
                           Icon(Icons.whatshot, size: 40, color: Colors.brown),
                           SizedBox(height: 30),
@@ -80,7 +77,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                     ),
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: InkWell(
                     onTap: () {
@@ -96,13 +93,13 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       );
                     },
                     child: Container(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isMyPostsSelected ? Colors.brown.shade100 : Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.grey),
                       ),
-                      child: Column(
+                      child: const Column(
                         children: [
                           Icon(Icons.notes, size: 40, color: Colors.black),
                           SizedBox(height: 30),
@@ -114,7 +111,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Expanded(
               child: ListView(
                 children: [
@@ -153,7 +150,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
             });
           }
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

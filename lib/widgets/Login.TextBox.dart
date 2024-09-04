@@ -158,7 +158,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                     );
 
                     if (newUser.user != null) {
-                      Get.to(() => const CalenderScreen());
+                      Get.to(() => CalenderScreen());
                     }
                   } catch (e) {
                     if (kDebugMode) {

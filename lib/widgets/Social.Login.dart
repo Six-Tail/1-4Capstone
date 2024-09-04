@@ -11,10 +11,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:todobest_home/screen/Calender.Screen.dart';
 import 'package:uni_links2/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../screen/Calender.Screen.dart';
 
 class SocialLogin extends StatefulWidget {
   const SocialLogin({super.key});
@@ -120,9 +119,7 @@ class _SocialLoginState extends State<SocialLogin> {
         base64Url.encode(List<int>.generate(16, (_) => Random().nextInt(255)));
     Uri url = Uri.parse(
         'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=$clientID&redirect_uri=$redirectUri&state=$state');
-    if (kDebugMode) {
-      print("네이버 로그인 열기 & 클라우드 함수 호출");
-    }
+    print("네이버 로그인 열기 & 클라우드 함수 호출");
     await launchUrl(url);
 
     initUniLinks();
@@ -215,9 +212,7 @@ class _SocialLoginState extends State<SocialLogin> {
         // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인
         try {
           await UserApi.instance.loginWithKakaoAccount().then((value) {
-            if (kDebugMode) {
-              print('value from kakao $value');
-            }
+            print('value from kakao $value');
             navigatorToMainPage();
             setState(() {
               isLoginAttempt = false; // Reset login attempt state
