@@ -1,4 +1,3 @@
-// Calender.Screen.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,11 +15,14 @@ class CalenderScreen extends StatefulWidget {
   _CalenderScreenState createState() => _CalenderScreenState();
 }
 
-class _CalenderScreenState extends State<CalenderScreen> {
+class _CalenderScreenState extends State<CalenderScreen>
+    with SingleTickerProviderStateMixin {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   final ScrollController _scrollController = ScrollController();
+
+  bool _isExpanded = false;
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
@@ -55,6 +57,12 @@ class _CalenderScreenState extends State<CalenderScreen> {
     });
   }
 
+  void _toggleMenu() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBarColor = Colors.orange.withOpacity(0.7); // 연한 주황색 배경
@@ -69,7 +77,6 @@ class _CalenderScreenState extends State<CalenderScreen> {
               color: Theme1Colors.textColor), // 글자 크기 키움
         ),
         centerTitle: true,
-        // 제목을 중앙으로 정렬
         backgroundColor: Theme1Colors.mainColor,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -114,33 +121,98 @@ class _CalenderScreenState extends State<CalenderScreen> {
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: Theme1Colors.textColor, // AppBar 배경색과 동일하게 설정
-        child: const Icon(Icons.add),
+      floatingActionButton: Stack(
+        children: [
+          // 메뉴 항목들
+          Positioned(
+            bottom: 80,
+            right: 16,
+            child: IgnorePointer(
+              ignoring: !_isExpanded,
+              child: AnimatedOpacity(
+                opacity: _isExpanded ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FloatingActionButton.extended(
+                      onPressed: () {
+                        // 일정 등록
+                        if (kDebugMode) {
+                          print('일정 등록');
+                        }
+                      },
+                      label: const Text('일정 등록'),
+                      icon: const Icon(Icons.add_task),
+                      backgroundColor: Theme1Colors.textColor,
+                    ),
+                    const SizedBox(height: 10),
+                    FloatingActionButton.extended(
+                      onPressed: () {
+                        // 일정 수정
+                        if (kDebugMode) {
+                          print('일정 수정');
+                        }
+                      },
+                      label: const Text('일정 수정'),
+                      icon: const Icon(Icons.edit),
+                      backgroundColor: Theme1Colors.textColor,
+                    ),
+                    const SizedBox(height: 10),
+                    FloatingActionButton.extended(
+                      onPressed: () {
+                        // 일정 삭제
+                        if (kDebugMode) {
+                          print('일정 삭제');
+                        }
+                      },
+                      label: const Text('일정 삭제'),
+                      icon: const Icon(Icons.delete),
+                      backgroundColor: Theme1Colors.textColor,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // 메인 플로팅 버튼
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: AnimatedRotation(
+              turns: _isExpanded ? 0.25 : 0,
+              duration: const Duration(milliseconds: 300),
+              child: FloatingActionButton(
+                onPressed: _toggleMenu,
+                backgroundColor: Theme1Colors.textColor,
+                child: Icon(_isExpanded ? Icons.close : Icons.add),
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
+            backgroundColor: Colors.white,
             icon: Icon(Icons.home, color: Colors.black),
-            label: 'Home'
+            label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
+            icon: Icon(Icons.chat, color: Colors.black),
             label: 'Chat',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.star),
+            icon: Icon(Icons.star, color: Colors.black),
             label: 'Star',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.more_horiz),
+            icon: Icon(Icons.more_horiz, color: Colors.black),
             label: 'More',
           ),
         ],
         selectedItemColor: Theme1Colors.textColor,
         onTap: (int index) {
-          // 여기에 각 인덱스별로 수행할 작업을 추가하세요.
           switch (index) {
             case 0:
               Get.to(() => const CalenderScreen());

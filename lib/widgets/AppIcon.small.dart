@@ -17,7 +17,7 @@ class AppIconSmall extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: iconSize,
-            backgroundImage: const AssetImage('assets/images/icon.png'),
+            backgroundImage: const AssetImage('assets/images/BackGroundIcon.png'),
           ),
         ],
       ),
