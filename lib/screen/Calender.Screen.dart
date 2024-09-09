@@ -65,7 +65,7 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   @override
   Widget build(BuildContext context) {
-    final appBarColor = Colors.orange.withOpacity(0.7); // 연한 주황색 배경
+    Colors.orange.withOpacity(0.7); // 연한 주황색 배경
 
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
