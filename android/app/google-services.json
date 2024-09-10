@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "49491866019",
+    "project_id": "to-do-best-72308",
+    "storage_bucket": "to-do-best-72308.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49491866019:android:336496646dee83d2dd2a16",
+        "android_client_info": {
+          "package_name": "com.example.graduationwork_community"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "49491866019-fln0pqo435dvmv0hmmv48sj3qhc2uhqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApBJ3XkCBYPSLcc4PugxjWAdeNyqfEWHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "49491866019-fln0pqo435dvmv0hmmv48sj3qhc2uhqq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "49491866019-4ntd7fb8uc0s6trao9hq37bag1ikgcph.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.todobestHome"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49491866019:android:747dc0a50581b5a2dd2a16",
+        "android_client_info": {
+          "package_name": "com.example.todobest_home"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "49491866019-l8behu6ut5iud1d8p44smlja0u3luhug.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.todobest_home",
+            "certificate_hash": "2c10e1b3e8b1ffa6cfe6701b14eafb2c95177fd7"
+          }
+        },
+        {
+          "client_id": "49491866019-fln0pqo435dvmv0hmmv48sj3qhc2uhqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApBJ3XkCBYPSLcc4PugxjWAdeNyqfEWHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "49491866019-fln0pqo435dvmv0hmmv48sj3qhc2uhqq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "49491866019-4ntd7fb8uc0s6trao9hq37bag1ikgcph.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.todobestHome"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

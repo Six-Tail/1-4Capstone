@@ -1,4 +1,4 @@
-package com.example.gift
+package com.example.latest
 
 import io.flutter.embedding.android.FlutterActivity
 
