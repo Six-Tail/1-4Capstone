@@ -5,6 +5,7 @@ class WeekScreen extends StatelessWidget {
   final ScrollController scrollController;
 
   const WeekScreen({
+    super.key,
     required this.focusedDay,
     required this.scrollController,
   });
@@ -24,7 +25,7 @@ class WeekScreen extends StatelessWidget {
             color: Colors.black54,
             child: Row(
               children: [
-                SizedBox(width: 40),  // 시간 칸과 정렬을 맞추기 위한 여백
+                const SizedBox(width: 40),  // 시간 칸과 정렬을 맞추기 위한 여백
                 ...daysOfWeek.map((day) {
                   return Expanded(
                     child: Column(
@@ -44,20 +45,20 @@ class WeekScreen extends StatelessWidget {
                         ),
                         Container(
                           height: 30,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                          ),
                           child: Center(
                             child: Text(
                               _dayOfWeek(day.weekday),
-                              style: TextStyle(fontSize: 12, color: Colors.white),
+                              style: const TextStyle(fontSize: 12, color: Colors.white),
                             ),
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
                           ),
                         ),
                       ],
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -78,8 +79,8 @@ class WeekScreen extends StatelessWidget {
                         ),
                         child: Center(
                           child: Text(
-                            '${index}:00',
-                            style: TextStyle(color: Colors.white),
+                            '$index:00',
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       );

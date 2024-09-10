@@ -18,42 +18,64 @@ class CalenderNavi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.chevron_left),
-            onPressed: onPrevMonth, // 이전 달로 이동
+            icon: Icon(Icons.chevron_left, color: theme.primaryColor),
+            onPressed: onPrevMonth,
           ),
           Row(
             children: [
               Text(
                 '${focusedDay.year}년 ${focusedDay.month}월',
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  color: theme.primaryColor,
+                ),
               ),
-              SizedBox(width: 8.0),
-              ToggleButtons(
-                borderColor: Colors.grey,
-                selectedBorderColor: Colors.blue,
-                selectedColor: Colors.white,
-                fillColor: Colors.blue,
-                borderRadius: BorderRadius.circular(8),
-                constraints: BoxConstraints(minHeight: 30.0, minWidth: 40.0), // 버튼 크기 줄임
-                isSelected: [calendarFormat == CalendarFormat.month, calendarFormat == CalendarFormat.week],
-                onPressed: (int index) {
-                  onFormatChanged(index == 0 ? CalendarFormat.month : CalendarFormat.week);
-                },
-                children: <Widget>[
-                  Text('Month'),
-                  Text('Week'),
-                ],
+              const SizedBox(width: 8.0),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: ToggleButtons(
+                  borderColor: theme.primaryColor,
+                  selectedBorderColor: theme.primaryColor,
+                  selectedColor: Colors.white,
+                  fillColor: theme.primaryColor.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(8),
+                  constraints: const BoxConstraints(
+                    minHeight: 24.0,
+                    minWidth: 36.0,
+                  ),
+                  isSelected: [
+                    calendarFormat == CalendarFormat.month,
+                    calendarFormat == CalendarFormat.week,
+                  ],
+                  onPressed: (int index) {
+                    onFormatChanged(
+                      index == 0 ? CalendarFormat.month : CalendarFormat.week,
+                    );
+                  },
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text('월', style: TextStyle(fontSize: 14)),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text('주', style: TextStyle(fontSize: 14)),
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(width: 8.0),
+              const SizedBox(width: 8.0),
               IconButton(
-                icon: Icon(Icons.chevron_right),
-                onPressed: onNextMonth, // 다음 달로 이동
+                icon: Icon(Icons.chevron_right, color: theme.primaryColor),
+                onPressed: onNextMonth,
               ),
             ],
           ),

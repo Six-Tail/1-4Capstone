@@ -6,8 +6,8 @@ import 'package:todobest_home/Setting.MainPage.dart';
 import 'package:todobest_home/community/Community.MainPage.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
 import '../utils/CalenderNavi.dart';
+import 'CalenderUtil/CustomCalender.dart';
 import 'CalenderUtil/EventModal.dart';
-import 'Week.Screen.dart';
 
 class CalenderScreen extends StatefulWidget {
   const CalenderScreen({super.key});
@@ -21,12 +21,17 @@ class _CalenderScreenState extends State<CalenderScreen>
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  bool _isExpanded = false;
+  final Map<DateTime, List<String>> _events = {};
+
+  // ScrollController 추가
   final ScrollController _scrollController = ScrollController();
 
-  bool _isExpanded = false;
-
-  // 일정 저장을 위한 맵
-  final Map<DateTime, List<String>> _events = {};
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
@@ -67,7 +72,6 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
   }
 
-  // 일정 추가 메서드
   void _addEvent(String event) {
     if (_selectedDay != null) {
       setState(() {
@@ -80,7 +84,6 @@ class _CalenderScreenState extends State<CalenderScreen>
     }
   }
 
-  // 일정 수정 메서드
   void _editEvent(int index, String updatedEvent) {
     if (_selectedDay != null && _events[_selectedDay!] != null) {
       setState(() {
@@ -89,7 +92,6 @@ class _CalenderScreenState extends State<CalenderScreen>
     }
   }
 
-  // 일정 삭제 메서드
   void _deleteEvent(int index) {
     if (_selectedDay != null && _events[_selectedDay!] != null) {
       setState(() {
@@ -131,84 +133,65 @@ class _CalenderScreenState extends State<CalenderScreen>
             onNextMonth: _onNextMonth,
             onFormatChanged: _onFormatChanged,
           ),
-          if (_calendarFormat == CalendarFormat.week)
-            WeekScreen(
+          Expanded(
+            child: CustomCalendar(
+              selectedDate: _selectedDay ?? DateTime.now(),
+              onDateSelected: (date) {
+                _onDaySelected(date, _focusedDay);
+              },
+              calendarFormat: _calendarFormat,
               focusedDay: _focusedDay,
-              scrollController: _scrollController,
             ),
-          if (_calendarFormat != CalendarFormat.week)
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    TableCalendar(
-                      firstDay: DateTime.utc(2010, 10, 16),
-                      lastDay: DateTime.utc(2030, 3, 14),
-                      focusedDay: _focusedDay,
-                      calendarFormat: _calendarFormat,
-                      headerVisible: false,
-                      selectedDayPredicate: (day) {
-                        return isSameDay(_selectedDay, day);
-                      },
-                      onDaySelected: _onDaySelected,
-                      onFormatChanged: _onFormatChanged,
-                      onPageChanged: _onPageChanged,
-                    ),
-                  ],
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: _selectedDay != null && _events[_selectedDay!] != null
+                ? ListView.builder(
+              itemCount: _events[_selectedDay!]!.length,
+              itemBuilder: (context, index) {
+                String event = _events[_selectedDay!]![index];
+                return ListTile(
+                  title: Text(event),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => EventModal(
+                              selectedDate: _selectedDay!,
+                              initialValue: event,
+                              editMode: true,
+                              onEventAdded: (updatedEvent) {
+                                _editEvent(index, updatedEvent);
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          _deleteEvent(index);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            )
+                : Center(
+              child: Text(
+                '선택된 날짜에 일정이 없습니다.',
+                style: TextStyle(
+                  color: Theme1Colors.textColor,
+                  fontSize: 16,
                 ),
               ),
             ),
-          if (_selectedDay != null)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${_selectedDay!.toLocal()}의 일정:',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Theme1Colors.textColor,
-                    ),
-                  ),
-                  ..._events[_selectedDay]?.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    String event = entry.value;
-
-                    return ListTile(
-                      title: Text(event),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => EventModal(
-                                  selectedDate: _selectedDay!,
-                                  initialValue: event,
-                                  editMode: true,
-                                  onEventAdded: (updatedEvent) {
-                                    _editEvent(index, updatedEvent);
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {
-                              _deleteEvent(index);
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList() ?? [],
-                ],
-              ),
-            ),
+          ),
         ],
       ),
       floatingActionButton: Stack(
