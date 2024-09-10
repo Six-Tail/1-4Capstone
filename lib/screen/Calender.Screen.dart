@@ -6,6 +6,7 @@ import 'package:todobest_home/Setting.MainPage.dart';
 import 'package:todobest_home/community/Community.MainPage.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
 import '../utils/CalenderNavi.dart';
+import 'CalenderUtil/EventModal.dart';
 import 'Week.Screen.dart';
 
 class CalenderScreen extends StatefulWidget {
@@ -23,6 +24,9 @@ class _CalenderScreenState extends State<CalenderScreen>
   final ScrollController _scrollController = ScrollController();
 
   bool _isExpanded = false;
+
+  // 일정 저장을 위한 맵
+  final Map<DateTime, List<String>> _events = {};
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
@@ -63,10 +67,39 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
   }
 
+  // 일정 추가 메서드
+  void _addEvent(String event) {
+    if (_selectedDay != null) {
+      setState(() {
+        if (_events[_selectedDay!] != null) {
+          _events[_selectedDay!]!.add(event);
+        } else {
+          _events[_selectedDay!] = [event];
+        }
+      });
+    }
+  }
+
+  // 일정 수정 메서드
+  void _editEvent(int index, String updatedEvent) {
+    if (_selectedDay != null && _events[_selectedDay!] != null) {
+      setState(() {
+        _events[_selectedDay!]![index] = updatedEvent;
+      });
+    }
+  }
+
+  // 일정 삭제 메서드
+  void _deleteEvent(int index) {
+    if (_selectedDay != null && _events[_selectedDay!] != null) {
+      setState(() {
+        _events[_selectedDay!]!.removeAt(index);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Colors.orange.withOpacity(0.7); // 연한 주황색 배경
-
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
@@ -74,13 +107,13 @@ class _CalenderScreenState extends State<CalenderScreen>
           'ToDoBest',
           style: TextStyle(
               fontSize: 26,
-              color: Theme1Colors.textColor), // 글자 크기 키움
+              color: Theme1Colors.textColor),
         ),
         centerTitle: true,
         backgroundColor: Theme1Colors.mainColor,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Image.asset('assets/images/icon.png'), // 아이콘 경로 설정
+          child: Image.asset('assets/images/icon.png'),
         ),
         actions: [
           IconButton(
@@ -105,25 +138,81 @@ class _CalenderScreenState extends State<CalenderScreen>
             ),
           if (_calendarFormat != CalendarFormat.week)
             Expanded(
-              child: TableCalendar(
-                firstDay: DateTime.utc(2010, 10, 16),
-                lastDay: DateTime.utc(2030, 3, 14),
-                focusedDay: _focusedDay,
-                calendarFormat: _calendarFormat,
-                headerVisible: false,
-                selectedDayPredicate: (day) {
-                  return isSameDay(_selectedDay, day);
-                },
-                onDaySelected: _onDaySelected,
-                onFormatChanged: _onFormatChanged,
-                onPageChanged: _onPageChanged,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    TableCalendar(
+                      firstDay: DateTime.utc(2010, 10, 16),
+                      lastDay: DateTime.utc(2030, 3, 14),
+                      focusedDay: _focusedDay,
+                      calendarFormat: _calendarFormat,
+                      headerVisible: false,
+                      selectedDayPredicate: (day) {
+                        return isSameDay(_selectedDay, day);
+                      },
+                      onDaySelected: _onDaySelected,
+                      onFormatChanged: _onFormatChanged,
+                      onPageChanged: _onPageChanged,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (_selectedDay != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${_selectedDay!.toLocal()}의 일정:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Theme1Colors.textColor,
+                    ),
+                  ),
+                  ..._events[_selectedDay]?.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    String event = entry.value;
+
+                    return ListTile(
+                      title: Text(event),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => EventModal(
+                                  selectedDate: _selectedDay!,
+                                  initialValue: event,
+                                  editMode: true,
+                                  onEventAdded: (updatedEvent) {
+                                    _editEvent(index, updatedEvent);
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              _deleteEvent(index);
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList() ?? [],
+                ],
               ),
             ),
         ],
       ),
       floatingActionButton: Stack(
         children: [
-          // 메뉴 항목들
           Positioned(
             bottom: 80,
             right: 16,
@@ -137,45 +226,24 @@ class _CalenderScreenState extends State<CalenderScreen>
                   children: [
                     FloatingActionButton.extended(
                       onPressed: () {
-                        // 일정 등록
-                        if (kDebugMode) {
-                          print('일정 등록');
-                        }
+                        showDialog(
+                          context: context,
+                          builder: (context) => EventModal(
+                            selectedDate: _selectedDay ?? _focusedDay,
+                            onEventAdded: _addEvent,
+                          ),
+                        );
                       },
                       label: const Text('일정 등록'),
                       icon: const Icon(Icons.add_task),
                       backgroundColor: Theme1Colors.textColor,
                     ),
                     const SizedBox(height: 10),
-                    FloatingActionButton.extended(
-                      onPressed: () {
-                        // 일정 수정
-                        if (kDebugMode) {
-                          print('일정 수정');
-                        }
-                      },
-                      label: const Text('일정 수정'),
-                      icon: const Icon(Icons.edit),
-                      backgroundColor: Theme1Colors.textColor,
-                    ),
-                    const SizedBox(height: 10),
-                    FloatingActionButton.extended(
-                      onPressed: () {
-                        // 일정 삭제
-                        if (kDebugMode) {
-                          print('일정 삭제');
-                        }
-                      },
-                      label: const Text('일정 삭제'),
-                      icon: const Icon(Icons.delete),
-                      backgroundColor: Theme1Colors.textColor,
-                    ),
                   ],
                 ),
               ),
             ),
           ),
-          // 메인 플로팅 버튼
           Positioned(
             bottom: 16,
             right: 16,
