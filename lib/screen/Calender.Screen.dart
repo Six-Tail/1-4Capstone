@@ -208,6 +208,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     FloatingActionButton.extended(
+                      heroTag: 'add task',
                       onPressed: () {
                         showDialog(
                           context: context,
