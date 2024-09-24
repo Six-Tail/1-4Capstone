@@ -112,14 +112,74 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
               ],
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: ListView(
+
+            // "게시판" 텍스트와 접기/펼치기 기능 추가 (선 없앰)
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                title: const Text(
+                  '게시판',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                initiallyExpanded: true,  // 기본값을 펼치기로 설정
+                tilePadding: const EdgeInsets.symmetric(horizontal: 0),  // 패딩 조정
+                childrenPadding: const EdgeInsets.symmetric(horizontal: 0),  // 패딩 조정
                 children: [
-                  buildListTile(context, '자유 게시판', FreeBoardScreen(posts: boardPosts['자유 게시판']!)),
-                  buildListTile(context, '목표 공유 게시판', GoalShareBoardScreen(posts: boardPosts['목표 공유 게시판']!)),
-                  buildListTile(context, '자기계발 팁 게시판', SdTipBoardScreen(posts: boardPosts['자기계발 팁 게시판']!)),
-                  buildListTile(context, '멘토링 요청 게시판', MentoringBoardScreen(posts: boardPosts['멘토링 요청 게시판']!)),
-                  buildListTile(context, '홍보 게시판', PromotionBoardScreen(posts: boardPosts['홍보 게시판']!)),
+                  ListTile(
+                    title: const Text('자유 게시판'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FreeBoardScreen(posts: boardPosts['자유 게시판']!),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('목표 공유 게시판'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GoalShareBoardScreen(posts: boardPosts['목표 공유 게시판']!),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('자기계발 팁 게시판'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SdTipBoardScreen(posts: boardPosts['자기계발 팁 게시판']!),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('멘토링 요청 게시판'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MentoringBoardScreen(posts: boardPosts['멘토링 요청 게시판']!),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('홍보 게시판'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PromotionBoardScreen(posts: boardPosts['홍보 게시판']!),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -154,6 +214,8 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
       ),
     );
   }
+
+
 
   List<Map<String, dynamic>> getHotPosts() {
     return boardPosts.values
