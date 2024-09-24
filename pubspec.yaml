@@ -45,8 +45,8 @@ dependencies:
   firebase_auth: ^4.19.6
   google_sign_in: ^6.2.1
   kakao_flutter_sdk_user: ^1.9.2
-  package_info_plus: ^8.0.0
   flutter_naver_login: ^1.8.0
+  firebase_database: ^10.5.7
   url_launcher: ^6.2.6
   uni_links2: ^0.6.0+2
   firebase_database: ^10.5.7
