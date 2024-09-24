@@ -5,8 +5,6 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:todobest_home/Setting.MainPage.dart';
 import 'package:todobest_home/community/Community.MainPage.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
-import '../utils/CalenderNavi.dart';
-import 'CalenderUtil/CustomCalender.dart';
 import 'CalenderUtil/EventModal.dart';
 
 class CalenderScreen extends StatefulWidget {
@@ -24,7 +22,6 @@ class _CalenderScreenState extends State<CalenderScreen>
   bool _isExpanded = false;
   final Map<DateTime, List<String>> _events = {};
 
-  // ScrollController 추가
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -108,8 +105,7 @@ class _CalenderScreenState extends State<CalenderScreen>
         title: Text(
           'ToDoBest',
           style: TextStyle(
-              fontSize: 26,
-              color: Theme1Colors.textColor),
+              fontSize: 26, color: Theme1Colors.textColor),
         ),
         centerTitle: true,
         backgroundColor: Theme1Colors.mainColor,
@@ -126,22 +122,20 @@ class _CalenderScreenState extends State<CalenderScreen>
       ),
       body: Column(
         children: [
-          CalenderNavi(
+          TableCalendar(
+            firstDay: DateTime.utc(2010, 10, 16),
+            lastDay: DateTime.utc(2030, 3, 14),
             focusedDay: _focusedDay,
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
             calendarFormat: _calendarFormat,
-            onPrevMonth: _onPrevMonth,
-            onNextMonth: _onNextMonth,
+            onDaySelected: _onDaySelected,
             onFormatChanged: _onFormatChanged,
-          ),
-          Expanded(
-            child: CustomCalendar(
-              selectedDate: _selectedDay ?? DateTime.now(),
-              onDateSelected: (date) {
-                _onDaySelected(date, _focusedDay);
-              },
-              calendarFormat: _calendarFormat,
-              focusedDay: _focusedDay,
-            ),
+            onPageChanged: _onPageChanged,
+            eventLoader: (day) {
+              return _events[day] ?? [];
+            },
           ),
           const SizedBox(height: 10),
           Expanded(

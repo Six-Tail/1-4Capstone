@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:todobest_home/screen/Splash.Screen.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +19,7 @@ void main() async {
     javaScriptAppKey: '75a73786836d92e7d0ba16f757d36355',
   );
 
-  runApp(const SplashScreen());
+  initializeDateFormatting().then((_) => runApp(const SplashScreen()));
 }
 
 class App extends StatelessWidget {
