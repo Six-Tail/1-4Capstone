@@ -123,6 +123,7 @@ class _CalenderScreenState extends State<CalenderScreen>
       body: Column(
         children: [
           TableCalendar(
+            locale: 'ko_KR',
             firstDay: DateTime.utc(2010, 10, 16),
             lastDay: DateTime.utc(2030, 3, 14),
             focusedDay: _focusedDay,
@@ -202,6 +203,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     FloatingActionButton.extended(
+                      heroTag: 'AddTask',
                       onPressed: () {
                         showDialog(
                           context: context,

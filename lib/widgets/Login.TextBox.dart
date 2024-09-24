@@ -158,7 +158,10 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                     );
 
                     if (newUser.user != null) {
-                      Get.to(() => CalenderScreen());
+                      if (kDebugMode) {
+                        print('이메일로 로그인 성공!');
+                      }
+                      Get.offAll(() => const CalenderScreen());
                     }
                   } catch (e) {
                     if (kDebugMode) {

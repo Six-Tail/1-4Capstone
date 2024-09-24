@@ -31,7 +31,7 @@ class LoginScreen extends StatelessWidget {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              Get.to(() => const FirstScreen());
+              Get.off(() => const FirstScreen());
             },
           ),
         ),
