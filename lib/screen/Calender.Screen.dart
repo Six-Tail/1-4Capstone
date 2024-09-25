@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -49,18 +48,6 @@ class _CalenderScreenState extends State<CalenderScreen>
   void _onPageChanged(DateTime focusedDay) {
     setState(() {
       _focusedDay = focusedDay;
-    });
-  }
-
-  void _onPrevMonth() {
-    setState(() {
-      _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
-    });
-  }
-
-  void _onNextMonth() {
-    setState(() {
-      _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
     });
   }
 
@@ -124,6 +111,7 @@ class _CalenderScreenState extends State<CalenderScreen>
       body: Column(
         children: [
           TableCalendar(
+            daysOfWeekHeight: 20,
             locale: 'ko_KR',
             firstDay: DateTime.utc(2010, 10, 16),
             lastDay: DateTime.utc(2030, 3, 14),
