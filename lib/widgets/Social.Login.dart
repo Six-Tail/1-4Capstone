@@ -2,15 +2,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-
-import 'package:http/http.dart' as http; // http 패키지 추가
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // 추가된 부분
 import 'package:todobest_home/screen/Calender.Screen.dart';
 import 'package:uni_links2/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,10 +24,23 @@ class SocialLogin extends StatefulWidget {
 
 class _SocialLoginState extends State<SocialLogin> {
   StreamSubscription<String?>? _linkSubscription;
+  bool isLoginAttempt = false; // 로그인 시도 여부
+  bool isLoggedIn = false; // 로그인 상태 여부
 
   @override
   void initState() {
     super.initState();
+    checkLoginStatus(); // 앱 시작 시 로그인 상태 확인
+  }
+
+  Future<void> checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    });
+    if (isLoggedIn) {
+      navigatorToMainPage(); // 이미 로그인된 경우 메인 페이지로 이동
+    }
   }
 
   @override
@@ -36,15 +49,11 @@ class _SocialLoginState extends State<SocialLogin> {
     super.dispose();
   }
 
-  bool isLoginAttempt = false; // State variable to track login attempt
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
-    // Calculate the size for the icons based on the screen width
-    final iconSize = screenWidth * 0.14; // Adjust the factor as needed
+    final iconSize = screenWidth * 0.14; // 아이콘 크기 조정
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -73,7 +82,7 @@ class _SocialLoginState extends State<SocialLogin> {
             GestureDetector(
               onTap: () async {
                 await signInWithNaver();
-                // Add your Naver login functionality here
+                // Naver 로그인 기능 추가
                 if (kDebugMode) {
                   print('naver');
                 }
@@ -108,9 +117,8 @@ class _SocialLoginState extends State<SocialLogin> {
 
   Future<void> signInWithNaver() async {
     setState(() {
-      isLoginAttempt = true; // Set login attempt state to true
+      isLoginAttempt = true; // 로그인 시도 상태를 true로 설정
     });
-
     String clientID = '3zEWgueywUQAaMf0tcK7';
     String redirectUri =
         'https://us-central1-to-do-best-72308.cloudfunctions.net/naverLoginCallback';
@@ -118,20 +126,17 @@ class _SocialLoginState extends State<SocialLogin> {
     base64Url.encode(List<int>.generate(16, (_) => Random().nextInt(255)));
     Uri url = Uri.parse(
         'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=$clientID&redirect_uri=$redirectUri&state=$state');
-    if (kDebugMode) {
-      print("네이버 로그인 열기 & 클라우드 함수 호출");
-    }
+    print("네이버 로그인 열기 & 클라우드 함수 호출");
     await launchUrl(url);
-
     initUniLinks();
   }
 
   Future<void> initUniLinks() async {
     final initialLink = await getInitialLink();
     if (initialLink != null) _handleDeepLink(initialLink);
-
     _linkSubscription = linkStream.listen((String? link) {
       if (isLoginAttempt) {
+        // 로그인 시도가 활성화되어 있는 경우 딥링크 처리
         _handleDeepLink(link!);
       }
     }, onError: (err, stacktrace) {
@@ -146,98 +151,129 @@ class _SocialLoginState extends State<SocialLogin> {
       print("딥링크 열기 $link");
     }
     final Uri uri = Uri.parse(link);
-
     if (uri.authority == 'login-callback') {
       String? firebaseToken = uri.queryParameters['firebaseToken'];
       String? name = uri.queryParameters['name'];
       String? profileImage = uri.queryParameters['profileImage'];
-
-      if (firebaseToken != null) {
-        await FirebaseAuth.instance
-            .signInWithCustomToken(firebaseToken)
-            .then((value) {
-          navigatorToMainPage();
-        }).onError((error, stackTrace) {
-          if (kDebugMode) {
-            print("error $error");
-          }
-        });
-      } else {
-        if (kDebugMode) {
-          print("firebaseToken이 null입니다.");
-        }
+      if (kDebugMode) {
+        print("name $name");
       }
-      setState(() {
-        isLoginAttempt = false; // Reset login attempt state
+      await FirebaseAuth.instance
+          .signInWithCustomToken(firebaseToken!)
+          .then((value) {
+        navigatorToMainPage();
+        setState(() {
+          isLoginAttempt = false; // 로그인 시도 상태를 초기화
+        });
+      }).onError((error, stackTrace) {
+        if (kDebugMode) {
+          print("error $error");
+        }
+        setState(() {
+          isLoginAttempt = false; // 로그인 시도 상태를 초기화
+        });
       });
     }
   }
 
   Future<void> signInWithKakao() async {
     setState(() {
-      isLoginAttempt = true; // Set login attempt state to true
+      isLoginAttempt = true; // 로그인 시도 상태를 true로 설정
     });
 
-    try {
-      OAuthToken token = await UserApi.instance.loginWithKakaoAccount();
+    if (await isKakaoTalkInstalled()) {
+      try {
+        await UserApi.instance.loginWithKakaoTalk().then((value) async {
+          await _handleSuccessfulLogin(value); // 성공적인 로그인 처리
+        });
+      } catch (error) {
+        if (kDebugMode) {
+          print('카카오톡으로 로그인 실패 $error');
+        }
+        if (error is PlatformException && error.code == 'CANCELED') {
+          setState(() {
+            isLoginAttempt = false; // 로그인 시도 상태를 초기화
+          });
+          return;
+        }
 
-      final response = await http.post(
-        Uri.parse('https://us-central1-to-do-best-72308.cloudfunctions.net/kakaoLogin'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'accessToken': token.accessToken,
-        }),
+        try {
+          await UserApi.instance.loginWithKakaoAccount().then((value) async {
+            await _handleSuccessfulLogin(value); // 성공적인 로그인 처리
+          });
+        } catch (error) {
+          if (kDebugMode) {
+            print('카카오계정으로 로그인 실패 $error');
+          }
+          setState(() {
+            isLoginAttempt = false; // 로그인 시도 상태를 초기화
+          });
+        }
+      }
+    } else {
+      try {
+        OAuthToken token = await UserApi.instance.loginWithKakaoAccount();
+        await _handleSuccessfulLogin(token); // 성공적인 로그인 처리
+      } catch (error) {
+        if (kDebugMode) {
+          print('카카오계정으로 로그인 실패 $error');
+        }
+        setState(() {
+          isLoginAttempt = false; // 로그인 시도 상태를 초기화
+        });
+      }
+    }
+    initUniLinks();
+  }
+
+  Future<void> _handleSuccessfulLogin(OAuthToken token) async {
+    try {
+      // 로그인 상태를 SharedPreferences에 저장
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+
+      var provider = OAuthProvider('oidc.todobest');
+      var credential = provider.credential(
+        idToken: token.idToken,
+        accessToken: token.accessToken,
       );
 
-      final responseData = jsonDecode(response.body);
-      final String? firebaseToken = responseData['firebaseToken']; // Nullable 처리
-
-      if (firebaseToken != null) {
-        await FirebaseAuth.instance.signInWithCustomToken(firebaseToken);
-        navigatorToMainPage();
-        if (kDebugMode) {
-          print('카카오 로그인 및 Firebase 연동 성공');
-        }
-      } else {
-        if (kDebugMode) {
-          print("firebaseToken이 null입니다.");
-        }
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      navigatorToMainPage();
+      setState(() {
+        isLoginAttempt = false; // 로그인 시도 상태를 초기화
+      });
+      if (kDebugMode) {
+        print('카카오 계정 로그인 성공');
       }
     } catch (error) {
       if (kDebugMode) {
-        print('카카오 로그인 실패: $error');
+        print('카카오 계정 로그인 실패 $error');
       }
-    } finally {
       setState(() {
-        isLoginAttempt = false; // Reset login attempt state
+        isLoginAttempt = false; // 로그인 시도 상태를 초기화
       });
     }
   }
 
   Future<void> signInWithGoogle() async {
     setState(() {
-      isLoginAttempt = true; // Set login attempt state to true
+      isLoginAttempt = true; // 로그인 시도 상태를 true로 설정
     });
-
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       final GoogleSignInAuthentication? googleAuth =
       await googleUser?.authentication;
-
       if (googleAuth == null) {
         setState(() {
-          isLoginAttempt = false; // Reset login attempt state
+          isLoginAttempt = false; // 로그인 시도 상태를 초기화
         });
         return;
       }
-
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-
       await FirebaseAuth.instance.signInWithCredential(credential);
       navigatorToMainPage();
       if (kDebugMode) {
@@ -247,12 +283,14 @@ class _SocialLoginState extends State<SocialLogin> {
       if (kDebugMode) {
         print('Google 로그인 실패 $error');
       }
-    } finally {
-      setState(() {
-        isLoginAttempt = false; // Reset login attempt state
-      });
     }
-    initUniLinks();
+  }
+
+  Future<void> signOut() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false); // 로그인 상태 초기화
+    await FirebaseAuth.instance.signOut(); // Firebase에서 로그아웃
+    // 필요시 Kakao에서도 로그아웃 처리
   }
 }
 
@@ -261,10 +299,10 @@ class SocialIcon extends StatelessWidget {
   final double iconSize;
 
   const SocialIcon({
-    super.key,
     required this.assetName,
     required this.iconSize,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
