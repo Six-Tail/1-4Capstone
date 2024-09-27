@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/Themes.Colors.dart';
+
 class WritePostScreen extends StatefulWidget {
   @override
   _WritePostScreenState createState() => _WritePostScreenState();
@@ -14,15 +16,30 @@ class _WritePostScreenState extends State<WritePostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('게시글 작성'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        backgroundColor: Theme1Colors.mainColor,
+        appBar: AppBar(
+          title: Text(
+            '게시글 작성', // 플래너 앱 제목을 ToDoBest로 변경
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: Theme1Colors.textColor,
+            ),
+          ),
+          centerTitle: true,
+          backgroundColor: Theme1Colors.mainColor,
+          leading: BackButton(
+            color: Theme1Colors.textColor, // 뒤로가기 버튼 색상
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                // 알림 기능 추가 가능
+              },
+            ),
+          ],
         ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

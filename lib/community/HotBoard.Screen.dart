@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/Themes.Colors.dart';
 import 'Post.Detail.dart'; // Import the file where PostDetailPage is defined
 
 class HotBoardScreen extends StatelessWidget {
@@ -9,8 +10,29 @@ class HotBoardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
-        title: Text('HOT 게시판'),
+        title: Text(
+          'HOT 게시판', // 플래너 앱 제목을 ToDoBest로 변경
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Theme1Colors.textColor,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Theme1Colors.mainColor,
+        leading: BackButton(
+          color: Theme1Colors.textColor, // 뒤로가기 버튼 색상
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              // 알림 기능 추가 가능
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/screen/Calender.Screen.dart';
+import '../utils/Themes.Colors.dart';
 import 'WritePost.Screen.dart';
 import 'FreeBoard.Screen.dart';
 import 'GoalshareBoard.Screen.dart';
@@ -31,14 +32,28 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
-        title: const Text('게시판'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Get.to(() => CalenderScreen());
-          },
+        title: Text(
+          'ToDoBest', // 플래너 앱 제목을 ToDoBest로 변경
+          style: TextStyle(
+            fontSize: 26,
+            color: Theme1Colors.textColor,
+          ),
         ),
+        centerTitle: true,
+        backgroundColor: Theme1Colors.mainColor,
+        leading: BackButton(
+          color: Theme1Colors.textColor, // 뒤로가기 버튼 색상
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              // 알림 기능 추가 가능
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
