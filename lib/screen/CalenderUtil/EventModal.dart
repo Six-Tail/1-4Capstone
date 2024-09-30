@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class EventModal extends StatelessWidget {
+class EventModal extends StatefulWidget {
   final DateTime selectedDate;
   final Function(String) onEventAdded;
   final String? initialValue; // 수정 모드에서 사용
@@ -15,9 +15,28 @@ class EventModal extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    TextEditingController eventController = TextEditingController(text: initialValue ?? "");
+  _EventModalState createState() => _EventModalState();
+}
 
+class _EventModalState extends State<EventModal> {
+  late TextEditingController eventController;
+
+  @override
+  void initState() {
+    super.initState();
+    // 초기 값 설정
+    eventController = TextEditingController(text: widget.initialValue ?? "");
+  }
+
+  @override
+  void dispose() {
+    // 메모리 누수 방지를 위해 dispose 호출
+    eventController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: SingleChildScrollView(
@@ -27,7 +46,9 @@ class EventModal extends StatelessWidget {
             mainAxisSize: MainAxisSize.min, // 팝업창의 크기를 내용에 맞게 조정
             children: [
               Text(
-                editMode ? '일정 수정' : '일정 등록 (${selectedDate.toLocal().toString().split(' ')[0]})',
+                widget.editMode
+                    ? '일정 수정'
+                    : '일정 등록 (${widget.selectedDate.toLocal().toString().split(' ')[0]})',
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -42,18 +63,18 @@ class EventModal extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(); // 팝업 닫기
                     },
                     child: const Text('취소'),
                   ),
                   TextButton(
                     onPressed: () {
                       if (eventController.text.isNotEmpty) {
-                        onEventAdded(eventController.text);
-                        Navigator.of(context).pop();
+                        widget.onEventAdded(eventController.text); // 이벤트 추가 또는 수정
+                        Navigator.of(context).pop(); // 팝업 닫기
                       }
                     },
-                    child: Text(editMode ? '수정' : '등록'),
+                    child: Text(widget.editMode ? '수정' : '등록'),
                   ),
                 ],
               ),

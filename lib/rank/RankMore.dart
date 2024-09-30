@@ -5,9 +5,11 @@ import 'DailyTaskScreen.dart';
 import 'WeekTaskScreen.dart';
 import 'ChallengeTaskScreen.dart';
 
-class RankmorePage extends StatelessWidget {
+class RankMore extends StatelessWidget {
   final int currentExp = 800; // 현재 경험치
   final int maxExp = 1500; // 총 경험치
+
+  const RankMore({super.key});
 
   @override
   Widget build(BuildContext context) {
