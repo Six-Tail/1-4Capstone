@@ -37,18 +37,13 @@ class _EventModalState extends State<EventModal> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
-    final screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: ConstrainedBox( // 화면 크기를 제한하는 ConstrainedBox 추가
+      child: ConstrainedBox(
+        // 화면 크기를 제한하는 ConstrainedBox 추가
         constraints: BoxConstraints(
           maxHeight: screenHeight * 0.6, // 팝업 창의 최대 높이를 화면의 60%로 제한
         ),
@@ -60,10 +55,9 @@ class _EventModalState extends State<EventModal> {
               Text(
                 widget.editMode
                     ? '일정 수정'
-                    : '일정 등록 (${widget.selectedDate.toLocal().toString().split(
-                    ' ')[0]})',
-                style: const TextStyle(
-                    fontSize: 20, fontWeight: FontWeight.bold),
+                    : '일정 등록 (${widget.selectedDate.toLocal().toString().split(' ')[0]})',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: screenHeight * 0.01),
               TextField(
@@ -84,8 +78,8 @@ class _EventModalState extends State<EventModal> {
                   TextButton(
                     onPressed: () {
                       if (eventController.text.isNotEmpty) {
-                        widget.onEventAdded(
-                            eventController.text); // 이벤트 추가 또는 수정
+                        widget
+                            .onEventAdded(eventController.text); // 이벤트 추가 또는 수정
                         Navigator.of(context).pop(); // 팝업 닫기
                       }
                     },
