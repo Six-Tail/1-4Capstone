@@ -100,6 +100,14 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    final screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
@@ -120,178 +128,188 @@ class _CalenderScreenState extends State<CalenderScreen>
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                // 모든 일정 완료된 날의 개수 표시
-                Text(
-                  '${_events.keys.where((day) => _isAllEventsCompleted(day)).length}',
-                  style: const TextStyle(fontSize: 20, color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-          TableCalendar(
-            daysOfWeekHeight: 20,
-            locale: 'ko_KR',
-            firstDay: DateTime.utc(2010, 10, 16),
-            lastDay: DateTime.utc(2030, 3, 14),
-            focusedDay: _focusedDay,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            calendarFormat: _calendarFormat,
-            onDaySelected: _onDaySelected,
-            onFormatChanged: _onFormatChanged,
-            onPageChanged: _onPageChanged,
-            eventLoader: (day) {
-              return _events[day] ?? [];
-            },
-            headerStyle: const HeaderStyle(
-              formatButtonVisible: false,
-              titleCentered: true,
-              leftChevronIcon: Icon(Icons.arrow_back_ios, size: 18),
-              rightChevronIcon: Icon(Icons.arrow_forward_ios, size: 18),
-              titleTextStyle: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            calendarStyle: CalendarStyle(
-              selectedDecoration: const BoxDecoration(
-                color: Colors.deepPurple,
-                shape: BoxShape.circle,
-              ),
-              todayDecoration: BoxDecoration(
-                color: Colors.deepPurple.shade200,
-                shape: BoxShape.circle,
-              ),
-              defaultTextStyle: const TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-              ),
-              weekendTextStyle: const TextStyle(
-                color: Colors.black, // 기본 주말 텍스트 색상
-              ),
-              outsideDaysVisible: false,
-            ),
-            calendarBuilders: CalendarBuilders(
-              markerBuilder: (context, day, events) {
-                // 모든 일정이 완료된 경우 초록색 체크 아이콘 표시
-                if (_isAllEventsCompleted(day)) {
-                  return const Positioned(
-                    bottom: 1,
-                    child: Icon(
+      body: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          height: screenHeight * 0.75,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
                       Icons.check_circle,
                       color: Colors.green,
                       size: 20,
                     ),
-                  );
-                }
-                return null;
-              },
-              // 토요일과 일요일 텍스트 색상 변경
-              defaultBuilder: (context, day, focusedDay) {
-                TextStyle textStyle;
-                if (day.weekday == DateTime.saturday) {
-                  textStyle = const TextStyle(
-                    color: Colors.blue, // 토요일 텍스트 색상
-                  );
-                } else if (day.weekday == DateTime.sunday) {
-                  textStyle = const TextStyle(
-                    color: Colors.red, // 일요일 텍스트 색상
-                  );
-                } else {
-                  textStyle = const TextStyle(
-                    color: Colors.black, // 평일 텍스트 색상
-                  );
-                }
-
-                return Center(
-                  child: Text(
-                    '${day.day}',
-                    style: textStyle,
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: _selectedDay != null && _events[_selectedDay!] != null
-                ? ListView.builder(
-              itemCount: _events[_selectedDay!]!.length,
-              itemBuilder: (context, index) {
-                Event event = _events[_selectedDay!]![index];
-                return ListTile(
-                  title: Row(
-                    children: [
-                      Checkbox(
-                        value: event.isCompleted,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            event.isCompleted = value ?? false; // 이벤트 완료 상태 업데이트
-                          });
-                        },
-                      ),
-                      Expanded(child: Text(event.name)),
-                    ],
-                  ),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        showDialog(
-                          context: context,
-                          builder: (context) => EventModal(
-                            selectedDate: _selectedDay!,
-                            initialValue: event.name,
-                            editMode: true,
-                            onEventAdded: (updatedEvent) {
-                              _editEvent(index, updatedEvent);
-                            },
-                          ),
-                        );
-                      } else if (value == 'delete') {
-                        _deleteEvent(index);
-                      }
-                    },
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Text('수정'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Text('삭제'),
-                        ),
-                      ];
-                    },
-                  ),
-                );
-              },
-            )
-                : Center(
-              child: Text(
-                '선택된 날짜에 일정이 없습니다.',
-                style: TextStyle(
-                  color: Theme1Colors.textColor,
-                  fontSize: 16,
+                    SizedBox(width: screenWidth * 0.02),
+                    // 모든 일정 완료된 날의 개수 표시
+                    Text(
+                      '${_events.keys
+                          .where((day) => _isAllEventsCompleted(day))
+                          .length}',
+                      style: const TextStyle(fontSize: 20, color: Colors.black),
+                    ),
+                  ],
                 ),
               ),
-            ),
+              TableCalendar(
+                daysOfWeekHeight: 20,
+                locale: 'ko_KR',
+                firstDay: DateTime.utc(2010, 10, 16),
+                lastDay: DateTime.utc(2030, 3, 14),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) {
+                  return isSameDay(_selectedDay, day);
+                },
+                calendarFormat: _calendarFormat,
+                onDaySelected: _onDaySelected,
+                onFormatChanged: _onFormatChanged,
+                onPageChanged: _onPageChanged,
+                eventLoader: (day) {
+                  return _events[day] ?? [];
+                },
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                  leftChevronIcon: Icon(Icons.arrow_back_ios, size: 18),
+                  rightChevronIcon: Icon(Icons.arrow_forward_ios, size: 18),
+                  titleTextStyle: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                calendarStyle: CalendarStyle(
+                  selectedDecoration: const BoxDecoration(
+                    color: Colors.deepPurple,
+                    shape: BoxShape.circle,
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: Colors.deepPurple.shade200,
+                    shape: BoxShape.circle,
+                  ),
+                  defaultTextStyle: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                  weekendTextStyle: const TextStyle(
+                    color: Colors.black, // 기본 주말 텍스트 색상
+                  ),
+                  outsideDaysVisible: false,
+                ),
+                calendarBuilders: CalendarBuilders(
+                  markerBuilder: (context, day, events) {
+                    // 모든 일정이 완료된 경우 초록색 체크 아이콘 표시
+                    if (_isAllEventsCompleted(day)) {
+                      return const Positioned(
+                        bottom: 1,
+                        child: Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 20,
+                        ),
+                      );
+                    }
+                    return null;
+                  },
+                  // 토요일과 일요일 텍스트 색상 변경
+                  defaultBuilder: (context, day, focusedDay) {
+                    TextStyle textStyle;
+                    if (day.weekday == DateTime.saturday) {
+                      textStyle = const TextStyle(
+                        color: Colors.blue, // 토요일 텍스트 색상
+                      );
+                    } else if (day.weekday == DateTime.sunday) {
+                      textStyle = const TextStyle(
+                        color: Colors.red, // 일요일 텍스트 색상
+                      );
+                    } else {
+                      textStyle = const TextStyle(
+                        color: Colors.black, // 평일 텍스트 색상
+                      );
+                    }
+
+                    return Center(
+                      child: Text(
+                        '${day.day}',
+                        style: textStyle,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.01),
+              Expanded(
+                child: _selectedDay != null && _events[_selectedDay!] != null
+                    ? ListView.builder(
+                  itemCount: _events[_selectedDay!]!.length,
+                  itemBuilder: (context, index) {
+                    Event event = _events[_selectedDay!]![index];
+                    return ListTile(
+                      title: Row(
+                        children: [
+                          Checkbox(
+                            value: event.isCompleted,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                event.isCompleted =
+                                    value ?? false; // 이벤트 완료 상태 업데이트
+                              });
+                            },
+                          ),
+                          Expanded(child: Text(event.name)),
+                        ],
+                      ),
+                      trailing: PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  EventModal(
+                                    selectedDate: _selectedDay!,
+                                    initialValue: event.name,
+                                    editMode: true,
+                                    onEventAdded: (updatedEvent) {
+                                      _editEvent(index, updatedEvent);
+                                    },
+                                  ),
+                            );
+                          } else if (value == 'delete') {
+                            _deleteEvent(index);
+                          }
+                        },
+                        itemBuilder: (BuildContext context) {
+                          return [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Text('수정'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Text('삭제'),
+                            ),
+                          ];
+                        },
+                      ),
+                    );
+                  },
+                )
+                    : Center(
+                  child: Text(
+                    '선택된 날짜에 일정이 없습니다.',
+                    style: TextStyle(
+                      color: Theme1Colors.textColor,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       floatingActionButton: Stack(
         children: [
@@ -311,17 +329,18 @@ class _CalenderScreenState extends State<CalenderScreen>
                       onPressed: () {
                         showDialog(
                           context: context,
-                          builder: (context) => EventModal(
-                            selectedDate: _selectedDay ?? _focusedDay,
-                            onEventAdded: _addEvent,
-                          ),
+                          builder: (context) =>
+                              EventModal(
+                                selectedDate: _selectedDay ?? _focusedDay,
+                                onEventAdded: _addEvent,
+                              ),
                         );
                       },
                       label: const Text('일정 추가'),
                       icon: const Icon(Icons.add),
                       backgroundColor: Theme1Colors.textColor,
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: screenHeight * 0.01),
                   ],
                 ),
               ),
@@ -390,4 +409,3 @@ class Event {
 
   Event({required this.name, this.isCompleted = false});
 }
-
