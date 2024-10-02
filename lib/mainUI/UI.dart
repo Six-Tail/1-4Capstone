@@ -2,11 +2,9 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -16,7 +14,7 @@ class _MyAppState extends State<MyApp> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
   // 각 페이지에 표시될 위젯 리스트
   List<Widget> _pageOptions = [];
@@ -90,7 +88,7 @@ class _MyAppState extends State<MyApp> {
               _focusedDay = focusedDay;
             });
           },
-          calendarStyle: CalendarStyle(
+          calendarStyle: const CalendarStyle(
             todayDecoration: BoxDecoration(
               color: Color(0xff73b1e7),
               shape: BoxShape.circle,
@@ -101,16 +99,16 @@ class _MyAppState extends State<MyApp> {
             ),
             markersMaxCount: 3,
           ),
-          headerStyle: HeaderStyle(
+          headerStyle: const HeaderStyle(
             formatButtonVisible: false,
             titleCentered: true,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         // 할일 리스트
         Expanded(
           child: ListView(
-            children: [
+            children: const [
               TaskTile(task: '운동하기(어깨)', time: '8:00~10:00', isCompleted: true),
               TaskTile(task: '회의 준비', time: '10:30~11:30', isCompleted: false),
               TaskTile(task: '점심 식사', time: '12:00~13:00', isCompleted: false),
@@ -123,17 +121,17 @@ class _MyAppState extends State<MyApp> {
 
   // 채팅 페이지 (예시)
   Widget _buildChatPage() {
-    return Center(child: Text('채팅 페이지'));
+    return const Center(child: Text('채팅 페이지'));
   }
 
   // 즐겨찾기 페이지 (예시)
   Widget _buildFavoritesPage() {
-    return Center(child: Text('즐겨찾기 페이지'));
+    return const Center(child: Text('즐겨찾기 페이지'));
   }
 
   // 기타 페이지 (예시)
   Widget _buildMorePage() {
-    return Center(child: Text('기타 페이지'));
+    return const Center(child: Text('기타 페이지'));
   }
 
   @override
@@ -141,8 +139,8 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('My App'), // 앱바 제목
-          backgroundColor: Color(0xff73b1e7),
+          title: const Text('My App'), // 앱바 제목
+          backgroundColor: const Color(0xff73b1e7),
           leading: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Image.asset(
@@ -152,9 +150,9 @@ class _MyAppState extends State<MyApp> {
           ), // 왼쪽에 이미지 삽입
         ),
         bottomNavigationBar: CurvedNavigationBar(
-          backgroundColor: Color(0xffc6dff5), // 네비게이션 바 배경색을 설정
+          backgroundColor: const Color(0xffc6dff5), // 네비게이션 바 배경색을 설정
           key: _bottomNavigationKey,
-          items: <Widget>[
+          items: const <Widget>[
             Icon(Icons.home, size: 30),
             Icon(Icons.chat, size: 30),
             Icon(Icons.star_border, size: 30),
@@ -167,7 +165,7 @@ class _MyAppState extends State<MyApp> {
           },
         ),
         body: Container(
-          color: Color(0xffc6dff5), // 전체 배경색을 설정
+          color: const Color(0xffc6dff5), // 전체 배경색을 설정
           child: _pageOptions[_page], // 현재 페이지에 맞는 위젯을 표시
         ),
       ),
@@ -181,14 +179,14 @@ class TaskTile extends StatelessWidget {
   final String time;
   final bool isCompleted;
 
-  TaskTile({required this.task, required this.time, required this.isCompleted});
+  const TaskTile({super.key, required this.task, required this.time, required this.isCompleted});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Container(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: Colors.lightBlue[50],
           borderRadius: BorderRadius.circular(10),
@@ -199,15 +197,15 @@ class TaskTile extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(task, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                SizedBox(height: 4),
+                Text(task, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
                 Text(time, style: TextStyle(color: Colors.grey[700])),
               ],
             ),
             Checkbox(
               value: isCompleted,
               onChanged: (bool? value) {},
-              activeColor: Color(0xff73b1e7),
+              activeColor: const Color(0xff73b1e7),
             ),
           ],
         ),
