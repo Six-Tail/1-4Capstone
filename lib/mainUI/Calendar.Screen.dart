@@ -2,6 +2,10 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -139,12 +143,12 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('My App'), // 앱바 제목
+          title: const Text('To Do Best'), // 앱바 제목
           backgroundColor: const Color(0xff73b1e7),
           leading: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Image.asset(
-              'assets/logo.png', // 여기에 이미지를 넣을 경로를 지정하세요
+              'assets/images/icon.png', // 여기에 이미지를 넣을 경로를 지정하세요
               fit: BoxFit.cover,
             ),
           ), // 왼쪽에 이미지 삽입

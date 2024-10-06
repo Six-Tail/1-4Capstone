@@ -1,11 +1,8 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:todobest_home/Setting.MainPage.dart';
-import 'package:todobest_home/community/Community.MainPage.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
-import '../rank/RankMore.dart';
-import 'CalenderUtil/EventModal.dart';
+import 'CalenderUtil/event.modal.dart';
 
 class CalenderScreen extends StatefulWidget {
   const CalenderScreen({super.key});
@@ -16,13 +13,14 @@ class CalenderScreen extends StatefulWidget {
 
 class _CalenderScreenState extends State<CalenderScreen>
     with SingleTickerProviderStateMixin {
-  CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now(); // 현재 날짜로 초기화
   bool _isExpanded = false;
+  CalendarFormat _calendarFormat = CalendarFormat.month;
   final Map<DateTime, List<Event>> _events = {};
   final ScrollController _scrollController = ScrollController();
   double _rotationAngle = 0.0; // 버튼의 회전 각도
+  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
   @override
   void initState() {
@@ -43,14 +41,6 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
   }
 
-  void _onFormatChanged(CalendarFormat format) {
-    if (_calendarFormat != format) {
-      setState(() {
-        _calendarFormat = format;
-      });
-    }
-  }
-
   void _onPageChanged(DateTime focusedDay) {
     setState(() {
       _focusedDay = focusedDay;
@@ -64,21 +54,25 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
   }
 
-  void _addEvent(String event) {
+  void _addEvent(String event, String time) {
     setState(() {
-      final selectedDay = _selectedDay ?? _focusedDay; // 항상 유효한 날짜를 사용하도록 보장
+      final selectedDay = _selectedDay ?? _focusedDay;
       if (_events[selectedDay] != null) {
-        _events[selectedDay]!.add(Event(name: event, isCompleted: false));
+        _events[selectedDay]!
+            .add(Event(name: event, time: time, isCompleted: false));
       } else {
-        _events[selectedDay] = [Event(name: event, isCompleted: false)];
+        _events[selectedDay] = [
+          Event(name: event, time: time, isCompleted: false)
+        ];
       }
     });
   }
 
-  void _editEvent(int index, String updatedEvent) {
+  void _editEvent(int index, String updatedEvent, String updatedTime) {
     if (_selectedDay != null && _events[_selectedDay!] != null) {
       setState(() {
         _events[_selectedDay!]![index].name = updatedEvent;
+        _events[_selectedDay!]![index].time = updatedTime; // 수정된 시간 업데이트
       });
     }
   }
@@ -95,13 +89,6 @@ class _CalenderScreenState extends State<CalenderScreen>
     }
   }
 
-  bool _isAllEventsCompleted(DateTime day) {
-    if (_events[day] != null && _events[day]!.isNotEmpty) {
-      return _events[day]!.every((event) => event.isCompleted);
-    }
-    return false;
-  }
-
   // 팝업창 띄우는 함수 추가
   void _showCompletionStats() {
     int completedEvents = 0;
@@ -112,7 +99,8 @@ class _CalenderScreenState extends State<CalenderScreen>
       totalEvents += events.length;
     });
 
-    double completionRate = totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+    double completionRate =
+        totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
 
     showDialog(
       context: context,
@@ -142,26 +130,37 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Theme1Colors.mainColor,
+      backgroundColor: const Color(0xffc6dff5),
       appBar: AppBar(
         title: Text(
           'ToDoBest',
           style: TextStyle(fontSize: 26, color: Theme1Colors.textColor),
         ),
         centerTitle: true,
-        backgroundColor: Theme1Colors.mainColor,
+        backgroundColor: const Color(0xff73b1e7),
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Image.asset('assets/images/icon.png'),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {},
+            icon: const Icon(
+              Icons.check_circle,
+              color: Colors.greenAccent,
+              size: 20,
+            ),
+            onPressed: _showCompletionStats, // 아이콘 클릭 시 팝업창 띄우는 함수 호출
           ),
+          // 모든 일정 완료된 날의 개수 표시
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 16.0), // 원하는 패딩 값으로 수정
+          //   child: Text(
+          //     '${_events.keys.where((day) => _isAllEventsCompleted(day)).length}',
+          //     style: const TextStyle(fontSize: 20, color: Colors.black),
+          //   ),
+          // ),
         ],
       ),
       body: SingleChildScrollView(
@@ -170,24 +169,40 @@ class _CalenderScreenState extends State<CalenderScreen>
           height: screenHeight * 0.75,
           child: Column(
             children: [
+              // 달력 형식 선택 버튼 추가
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                        size: 20,
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _calendarFormat = CalendarFormat.month;
+                        });
+                      },
+                      child: Text(
+                        '월간',
+                        style: TextStyle(
+                            color: _calendarFormat == CalendarFormat.month
+                                ? Colors.blueGrey
+                                : Colors.grey),
                       ),
-                      onPressed: _showCompletionStats, // 아이콘 클릭 시 팝업창 띄우는 함수 호출
                     ),
-                    SizedBox(width: screenWidth * 0.02),
-                    // 모든 일정 완료된 날의 개수 표시
-                    Text(
-                      '${_events.keys.where((day) => _isAllEventsCompleted(day)).length}',
-                      style: const TextStyle(fontSize: 20, color: Colors.black),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _calendarFormat = CalendarFormat.week;
+                        });
+                      },
+                      child: Text(
+                        '주간',
+                        style: TextStyle(
+                          color: _calendarFormat == CalendarFormat.week
+                              ? Colors.blueGrey
+                              : Colors.grey,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -201,9 +216,9 @@ class _CalenderScreenState extends State<CalenderScreen>
                 selectedDayPredicate: (day) {
                   return isSameDay(_selectedDay, day);
                 },
-                calendarFormat: _calendarFormat,
+                calendarFormat: CalendarFormat.month,
+                // 고정값으로 설정
                 onDaySelected: _onDaySelected,
-                onFormatChanged: _onFormatChanged,
                 onPageChanged: _onPageChanged,
                 eventLoader: (day) {
                   return _events[day] ?? [];
@@ -220,11 +235,11 @@ class _CalenderScreenState extends State<CalenderScreen>
                 ),
                 calendarStyle: CalendarStyle(
                   selectedDecoration: const BoxDecoration(
-                    color: Colors.deepPurple,
+                    color: Colors.blueAccent,
                     shape: BoxShape.circle,
                   ),
                   todayDecoration: BoxDecoration(
-                    color: Colors.deepPurple.shade200,
+                    color: Colors.blueAccent.shade100,
                     shape: BoxShape.circle,
                   ),
                   defaultTextStyle: const TextStyle(
@@ -251,7 +266,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                           bottom: 1,
                           child: Icon(
                             Icons.check_circle,
-                            color: Colors.green,
+                            color: Colors.greenAccent,
                             size: 20,
                           ),
                         );
@@ -276,7 +291,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                                   width: progressWidth, // 완료된 비율만큼의 너비
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5),
-                                    color: Colors.green, // 완료된 일정 색상
+                                    color: Colors.greenAccent, // 완료된 일정 색상
                                   ),
                                 ),
                                 // 미완료 일정 표시
@@ -287,7 +302,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                                       width: 50 - progressWidth, // 나머지 비율
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(5),
-                                        color: Colors.red, // 미완료 일정 색상
+                                        color: Colors.redAccent, // 미완료 일정 색상
                                       ),
                                     ),
                                   ),
@@ -333,51 +348,89 @@ class _CalenderScreenState extends State<CalenderScreen>
                         itemCount: _events[_selectedDay!]!.length,
                         itemBuilder: (context, index) {
                           Event event = _events[_selectedDay!]![index];
-                          return ListTile(
-                            title: Row(
-                              children: [
-                                Checkbox(
-                                  value: event.isCompleted,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      event.isCompleted =
-                                          value ?? false; // 이벤트 완료 상태 업데이트
-                                    });
-                                  },
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 4.0, horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white, // 일정 카드 배경색
+                              borderRadius:
+                                  BorderRadius.circular(12.0), // 모서리 둥글게
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26, // 그림자 색상
+                                  blurRadius: 4.0, // 흐림 정도
+                                  offset: Offset(0, 2), // 그림자 위치
                                 ),
-                                Expanded(child: Text(event.name)),
                               ],
                             ),
-                            trailing: PopupMenuButton<String>(
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => EventModal(
-                                      selectedDate: _selectedDay!,
-                                      initialValue: event.name,
-                                      editMode: true,
-                                      onEventAdded: (updatedEvent) {
-                                        _editEvent(index, updatedEvent);
-                                      },
+                            child: ListTile(
+                              contentPadding:
+                                  const EdgeInsets.all(12.0), // 패딩 추가
+                              title: Row(
+                                children: [
+                                  Checkbox(
+                                    value: event.isCompleted,
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        event.isCompleted =
+                                            value ?? false; // 이벤트 완료 상태 업데이트
+                                      });
+                                    },
+                                  ),
+                                  Expanded(
+                                      child: Text(
+                                    event.name,
+                                    style: TextStyle(
+                                      fontSize: 16.0, // 글자 크기
+                                      fontWeight: FontWeight.bold, // 글자 두껍게
+                                      decoration: event.isCompleted
+                                          ? TextDecoration.lineThrough
+                                          : null, // 완료된 일정에 취소선 추가
                                     ),
-                                  );
-                                } else if (value == 'delete') {
-                                  _deleteEvent(index);
-                                }
-                              },
-                              itemBuilder: (BuildContext context) {
-                                return [
-                                  const PopupMenuItem(
-                                    value: 'edit',
-                                    child: Text('수정'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'delete',
-                                    child: Text('삭제'),
-                                  ),
-                                ];
-                              },
+                                  )),
+                                ],
+                              ),
+                              subtitle: Text(
+                                event.time,
+                                style: TextStyle(
+                                  fontSize: 14.0, // 시간 텍스트 크기
+                                  color: Colors.grey[700], // 시간 텍스트 색상
+                                ),
+                              ),
+                              trailing: PopupMenuButton<String>(
+                                onSelected: (value) {
+                                  if (value == 'edit') {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => EventModal(
+                                        selectedDate: _selectedDay!,
+                                        initialValue: event.name,
+                                        initialTime: event.time,
+                                        editMode: true,
+                                        onEventAdded:
+                                            (updatedEvent, updatedTime) {
+                                          _editEvent(index, updatedEvent,
+                                              updatedTime); // 수정된 이벤트와 시간 전달
+                                        },
+                                      ),
+                                    );
+                                  } else if (value == 'delete') {
+                                    _deleteEvent(index);
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) {
+                                  return [
+                                    const PopupMenuItem(
+                                      value: 'edit',
+                                      child: Text('수정'),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'delete',
+                                      child: Text('삭제'),
+                                    ),
+                                  ];
+                                },
+                              ),
                             ),
                           );
                         },
@@ -445,51 +498,25 @@ class _CalenderScreenState extends State<CalenderScreen>
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            backgroundColor: Colors.white,
-            icon: Icon(Icons.home, color: Colors.black),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat, color: Colors.black),
-            label: 'Chat',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.star, color: Colors.black),
-            label: 'Star',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.more_horiz, color: Colors.black),
-            label: 'More',
-          ),
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: const Color(0xffc6dff5), // 네이게이션 바 배경색
+        key: _bottomNavigationKey,
+        items: const <Widget>[
+          Icon(Icons.home, size: 30),
+          Icon(Icons.chat, size: 30),
+          Icon(Icons.star_border, size: 30),
+          Icon(Icons.more_horiz, size: 30),
         ],
-        selectedItemColor: Theme1Colors.textColor,
-        onTap: (int index) {
-          switch (index) {
-            case 0:
-              Get.to(() => const CalenderScreen());
-              break;
-            case 1:
-              Get.to(() => CommunityMainPage());
-              break;
-            case 2:
-              Get.to(() => const RankMore());
-              break;
-            case 3:
-              Get.to(() => SettingMainPage());
-              break;
-          }
-        },
       ),
     );
   }
 }
 
+// 이벤트 아이템
 class Event {
   String name;
+  String time;
   bool isCompleted;
 
-  Event({required this.name, this.isCompleted = false});
+  Event({required this.name, required this.time, this.isCompleted = false});
 }

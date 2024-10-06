@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class EventModal extends StatefulWidget {
   final DateTime selectedDate;
-  final Function(String) onEventAdded;
+  final Function(String, String) onEventAdded; // 시간 정보도 함께 받도록 수정
   final String? initialValue; // 수정 모드에서 사용
+  final String? initialTime; // 수정 모드에서 사용할 시간 정보
   final bool editMode; // 수정 모드 여부
 
   const EventModal({
@@ -11,6 +12,7 @@ class EventModal extends StatefulWidget {
     required this.selectedDate,
     required this.onEventAdded,
     this.initialValue,
+    this.initialTime,
     this.editMode = false,
   });
 
@@ -20,18 +22,21 @@ class EventModal extends StatefulWidget {
 
 class _EventModalState extends State<EventModal> {
   late TextEditingController eventController;
+  late TextEditingController timeController; // 시간 입력 필드 추가
 
   @override
   void initState() {
     super.initState();
     // 초기 값 설정
     eventController = TextEditingController(text: widget.initialValue ?? "");
+    timeController = TextEditingController(text: widget.initialTime ?? ""); // 초기 시간 값 설정
   }
 
   @override
   void dispose() {
     // 메모리 누수 방지를 위해 dispose 호출
     eventController.dispose();
+    timeController.dispose(); // 시간 컨트롤러도 dispose
     super.dispose();
   }
 
@@ -56,14 +61,19 @@ class _EventModalState extends State<EventModal> {
                 widget.editMode
                     ? '일정 수정'
                     : '일정 등록 (${widget.selectedDate.toLocal().toString().split(' ')[0]})',
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: screenHeight * 0.01),
               TextField(
                 controller: eventController,
                 decoration: const InputDecoration(hintText: '일정 내용을 입력하세요'),
                 maxLines: 3,
+              ),
+              SizedBox(height: screenHeight * 0.01),
+              TextField(
+                controller: timeController, // 시간 입력 필드
+                decoration: const InputDecoration(hintText: '시간을 입력하세요 (예: 14:30)'),
+                keyboardType: TextInputType.datetime, // 시간 입력 전용 키보드
               ),
               SizedBox(height: screenHeight * 0.01),
               Row(
@@ -77,9 +87,8 @@ class _EventModalState extends State<EventModal> {
                   ),
                   TextButton(
                     onPressed: () {
-                      if (eventController.text.isNotEmpty) {
-                        widget
-                            .onEventAdded(eventController.text); // 이벤트 추가 또는 수정
+                      if (eventController.text.isNotEmpty && timeController.text.isNotEmpty) {
+                        widget.onEventAdded(eventController.text, timeController.text); // 일정 내용과 시간 정보를 함께 전달
                         Navigator.of(context).pop(); // 팝업 닫기
                       }
                     },

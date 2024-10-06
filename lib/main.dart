@@ -31,7 +31,7 @@ class App extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TodoBest',
-      home: const AuthWrapper(), // AuthWrapper가 로그인 상태를 관리
+      home: const AuthWrapper(), // AuthWrapper 로그인 상태를 관리
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
