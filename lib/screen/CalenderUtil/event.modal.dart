@@ -5,6 +5,7 @@ class EventModal extends StatefulWidget {
   final Function(String, String) onEventAdded; // 시간 정보도 함께 받도록 수정
   final String? initialValue; // 수정 모드에서 사용
   final String? initialTime; // 수정 모드에서 사용할 시간 정보
+  final String? initialEndTime; // 수정 모드에서 사용할 종료 시간 정보
   final bool editMode; // 수정 모드 여부
 
   const EventModal({
@@ -13,6 +14,7 @@ class EventModal extends StatefulWidget {
     required this.onEventAdded,
     this.initialValue,
     this.initialTime,
+    this.initialEndTime,
     this.editMode = false,
   });
 
@@ -22,40 +24,63 @@ class EventModal extends StatefulWidget {
 
 class _EventModalState extends State<EventModal> {
   late TextEditingController eventController;
-  late TextEditingController timeController; // 시간 입력 필드 추가
+  TimeOfDay? startTime; // 시작 시간
+  TimeOfDay? endTime; // 종료 시간
 
   @override
   void initState() {
     super.initState();
     // 초기 값 설정
     eventController = TextEditingController(text: widget.initialValue ?? "");
-    timeController = TextEditingController(text: widget.initialTime ?? ""); // 초기 시간 값 설정
+    // TimeOfDay 초기화
+    if (widget.initialTime != null) {
+      final parts = widget.initialTime!.split(':');
+      startTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    }
+    if (widget.initialEndTime != null) {
+      final parts = widget.initialEndTime!.split(':');
+      endTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    }
   }
 
   @override
   void dispose() {
     // 메모리 누수 방지를 위해 dispose 호출
     eventController.dispose();
-    timeController.dispose(); // 시간 컨트롤러도 dispose
     super.dispose();
+  }
+
+  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: isStartTime ? (startTime ?? TimeOfDay.now()) : (endTime ?? TimeOfDay.now()),
+    );
+
+    if (pickedTime != null) {
+      setState(() {
+        if (isStartTime) {
+          startTime = pickedTime;
+        } else {
+          endTime = pickedTime;
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ConstrainedBox(
-        // 화면 크기를 제한하는 ConstrainedBox 추가
         constraints: BoxConstraints(
-          maxHeight: screenHeight * 0.6, // 팝업 창의 최대 높이를 화면의 60%로 제한
+          maxHeight: screenHeight * 0.6,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisSize: MainAxisSize.min, // 팝업창의 크기를 내용에 맞게 조정
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 widget.editMode
@@ -71,9 +96,21 @@ class _EventModalState extends State<EventModal> {
               ),
               SizedBox(height: screenHeight * 0.01),
               TextField(
-                controller: timeController, // 시간 입력 필드
-                decoration: const InputDecoration(hintText: '시간을 입력하세요 (예: 14:30)'),
-                keyboardType: TextInputType.datetime, // 시간 입력 전용 키보드
+                readOnly: true, // 사용자가 직접 입력할 수 없도록 설정
+                onTap: () => _selectTime(context, true),
+                decoration: InputDecoration(
+                  hintText: startTime != null ? '시작 시간: ${startTime!.format(context)}' : '시작 시간 선택',
+                  suffixIcon: const Icon(Icons.access_time),
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.01),
+              TextField(
+                readOnly: true, // 사용자가 직접 입력할 수 없도록 설정
+                onTap: () => _selectTime(context, false),
+                decoration: InputDecoration(
+                  hintText: endTime != null ? '종료 시간: ${endTime!.format(context)}' : '종료 시간 선택',
+                  suffixIcon: const Icon(Icons.access_time),
+                ),
               ),
               SizedBox(height: screenHeight * 0.01),
               Row(
@@ -87,8 +124,10 @@ class _EventModalState extends State<EventModal> {
                   ),
                   TextButton(
                     onPressed: () {
-                      if (eventController.text.isNotEmpty && timeController.text.isNotEmpty) {
-                        widget.onEventAdded(eventController.text, timeController.text); // 일정 내용과 시간 정보를 함께 전달
+                      if (eventController.text.isNotEmpty && startTime != null && endTime != null) {
+                        String startTimeString = '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}';
+                        String endTimeString = '${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}';
+                        widget.onEventAdded(eventController.text, '$startTimeString - $endTimeString'); // 일정 내용과 시간 정보를 함께 전달
                         Navigator.of(context).pop(); // 팝업 닫기
                       }
                     },
