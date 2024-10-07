@@ -26,26 +26,37 @@ class _EventModalState extends State<EventModal> {
   late TextEditingController eventController;
   TimeOfDay? startTime; // 시작 시간
   TimeOfDay? endTime; // 종료 시간
+  DateTime? selectedEndDate; // 선택한 종료 날짜
 
   @override
   void initState() {
     super.initState();
-    // 초기 값 설정
     eventController = TextEditingController(text: widget.initialValue ?? "");
+
     // TimeOfDay 초기화
-    if (widget.initialTime != null) {
+    if (widget.initialTime != null && widget.initialTime!.isNotEmpty) {
       final parts = widget.initialTime!.split(':');
-      startTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      if (parts.length == 2) {
+        startTime = TimeOfDay(
+          hour: int.tryParse(parts[0]) ?? 0,
+          minute: int.tryParse(parts[1]) ?? 0,
+        );
+      }
     }
-    if (widget.initialEndTime != null) {
+    if (widget.initialEndTime != null && widget.initialEndTime!.isNotEmpty) {
       final parts = widget.initialEndTime!.split(':');
-      endTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      if (parts.length == 2) {
+        endTime = TimeOfDay(
+          hour: int.tryParse(parts[0]) ?? 0,
+          minute: int.tryParse(parts[1]) ?? 0,
+        );
+      }
     }
+    selectedEndDate = widget.selectedDate; // 초기 종료 날짜 설정
   }
 
   @override
   void dispose() {
-    // 메모리 누수 방지를 위해 dispose 호출
     eventController.dispose();
     super.dispose();
   }
@@ -56,7 +67,8 @@ class _EventModalState extends State<EventModal> {
       initialTime: isStartTime ? (startTime ?? TimeOfDay.now()) : (endTime ?? TimeOfDay.now()),
     );
 
-    if (pickedTime != null) {
+    // Check if the widget is still mounted before calling setState
+    if (pickedTime != null && mounted) {
       setState(() {
         if (isStartTime) {
           startTime = pickedTime;
@@ -95,22 +107,33 @@ class _EventModalState extends State<EventModal> {
                 maxLines: 3,
               ),
               SizedBox(height: screenHeight * 0.01),
-              TextField(
-                readOnly: true, // 사용자가 직접 입력할 수 없도록 설정
-                onTap: () => _selectTime(context, true),
-                decoration: InputDecoration(
-                  hintText: startTime != null ? '시작 시간: ${startTime!.format(context)}' : '시작 시간 선택',
-                  suffixIcon: const Icon(Icons.access_time),
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.01),
-              TextField(
-                readOnly: true, // 사용자가 직접 입력할 수 없도록 설정
-                onTap: () => _selectTime(context, false),
-                decoration: InputDecoration(
-                  hintText: endTime != null ? '종료 시간: ${endTime!.format(context)}' : '종료 시간 선택',
-                  suffixIcon: const Icon(Icons.access_time),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      readOnly: true,
+                      onTap: () => _selectTime(context, true),
+                      decoration: InputDecoration(
+                        hintText: startTime != null ? startTime!.format(context) : '시작 시간',
+                        suffixIcon: const Icon(Icons.access_time),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10), // 간격 추가
+                  const Icon(Icons.arrow_forward), // 오른쪽 화살표 아이콘
+                  const SizedBox(width: 10), // 간격 추가
+                  Expanded(
+                    child: TextField(
+                      readOnly: true,
+                      onTap: () => _selectTime(context, false),
+                      decoration: InputDecoration(
+                        hintText: endTime != null ? endTime!.format(context) : '종료 시간',
+                        suffixIcon: const Icon(Icons.access_time),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: screenHeight * 0.01),
               Row(
