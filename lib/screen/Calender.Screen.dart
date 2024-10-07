@@ -102,24 +102,32 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
   }
 
-  // 팝업창 띄우는 함수 추가
   void _showCompletionStats() {
     int completedEvents = 0;
     int totalEvents = 0;
 
+    // 현재 선택된 날짜의 연도와 월을 가져옵니다.
+    int currentYear = _selectedDay!.year;
+    int currentMonth = _selectedDay!.month;
+
+    // 이벤트를 날짜별로 반복하여 완료된 일정과 총 일정을 세어줍니다.
     _events.forEach((day, events) {
-      completedEvents += events.where((event) => event.isCompleted).length;
-      totalEvents += events.length;
+      // 해당 월과 연도에 해당하는 일정만 계산합니다.
+      if (day.year == currentYear && day.month == currentMonth) {
+        completedEvents += events.where((event) => event.isCompleted).length;
+        totalEvents += events.length;
+      }
     });
 
     double completionRate =
-        totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+    totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
 
+    // 팝업창 띄우기
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('통계'),
+          title: const Text('월별 통계'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
