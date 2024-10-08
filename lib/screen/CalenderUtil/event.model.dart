@@ -1,3 +1,4 @@
+// event.model.dart
 // 이벤트 아이템
 class Event {
   String name;

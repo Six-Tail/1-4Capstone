@@ -1,3 +1,4 @@
+// custom_calendar.dart
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'event.model.dart';
@@ -10,13 +11,13 @@ class CustomCalendar extends StatelessWidget {
   final Function(DateTime) onPageChanged;
 
   const CustomCalendar({
-    Key? key,
+    super.key,
     required this.focusedDay,
     required this.selectedDay,
     required this.events,
     required this.onDaySelected,
     required this.onPageChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -127,7 +127,9 @@ class _CalenderScreenState extends State<CalenderScreen>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('월별 통계'),
+          title: Center(
+            child: Text('$currentYear년 $currentMonth월 통계')
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
