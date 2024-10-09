@@ -1,5 +1,5 @@
-// Calendar.Screen.dart
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
@@ -41,8 +41,8 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
-      _selectedDay = selectedDay;
-      _focusedDay = focusedDay;
+      _selectedDay = selectedDay; // 선택된 날짜 업데이트
+      _focusedDay = focusedDay;   // 포커스된 날짜 업데이트
     });
   }
 
@@ -59,27 +59,67 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
   }
 
-  void _addEvent(String event, String time) {
+  // 이벤트 추가 시 팝업에서 선택한 날짜 기반으로 이벤트를 추가하는 함수
+  void _addEvent(String event, String time, DateTime startDate, DateTime endDate) {
     setState(() {
-      final selectedDay = _selectedDay ?? _focusedDay;
-      if (_events[selectedDay] != null) {
-        _events[selectedDay]!
-            .add(Event(name: event, time: time, isCompleted: false));
-      } else {
-        _events[selectedDay] = [
-          Event(name: event, time: time, isCompleted: false)
-        ];
+      DateTime currentDate = startDate;
+
+      while (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
+        if (_events[currentDate] != null) {
+          _events[currentDate]!.add(Event(
+            name: event,
+            time: time,
+            isCompleted: false,
+            startDate: startDate,
+            endDate: endDate,
+          ));
+        } else {
+          _events[currentDate] = [
+            Event(
+              name: event,
+              time: time,
+              isCompleted: false,
+              startDate: startDate,
+              endDate: endDate,
+            ),
+          ];
+        }
+        currentDate = currentDate.add(const Duration(days: 1));
+      }
+
+      // 선택된 날짜를 이벤트의 시작 날짜로 설정
+      _selectedDay = startDate;
+      _focusedDay = startDate; // 포커스된 날짜도 시작 날짜로 설정
+
+      // 디버그 메시지
+      if (kDebugMode) {
+        print('일정 등록됨: $event from $startDate to $endDate');
+        print('현재 이벤트: $_events');
       }
     });
   }
 
-  void _editEvent(int index, String updatedEvent, String updatedTime) {
-    if (_selectedDay != null && _events[_selectedDay!] != null) {
-      setState(() {
-        _events[_selectedDay!]![index].name = updatedEvent;
-        _events[_selectedDay!]![index].time = updatedTime; // 수정된 시간 업데이트
-      });
-    }
+
+
+  void _editEvent(int index, String updatedEvent, String updatedTime,
+      DateTime updatedStartDate, DateTime updatedEndDate) {
+    setState(() {
+      // 선택된 날짜 범위에 해당하는 이벤트를 업데이트
+      DateTime currentDate = updatedStartDate;
+      while (currentDate.isBefore(updatedEndDate) || currentDate.isAtSameMomentAs(updatedEndDate)) {
+        if (_events[currentDate] != null && _events[currentDate]!.length > index) {
+          // Event 객체를 새로 생성하여 업데이트
+          _events[currentDate]![index] = Event(
+            name: updatedEvent,
+            time: updatedTime,
+            isCompleted: _events[currentDate]![index].isCompleted, // 기존 완료 상태 유지
+            startDate: updatedStartDate, // 새 시작 날짜
+            endDate: updatedEndDate,       // 새 종료 날짜
+          );
+        }
+        currentDate = currentDate.add(const Duration(days: 1));
+      }
+    });
   }
 
   void _deleteEvent(int index) {
@@ -97,7 +137,14 @@ class _CalenderScreenState extends State<CalenderScreen>
   void _toggleEventCompletion(int index, bool isCompleted) {
     setState(() {
       if (_selectedDay != null && _events[_selectedDay!] != null) {
-        _events[_selectedDay!]![index].isCompleted = isCompleted; // 이벤트의 완료 상태 업데이트
+        // 기존 완료 상태를 토글
+        _events[_selectedDay!]![index] = Event(
+          name: _events[_selectedDay!]![index].name,
+          time: _events[_selectedDay!]![index].time,
+          isCompleted: isCompleted, // 새로운 완료 상태로 업데이트
+          startDate: _events[_selectedDay!]![index].startDate,
+          endDate: _events[_selectedDay!]![index].endDate,
+        );
       }
     });
   }
@@ -127,9 +174,7 @@ class _CalenderScreenState extends State<CalenderScreen>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(
-            child: Text('$currentYear년 $currentMonth월 통계')
-          ),
+          title: Center(child: Text('$currentYear년 $currentMonth월 통계')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -224,7 +269,7 @@ class _CalenderScreenState extends State<CalenderScreen>
               ),
               CustomCalendar(
                 focusedDay: _focusedDay,
-                selectedDay: _selectedDay,
+                selectedDay: _selectedDay!,
                 events: _events,
                 onDaySelected: _onDaySelected,
                 onPageChanged: _onPageChanged,
@@ -232,30 +277,30 @@ class _CalenderScreenState extends State<CalenderScreen>
               SizedBox(height: screenHeight * 0.01),
               // EventList 위젯 사용 시
               EventList(
-                selectedDay: _selectedDay,
-                events: _events[_selectedDay!],
+                selectedDay: _selectedDay!,
+                events: _events,
                 editEvent: _editEvent,
                 deleteEvent: _deleteEvent,
-                toggleEventCompletion: _toggleEventCompletion, // 추가된 콜백 전달
+                toggleEventCompletion: _toggleEventCompletion,
               ),
             ],
           ),
         ),
       ),
       floatingActionButton: CustomFloatingActionButton(
-      isExpanded: _isExpanded,
-      rotationAngle: _rotationAngle,
-      toggleMenu: _toggleMenu,
-      addEvent: () {
-        showDialog(
-          context: context,
-          builder: (context) => EventModal(
-            selectedDate: _selectedDay ?? _focusedDay,
-            onEventAdded: _addEvent,
-          ),
-        );
-      },
-    ),
+        isExpanded: _isExpanded,
+        rotationAngle: _rotationAngle,
+        toggleMenu: _toggleMenu,
+        addEvent: () {
+          showDialog(
+            context: context,
+            builder: (context) => EventModal(
+              selectedDate: _selectedDay ?? _focusedDay, // null일 경우 fallback 처리
+              onEventAdded: _addEvent, // 수정된 함수로 전달
+            ),
+          );
+        },
+      ),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: const Color(0xffc6dff5), // 네이게이션 바 배경색
         key: _bottomNavigationKey,

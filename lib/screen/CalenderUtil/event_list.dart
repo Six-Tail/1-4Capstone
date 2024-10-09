@@ -1,16 +1,14 @@
-// event_list.dart
 import 'package:flutter/material.dart';
-
 import 'event.modal.dart';
 import 'event.model.dart';
 
 class EventList extends StatelessWidget {
   final DateTime? selectedDay;
-  final List<Event>? events;
-  final Function(int index, String updatedEvent, String updatedTime) editEvent;
+  final Map<DateTime, List<Event>> events; // 전체 이벤트를 받음
+  final Function(int index, String updatedEvent, String updatedTime,
+      DateTime updatedStartDate, DateTime updatedEndDate) editEvent;
   final Function(int index) deleteEvent;
-  final Function(int index, bool isCompleted) toggleEventCompletion; // 체크박스 상태를 업데이트할 콜백 추가
-
+  final Function(int index, bool isCompleted) toggleEventCompletion;
 
   const EventList({
     super.key,
@@ -18,50 +16,51 @@ class EventList extends StatelessWidget {
     required this.events,
     required this.editEvent,
     required this.deleteEvent,
-    required this.toggleEventCompletion, // 추가된 인자
+    required this.toggleEventCompletion,
   });
 
   @override
   Widget build(BuildContext context) {
+    List<Event> selectedEvents = events[selectedDay!] ?? []; // 선택된 날짜의 이벤트만 가져옴
+
     return Expanded(
-      child: selectedDay != null && events != null
+      child: selectedDay != null && selectedEvents.isNotEmpty
           ? ListView.builder(
-        itemCount: events!.length,
+        itemCount: selectedEvents.length,
         itemBuilder: (context, index) {
-          Event event = events![index];
+          Event event = selectedEvents[index];
           return Container(
-            margin: const EdgeInsets.symmetric(
-                vertical: 4.0, horizontal: 16.0),
+            margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
             decoration: BoxDecoration(
-              color: Colors.white, // 일정 카드 배경색
-              borderRadius: BorderRadius.circular(12.0), // 모서리 둥글게
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.0),
               boxShadow: const [
                 BoxShadow(
-                  color: Colors.black26, // 그림자 색상
-                  blurRadius: 4.0, // 흐림 정도
-                  offset: Offset(0, 2), // 그림자 위치
+                  color: Colors.black26,
+                  blurRadius: 4.0,
+                  offset: Offset(0, 2),
                 ),
               ],
             ),
             child: ListTile(
-              contentPadding: const EdgeInsets.all(12.0), // 패딩 추가
+              contentPadding: const EdgeInsets.all(12.0),
               title: Row(
                 children: [
                   Checkbox(
                     value: event.isCompleted,
                     onChanged: (bool? value) {
-                      toggleEventCompletion(index, value ?? false); // 체크박스 상태 업데이트
+                      toggleEventCompletion(index, value ?? false);
                     },
                   ),
                   Expanded(
                     child: Text(
                       event.name,
                       style: TextStyle(
-                        fontSize: 16.0, // 글자 크기
-                        fontWeight: FontWeight.bold, // 글자 두껍게
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
                         decoration: event.isCompleted
                             ? TextDecoration.lineThrough
-                            : null, // 완료된 일정에 취소선 추가
+                            : null,
                       ),
                     ),
                   ),
@@ -70,8 +69,8 @@ class EventList extends StatelessWidget {
               subtitle: Text(
                 event.time,
                 style: TextStyle(
-                  fontSize: 14.0, // 시간 텍스트 크기
-                  color: Colors.grey[700], // 시간 텍스트 색상
+                  fontSize: 14.0,
+                  color: Colors.grey[700],
                 ),
               ),
               trailing: PopupMenuButton<String>(
@@ -84,8 +83,10 @@ class EventList extends StatelessWidget {
                         initialValue: event.name,
                         initialTime: event.time,
                         editMode: true,
-                        onEventAdded: (updatedEvent, updatedTime) {
-                          editEvent(index, updatedEvent, updatedTime); // 수정된 이벤트와 시간 전달
+                        onEventAdded: (updatedEvent, updatedTime,
+                            updatedStartDate, updatedEndDate) {
+                          editEvent(index, updatedEvent, updatedTime,
+                              updatedStartDate, updatedEndDate);
                         },
                       ),
                     );

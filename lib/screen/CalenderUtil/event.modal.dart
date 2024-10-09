@@ -1,9 +1,11 @@
+// event.modal.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class EventModal extends StatefulWidget {
   final DateTime selectedDate;
-  final Function(String, String) onEventAdded;
+  final Function(String, String, DateTime, DateTime) onEventAdded;
   final String? initialValue;
   final String? initialTime;
   final String? initialEndTime;
@@ -29,15 +31,16 @@ class _EventModalState extends State<EventModal> {
   TimeOfDay? startTime;
   TimeOfDay? endTime;
   bool _isAllDay = false;
-  DateTime? adjustedStartDate; // 시작 날짜 조정 변수 추가
+  DateTime? startDate;
+  DateTime? endDate;
 
   @override
   void initState() {
     super.initState();
     eventController = TextEditingController(text: widget.initialValue ?? "");
-    adjustedStartDate = widget.selectedDate; // 초기 시작 날짜 설정
+    startDate = widget.selectedDate;
+    endDate = widget.selectedDate;
 
-    // 초기 시간 설정
     if (widget.initialTime != null && widget.initialTime!.isNotEmpty) {
       final parts = widget.initialTime!.split(':');
       if (parts.length == 2) {
@@ -56,7 +59,6 @@ class _EventModalState extends State<EventModal> {
         );
       }
     }
-    selectedEndDate = widget.selectedDate; // 초기 종료 날짜 설정
   }
 
   @override
@@ -68,9 +70,7 @@ class _EventModalState extends State<EventModal> {
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: isStartDate
-          ? adjustedStartDate!
-          : (selectedEndDate ?? adjustedStartDate!),
+      initialDate: isStartDate ? startDate! : (endDate ?? startDate!),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
@@ -78,18 +78,15 @@ class _EventModalState extends State<EventModal> {
     if (picked != null) {
       setState(() {
         if (isStartDate) {
-          // 종료 날짜가 시작 날짜보다 이전인 경우 종료 날짜를 시작 날짜로 설정
-          if (picked.isAfter(selectedEndDate!)) {
-            selectedEndDate = picked;
+          if (picked.isAfter(endDate!)) {
+            endDate = picked;
           }
-          adjustedStartDate = picked; // 시작 날짜 조정
+          startDate = picked;
         } else {
-          // 시작 날짜가 종료 날짜보다 이후인 경우 시작 날짜를 종료 날짜로 설정
-          if (picked.isBefore(adjustedStartDate!)) {
-            adjustedStartDate = picked; // 시작 날짜를 종료 날짜로 설정
+          if (picked.isBefore(startDate!)) {
+            startDate = picked;
           }
-          selectedEndDate =
-              picked.isBefore(adjustedStartDate!) ? adjustedStartDate : picked;
+          endDate = picked.isBefore(startDate!) ? startDate : picked;
         }
       });
     }
@@ -131,11 +128,8 @@ class _EventModalState extends State<EventModal> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                widget.editMode
-                    ? '일정 수정'
-                    : '일정 등록',
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                widget.editMode ? '일정 수정' : '일정 등록',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: screenHeight * 0.01),
               TextField(
@@ -146,11 +140,11 @@ class _EventModalState extends State<EventModal> {
               SizedBox(height: screenHeight * 0.01),
               Row(
                 children: [
-                  const Icon(Icons.access_time), // 시계 아이콘 추가
+                  const Icon(Icons.access_time),
                   SizedBox(width: screenWidth * 0.02),
                   const Text('하루 종일'),
                   Transform.scale(
-                    scale: 0.6, // 스위치 크기 줄이기
+                    scale: 0.6,
                     child: Switch(
                       value: _isAllDay,
                       onChanged: (value) {
@@ -168,8 +162,7 @@ class _EventModalState extends State<EventModal> {
                   const Text('시작 날짜:'),
                   TextButton(
                     onPressed: () => _selectDate(context, true),
-                    child: Text(
-                        DateFormat('yyyy년 MM월 dd일').format(adjustedStartDate!)),
+                    child: Text(DateFormat('yyyy년 MM월 dd일').format(startDate!)),
                   ),
                   if (!_isAllDay)
                     TextButton(
@@ -186,14 +179,14 @@ class _EventModalState extends State<EventModal> {
                   const Text('종료 날짜:'),
                   TextButton(
                     onPressed: () => _selectDate(context, false),
-                    child: Text(
-                        DateFormat('yyyy년 MM월 dd일').format(selectedEndDate!)),
+                    child: Text(DateFormat('yyyy년 MM월 dd일').format(endDate!)),
                   ),
                   if (!_isAllDay)
                     TextButton(
                       onPressed: () => _selectTime(context, false),
-                      child: Text(
-                          endTime != null ? endTime!.format(context) : '종료 시간'),
+                      child: Text(endTime != null
+                          ? endTime!.format(context)
+                          : '종료 시간'),
                     ),
                 ],
               ),
@@ -202,25 +195,21 @@ class _EventModalState extends State<EventModal> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pop(); // 팝업 닫기
+                      Navigator.of(context).pop();
                     },
                     child: const Text('취소'),
                   ),
                   TextButton(
                     onPressed: () {
                       if (eventController.text.isNotEmpty) {
-                        // 날짜가 선택되었는지 확인
-                        if (adjustedStartDate == null ||
-                            selectedEndDate == null) {
+                        if (startDate == null || endDate == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('날짜를 선택해야 합니다.')),
                           );
                           return;
                         }
 
-                        if (!_isAllDay &&
-                            (startTime == null || endTime == null)) {
-                          // 시간이 선택되지 않았을 때 경고 메시지
+                        if (!_isAllDay && (startTime == null || endTime == null)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('시작 및 종료 시간을 선택하세요')),
                           );
@@ -234,19 +223,23 @@ class _EventModalState extends State<EventModal> {
                             ? '하루 종일'
                             : '${endTime?.hour.toString().padLeft(2, '0')}:${endTime?.minute.toString().padLeft(2, '0')}';
 
-                        // 이벤트를 등록하는 로직 (시작 및 종료 날짜를 기반으로 여러 날짜에 등록)
-                        for (DateTime date = adjustedStartDate!;
-                            date.isBefore(
-                                selectedEndDate!.add(const Duration(days: 1)));
-                            date = date.add(const Duration(days: 1))) {
-                          widget.onEventAdded(
-                              eventController.text,
-                              _isAllDay
-                                  ? '하루 종일'
-                                  : '$startTimeString - $endTimeString');
+                        widget.onEventAdded(
+                          eventController.text,
+                          _isAllDay ? '하루 종일' : '$startTimeString - $endTimeString',
+                          startDate!,
+                          endDate!,
+                        );
+
+                        if (kDebugMode) {
+                          print('이벤트 등록됨: ${eventController.text}, '
+                              '시작 날짜: ${DateFormat('yyyy-MM-dd').format(startDate!)}, '
+                              '종료 날짜: ${DateFormat('yyyy-MM-dd').format(endDate!)}, '
+                              '시작 시간: $startTimeString, '
+                              '종료 시간: $endTimeString, '
+                              '하루 종일: ${_isAllDay ? '예' : '아니오'}');
                         }
 
-                        Navigator.of(context).pop(); // 팝업 닫기
+                        Navigator.of(context).pop();
                       }
                     },
                     child: Text(widget.editMode ? '수정' : '등록'),

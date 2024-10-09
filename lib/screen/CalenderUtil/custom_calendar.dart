@@ -1,4 +1,5 @@
 // custom_calendar.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'event.model.dart';
@@ -31,7 +32,22 @@ class CustomCalendar extends StatelessWidget {
       calendarFormat: CalendarFormat.month,
       onDaySelected: onDaySelected,
       onPageChanged: onPageChanged,
-      eventLoader: (day) => events[day] ?? [],
+      eventLoader: (day) {
+        final eventList = events[day] ?? [];
+
+        // 디버그 메시지 출력
+        if (eventList.isNotEmpty) {
+          if (kDebugMode) {
+            print('로드된 날짜: $day, 이벤트 수: ${eventList.length}');
+          }
+        } else {
+          if (kDebugMode) {
+            print('로드된 날짜: $day, 이벤트 없음');
+          }
+        }
+
+        return eventList;
+      },
       headerStyle: const HeaderStyle(
         formatButtonVisible: false,
         titleCentered: true,

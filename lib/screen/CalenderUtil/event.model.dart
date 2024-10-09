@@ -3,7 +3,18 @@
 class Event {
   String name;
   String time;
+  DateTime startDate;
+  DateTime endDate;
   bool isCompleted;
 
-  Event({required this.name, required this.time, this.isCompleted = false});
+  Event({
+    required this.name,
+    required this.time,
+    required this.startDate,
+    required this.endDate,
+    this.isCompleted = false,
+  });
 }
+
+
+
