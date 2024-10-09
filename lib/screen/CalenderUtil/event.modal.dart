@@ -1,11 +1,13 @@
-// event.modal.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'event.model.dart'; // Firestore 추가
+
 class EventModal extends StatefulWidget {
   final DateTime selectedDate;
-  final Function(String, String, DateTime, DateTime) onEventAdded;
+  final Function(String, String, DateTime, DateTime) onSave; // 수정된 이벤트를 저장하는 콜백
   final String? initialValue;
   final String? initialTime;
   final String? initialEndTime;
@@ -14,7 +16,7 @@ class EventModal extends StatefulWidget {
   const EventModal({
     super.key,
     required this.selectedDate,
-    required this.onEventAdded,
+    required this.onSave, // onSave를 사용합니다.
     this.initialValue,
     this.initialTime,
     this.initialEndTime,
@@ -33,6 +35,8 @@ class _EventModalState extends State<EventModal> {
   bool _isAllDay = false;
   DateTime? startDate;
   DateTime? endDate;
+  bool _showError = false; // 에러 메시지 표시 여부
+  String _errorMessage = ''; // 에러 메시지 내용
 
   @override
   void initState() {
@@ -75,7 +79,8 @@ class _EventModalState extends State<EventModal> {
       lastDate: DateTime(2100),
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
+      // mounted 체크 추가
       setState(() {
         if (isStartDate) {
           if (picked.isAfter(endDate!)) {
@@ -101,6 +106,7 @@ class _EventModalState extends State<EventModal> {
     );
 
     if (pickedTime != null && mounted) {
+      // mounted 체크 추가
       setState(() {
         if (isStartTime) {
           startTime = pickedTime;
@@ -110,6 +116,35 @@ class _EventModalState extends State<EventModal> {
       });
     }
   }
+
+  // Firestore에 이벤트 추가 또는 수정
+  Future<void> _addOrUpdateEventToFirestore(Event event, {String? eventId}) async {
+    final eventCollection = FirebaseFirestore.instance.collection('events');
+
+    try {
+      if (eventId != null) {
+        // 이벤트 ID가 있을 경우, 해당 이벤트 업데이트
+        await eventCollection.doc(eventId).update(event.toFirestore());
+        // 성공 메시지를 콘솔에 출력
+        if (kDebugMode) {
+          print('이벤트가 Firestore에서 수정되었습니다.');
+        }
+      } else {
+        // 이벤트 ID가 없으면 새 이벤트 추가
+        await eventCollection.add(event.toFirestore());
+        // 성공 메시지를 콘솔에 출력
+        if (kDebugMode) {
+          print('이벤트가 Firestore에 등록되었습니다.');
+        }
+      }
+    } catch (e) {
+      // 실패 메시지를 콘솔에 출력
+      if (kDebugMode) {
+        print('이벤트 등록 또는 수정에 실패했습니다. 오류: $e');
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +164,8 @@ class _EventModalState extends State<EventModal> {
             children: [
               Text(
                 widget.editMode ? '일정 수정' : '일정 등록',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: screenHeight * 0.01),
               TextField(
@@ -138,6 +174,15 @@ class _EventModalState extends State<EventModal> {
                 maxLines: 3,
               ),
               SizedBox(height: screenHeight * 0.01),
+              // 경고 메시지 표시
+              if (_showError)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    _errorMessage,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
               Row(
                 children: [
                   const Icon(Icons.access_time),
@@ -184,9 +229,8 @@ class _EventModalState extends State<EventModal> {
                   if (!_isAllDay)
                     TextButton(
                       onPressed: () => _selectTime(context, false),
-                      child: Text(endTime != null
-                          ? endTime!.format(context)
-                          : '종료 시간'),
+                      child: Text(
+                          endTime != null ? endTime!.format(context) : '종료 시간'),
                     ),
                 ],
               ),
@@ -202,18 +246,18 @@ class _EventModalState extends State<EventModal> {
                   TextButton(
                     onPressed: () {
                       if (eventController.text.isNotEmpty) {
-                        if (startDate == null || endDate == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('날짜를 선택해야 합니다.')),
-                          );
-                          return;
-                        }
-
                         if (!_isAllDay && (startTime == null || endTime == null)) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('시작 및 종료 시간을 선택하세요')),
-                          );
-                          return;
+                          // 시작 시간 또는 종료 시간이 설정되지 않았을 때 경고 메시지 표시
+                          setState(() {
+                            _showError = true;
+                            _errorMessage = '시작 시간과 종료 시간을 모두 선택해 주세요.'; // 경고 메시지 설정
+                          });
+                          return; // 이벤트 등록을 중단
+                        } else {
+                          // 에러 메시지 숨기기
+                          setState(() {
+                            _showError = false;
+                          });
                         }
 
                         String startTimeString = _isAllDay
@@ -223,23 +267,34 @@ class _EventModalState extends State<EventModal> {
                             ? '하루 종일'
                             : '${endTime?.hour.toString().padLeft(2, '0')}:${endTime?.minute.toString().padLeft(2, '0')}';
 
-                        widget.onEventAdded(
+                        // Event 객체 생성
+                        Event newEvent = Event(
+                          name: eventController.text,
+                          time: _isAllDay
+                              ? '하루 종일'
+                              : '$startTimeString - $endTimeString',
+                          startDate: startDate!,
+                          endDate: endDate!,
+                        );
+
+                        // Firestore에 이벤트 추가 또는 수정
+                        if (widget.editMode) {
+                          _addOrUpdateEventToFirestore(newEvent, eventId: widget.initialValue); // 수정할 때 이벤트 ID 전달
+                        } else {
+                          _addOrUpdateEventToFirestore(newEvent); // 새 이벤트 추가
+                        }
+
+                        // onSave 콜백 호출하여 수정된 이벤트 전달
+                        widget.onSave(
                           eventController.text,
-                          _isAllDay ? '하루 종일' : '$startTimeString - $endTimeString',
+                          _isAllDay
+                              ? '하루 종일'
+                              : '$startTimeString - $endTimeString',
                           startDate!,
                           endDate!,
                         );
 
-                        if (kDebugMode) {
-                          print('이벤트 등록됨: ${eventController.text}, '
-                              '시작 날짜: ${DateFormat('yyyy-MM-dd').format(startDate!)}, '
-                              '종료 날짜: ${DateFormat('yyyy-MM-dd').format(endDate!)}, '
-                              '시작 시간: $startTimeString, '
-                              '종료 시간: $endTimeString, '
-                              '하루 종일: ${_isAllDay ? '예' : '아니오'}');
-                        }
-
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(); // 다이얼로그 닫기
                       }
                     },
                     child: Text(widget.editMode ? '수정' : '등록'),

@@ -296,7 +296,7 @@ class _CalenderScreenState extends State<CalenderScreen>
             context: context,
             builder: (context) => EventModal(
               selectedDate: _selectedDay ?? _focusedDay, // null일 경우 fallback 처리
-              onEventAdded: _addEvent, // 수정된 함수로 전달
+              onSave: _addEvent, // onSave로 수정된 함수 전달
             ),
           );
         },

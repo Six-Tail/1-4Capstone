@@ -83,10 +83,8 @@ class EventList extends StatelessWidget {
                         initialValue: event.name,
                         initialTime: event.time,
                         editMode: true,
-                        onEventAdded: (updatedEvent, updatedTime,
-                            updatedStartDate, updatedEndDate) {
-                          editEvent(index, updatedEvent, updatedTime,
-                              updatedStartDate, updatedEndDate);
+                        onSave: (updatedEvent, updatedTime, updatedStartDate, updatedEndDate) {
+                          editEvent(index, updatedEvent, updatedTime, updatedStartDate, updatedEndDate);
                         },
                       ),
                     );
