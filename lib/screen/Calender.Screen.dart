@@ -1,3 +1,4 @@
+// Calendar.Screen.dart
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -98,9 +99,7 @@ class _CalenderScreenState extends State<CalenderScreen>
       }
     });
   }
-
-
-
+  
   void _editEvent(int index, String updatedEvent, String updatedTime,
       DateTime updatedStartDate, DateTime updatedEndDate) {
     setState(() {

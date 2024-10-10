@@ -243,6 +243,7 @@ class _EventModalState extends State<EventModal> {
                     },
                     child: const Text('취소'),
                   ),
+                  // EventModal 클래스 내부의 onPressed 콜백 수정
                   TextButton(
                     onPressed: () {
                       if (eventController.text.isNotEmpty) {
@@ -273,8 +274,8 @@ class _EventModalState extends State<EventModal> {
                           time: _isAllDay
                               ? '하루 종일'
                               : '$startTimeString - $endTimeString',
-                          startDate: startDate!,
-                          endDate: endDate!,
+                          startDate: startDate!, // 팝업에서 선택한 시작 날짜
+                          endDate: endDate!, // 팝업에서 선택한 종료 날짜
                         );
 
                         // Firestore에 이벤트 추가 또는 수정
@@ -290,8 +291,8 @@ class _EventModalState extends State<EventModal> {
                           _isAllDay
                               ? '하루 종일'
                               : '$startTimeString - $endTimeString',
-                          startDate!,
-                          endDate!,
+                          startDate!, // 팝업에서 선택한 시작 날짜
+                          endDate!, // 팝업에서 선택한 종료 날짜
                         );
 
                         Navigator.of(context).pop(); // 다이얼로그 닫기

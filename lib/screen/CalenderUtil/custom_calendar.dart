@@ -30,7 +30,9 @@ class CustomCalendar extends StatelessWidget {
       focusedDay: focusedDay,
       selectedDayPredicate: (day) => isSameDay(selectedDay, day),
       calendarFormat: CalendarFormat.month,
-      onDaySelected: onDaySelected,
+      onDaySelected: (selectedDay, focusedDay) {
+        onDaySelected(selectedDay, focusedDay); // 날짜 선택 시 콜백 호출
+      },
       onPageChanged: onPageChanged,
       eventLoader: (day) {
         final eventList = events[day] ?? [];
@@ -45,7 +47,6 @@ class CustomCalendar extends StatelessWidget {
             print('로드된 날짜: $day, 이벤트 없음');
           }
         }
-
         return eventList;
       },
       headerStyle: const HeaderStyle(
