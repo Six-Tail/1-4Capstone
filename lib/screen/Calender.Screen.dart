@@ -61,7 +61,7 @@ class _CalenderScreenState extends State<CalenderScreen>
   }
 
   // 이벤트 추가 시 팝업에서 선택한 날짜 기반으로 이벤트를 추가하는 함수
-  void _addEvent(String event, String time, DateTime startDate, DateTime endDate) {
+  void _addEvent(String event, String time, DateTime startDate, DateTime endDate, String repeat) {
     setState(() {
       DateTime currentDate = startDate;
 
@@ -73,6 +73,7 @@ class _CalenderScreenState extends State<CalenderScreen>
             isCompleted: false,
             startDate: startDate,
             endDate: endDate,
+            repeat: repeat,  // repeat 필드를 추가
           ));
         } else {
           _events[currentDate] = [
@@ -82,6 +83,7 @@ class _CalenderScreenState extends State<CalenderScreen>
               isCompleted: false,
               startDate: startDate,
               endDate: endDate,
+              repeat: repeat,  // repeat 필드를 추가
             ),
           ];
         }
@@ -94,14 +96,14 @@ class _CalenderScreenState extends State<CalenderScreen>
 
       // 디버그 메시지
       if (kDebugMode) {
-        print('일정 등록됨: $event from $startDate to $endDate');
+        print('일정 등록됨: $event from $startDate to $endDate (반복: $repeat)');
         print('현재 이벤트: $_events');
       }
     });
   }
-  
+
   void _editEvent(int index, String updatedEvent, String updatedTime,
-      DateTime updatedStartDate, DateTime updatedEndDate) {
+      DateTime updatedStartDate, DateTime updatedEndDate, String repeat) {
     setState(() {
       // 선택된 날짜 범위에 해당하는 이벤트를 업데이트
       DateTime currentDate = updatedStartDate;
@@ -113,13 +115,15 @@ class _CalenderScreenState extends State<CalenderScreen>
             time: updatedTime,
             isCompleted: _events[currentDate]![index].isCompleted, // 기존 완료 상태 유지
             startDate: updatedStartDate, // 새 시작 날짜
-            endDate: updatedEndDate,       // 새 종료 날짜
+            endDate: updatedEndDate,     // 새 종료 날짜
+            repeat: repeat,              // repeat 필드를 추가
           );
         }
         currentDate = currentDate.add(const Duration(days: 1));
       }
     });
   }
+
 
   void _deleteEvent(int index) {
     if (_selectedDay != null && _events[_selectedDay!] != null) {
@@ -137,16 +141,20 @@ class _CalenderScreenState extends State<CalenderScreen>
     setState(() {
       if (_selectedDay != null && _events[_selectedDay!] != null) {
         // 기존 완료 상태를 토글
+        Event currentEvent = _events[_selectedDay!]![index];
+
         _events[_selectedDay!]![index] = Event(
-          name: _events[_selectedDay!]![index].name,
-          time: _events[_selectedDay!]![index].time,
+          name: currentEvent.name,
+          time: currentEvent.time,
           isCompleted: isCompleted, // 새로운 완료 상태로 업데이트
-          startDate: _events[_selectedDay!]![index].startDate,
-          endDate: _events[_selectedDay!]![index].endDate,
+          startDate: currentEvent.startDate,
+          endDate: currentEvent.endDate,
+          repeat: currentEvent.repeat, // repeat 필드 추가
         );
       }
     });
   }
+
 
   void _showCompletionStats() {
     int completedEvents = 0;
@@ -294,8 +302,10 @@ class _CalenderScreenState extends State<CalenderScreen>
           showDialog(
             context: context,
             builder: (context) => EventModal(
-              selectedDate: _selectedDay ?? _focusedDay, // null일 경우 fallback 처리
-              onSave: _addEvent, // onSave로 수정된 함수 전달
+              selectedDate: _selectedDay ?? _focusedDay,
+              onSave: (event, time, startDate, endDate, repeat) {
+                _addEvent(event, time, startDate, endDate, repeat);
+              },
             ),
           );
         },

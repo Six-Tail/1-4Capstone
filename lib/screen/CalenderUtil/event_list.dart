@@ -6,7 +6,7 @@ class EventList extends StatelessWidget {
   final DateTime? selectedDay;
   final Map<DateTime, List<Event>> events; // 전체 이벤트를 받음
   final Function(int index, String updatedEvent, String updatedTime,
-      DateTime updatedStartDate, DateTime updatedEndDate) editEvent;
+      DateTime updatedStartDate, DateTime updatedEndDate, String repeat) editEvent;
   final Function(int index) deleteEvent;
   final Function(int index, bool isCompleted) toggleEventCompletion;
 
@@ -83,8 +83,8 @@ class EventList extends StatelessWidget {
                         initialValue: event.name,
                         initialTime: event.time,
                         editMode: true,
-                        onSave: (updatedEvent, updatedTime, updatedStartDate, updatedEndDate) {
-                          editEvent(index, updatedEvent, updatedTime, updatedStartDate, updatedEndDate);
+                        onSave: (updatedEvent, updatedTime, updatedStartDate, updatedEndDate, repeat) {
+                          editEvent(index, updatedEvent, updatedTime, updatedStartDate, updatedEndDate, repeat);
                         },
                       ),
                     );
@@ -105,6 +105,7 @@ class EventList extends StatelessWidget {
                   ];
                 },
               ),
+
             ),
           );
         },
