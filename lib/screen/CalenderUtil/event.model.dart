@@ -8,7 +8,8 @@ class Event {
   DateTime startDate;
   DateTime endDate;
   String repeat;
-  final bool isCompleted; // 이벤트 완료 여부를 저장하는 필드
+  final bool isCompleted;
+  int repeatCount; // 반복 횟수 추가
 
   Event({
     required this.name,
@@ -16,7 +17,8 @@ class Event {
     required this.startDate,
     required this.endDate,
     required this.repeat,
-    this.isCompleted = false, // 기본값은 false로 설정
+    this.isCompleted = false,
+    this.repeatCount = 1, // 기본 반복 횟수 1
   });
 
   // Firestore로 변환하기 위한 메서드
@@ -27,11 +29,12 @@ class Event {
       'startDate': startDate,
       'endDate': endDate,
       'repeat': repeat,
-      'isCompleted': isCompleted, // Firestore에 완료 상태도 저장
+      'isCompleted': isCompleted,
+      'repeatCount': repeatCount, // Firestore에 반복 횟수 저장
     };
   }
 
-  // Firestore에서 데이터를 받아오는 메서드 (선택 사항)
+  // Firestore에서 데이터를 받아오는 메서드
   factory Event.fromFirestore(Map<String, dynamic> data) {
     return Event(
       name: data['name'],
@@ -39,8 +42,8 @@ class Event {
       startDate: (data['startDate'] as Timestamp).toDate(),
       endDate: (data['endDate'] as Timestamp).toDate(),
       repeat: data['repeat'],
-      isCompleted: data['isCompleted'] ?? false, // Firestore에서 완료 여부를 가져옴
+      isCompleted: data['isCompleted'] ?? false,
+      repeatCount: data['repeatCount'] ?? 1, // Firestore에서 반복 횟수 가져옴
     );
   }
 }
-

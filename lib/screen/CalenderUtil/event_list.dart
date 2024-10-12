@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+
 import 'event.modal.dart';
 import 'event.model.dart';
 
 class EventList extends StatelessWidget {
   final DateTime? selectedDay;
   final Map<DateTime, List<Event>> events; // 전체 이벤트를 받음
-  final Function(int index, String updatedEvent, String updatedTime,
-      DateTime updatedStartDate, DateTime updatedEndDate, String repeat) editEvent;
+  final Function(
+      int index,
+      String updatedEvent,
+      String updatedTime,
+      DateTime updatedStartDate,
+      DateTime updatedEndDate,
+      String repeat) editEvent;
   final Function(int index) deleteEvent;
   final Function(int index, bool isCompleted) toggleEventCompletion;
 
@@ -29,101 +35,105 @@ class EventList extends StatelessWidget {
     return Expanded(
       child: selectedDay != null && selectedEvents.isNotEmpty
           ? ListView.builder(
-        itemCount: selectedEvents.length,
-        itemBuilder: (context, index) {
-          Event event = selectedEvents[index];
-          return Container(
-            margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12.0),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 4.0,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(12.0),
-              title: Row(
-                children: [
-                  Checkbox(
-                    value: event.isCompleted,
-                    onChanged: (bool? value) {
-                      toggleEventCompletion(index, value ?? false);
-                    },
+              itemCount: selectedEvents.length,
+              itemBuilder: (context, index) {
+                Event event = selectedEvents[index];
+                return Container(
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 4.0, horizontal: 16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.0),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4.0,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: Text(
-                      event.name,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(12.0),
+                    title: Row(
+                      children: [
+                        Checkbox(
+                          value: event.isCompleted,
+                          onChanged: (bool? value) {
+                            toggleEventCompletion(index, value ?? false);
+                          },
+                        ),
+                        Expanded(
+                          child: Text(
+                            event.name,
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              decoration: event.isCompleted
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    subtitle: Text(
+                      event.time,
                       style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        decoration: event.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
+                        fontSize: 14.0,
+                        color: Colors.grey[700],
                       ),
                     ),
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          showDialog(
+                            context: context,
+                            builder: (context) => EventModal(
+                              selectedDate: selectedDay!,
+                              initialValue: event.name,
+                              initialTime: event.time,
+                              editMode: true,
+                              onSave: (updatedEvent,
+                                  updatedTime,
+                                  updatedStartDate,
+                                  updatedEndDate,
+                                  repeat,
+                                  index) {
+                                editEvent(index, updatedEvent, updatedTime,
+                                    updatedStartDate, updatedEndDate, repeat);
+                              },
+                            ),
+                          );
+                        } else if (value == 'delete') {
+                          deleteEvent(index);
+                        }
+                      },
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text('수정'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text('삭제'),
+                          ),
+                        ];
+                      },
+                    ),
                   ),
-                ],
-              ),
-              subtitle: Text(
-                event.time,
+                );
+              },
+            )
+          : const Center(
+              child: Text(
+                '선택된 날짜에 일정이 없습니다.',
                 style: TextStyle(
-                  fontSize: 14.0,
-                  color: Colors.grey[700],
+                  color: Colors.black,
+                  fontSize: 16,
                 ),
               ),
-              trailing: PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    showDialog(
-                      context: context,
-                      builder: (context) =>
-                          EventModal(
-                            selectedDate: selectedDay!,
-                            initialValue: event.name,
-                            initialTime: event.time,
-                            editMode: true,
-                            onSave: (updatedEvent, updatedTime,
-                                updatedStartDate, updatedEndDate, repeat) {
-                              editEvent(index, updatedEvent, updatedTime,
-                                  updatedStartDate, updatedEndDate, repeat);
-                            },
-                          ),
-                    );
-                  } else if (value == 'delete') {
-                    deleteEvent(index);
-                  }
-                },
-                itemBuilder: (BuildContext context) {
-                  return [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Text('수정'),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Text('삭제'),
-                    ),
-                  ];
-                },
-              ),
             ),
-          );
-        },
-      )
-          : const Center(
-        child: Text(
-          '선택된 날짜에 일정이 없습니다.',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-          ),
-        ),
-      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
+
 import 'CalenderUtil/custom_calendar.dart';
 import 'CalenderUtil/custom_floating_action_button.dart';
 import 'CalenderUtil/event.modal.dart';
@@ -68,12 +69,13 @@ class _CalenderScreenState extends State<CalenderScreen>
   // 이벤트 추가 시 팝업에서 선택한 날짜 기반으로 이벤트를 추가하는 함수
   // 팝업에서 이벤트를 추가할 때 사용되는 함수
   void _addEvent(String event, String time, DateTime startDate,
-      DateTime endDate, String repeat) {
+      DateTime endDate, String repeat, int repeatCount) {
     setState(() {
       DateTime currentDate = startDate.toUtc(); // UTC로 변환
 
-      while (
-          currentDate.isBefore(endDate.toUtc().add(const Duration(days: 1)))) {
+      // 반복 로직
+      for (int count = 0; count < repeatCount; count++) {
+        // 선택한 날짜에 이벤트 추가
         if (_events[currentDate] != null) {
           _events[currentDate]!.add(Event(
             name: event,
@@ -95,7 +97,34 @@ class _CalenderScreenState extends State<CalenderScreen>
             ),
           ];
         }
-        currentDate = currentDate.add(const Duration(days: 1));
+
+        // 반복에 따른 날짜 변경
+        switch (repeat) {
+          case '매일':
+            currentDate = currentDate.add(const Duration(days: 1));
+            break;
+          case '매주':
+            currentDate = currentDate.add(const Duration(days: 7));
+            break;
+          case '매월':
+          // 현재 월의 마지막 날을 확인
+            int nextMonth = currentDate.month == 12 ? 1 : currentDate.month + 1;
+            int year = currentDate.month == 12 ? currentDate.year + 1 : currentDate.year;
+
+            // 새로운 날짜를 설정
+            DateTime newDate = DateTime(year, nextMonth, currentDate.day);
+            // 새로운 날짜가 다음 달의 마지막 날 이후인지 확인
+            if (newDate.month != nextMonth) {
+              newDate = DateTime(year, nextMonth + 1, 0); // 다음 달의 마지막 날
+            }
+            currentDate = newDate;
+            break;
+          case '매년':
+            currentDate = DateTime(currentDate.year + 1, currentDate.month, currentDate.day);
+            break;
+          default:
+            break; // 더 이상의 반복 없음
+        }
       }
 
       // 선택된 날짜를 이벤트의 시작 날짜로 변경
@@ -104,11 +133,12 @@ class _CalenderScreenState extends State<CalenderScreen>
 
       // 디버그 메시지
       if (kDebugMode) {
-        print('일정 등록됨: $event from $startDate to $endDate (반복: $repeat)');
+        print('일정 등록됨: $event from $startDate to $endDate (반복: $repeat, 횟수: $repeatCount)');
         print('현재 이벤트: $_events');
       }
     });
   }
+
 
   void _editEvent(int index, String updatedEvent, String updatedTime,
       DateTime updatedStartDate, DateTime updatedEndDate, String repeat) {
@@ -315,8 +345,8 @@ class _CalenderScreenState extends State<CalenderScreen>
             context: context,
             builder: (context) => EventModal(
               selectedDate: _selectedDay ?? _focusedDay,
-              onSave: (event, time, startDate, endDate, repeat) {
-                _addEvent(event, time, startDate, endDate, repeat);
+              onSave: (event, time, startDate, endDate, repeat, repeatCount) {
+                _addEvent(event, time, startDate, endDate, repeat, repeatCount);
               },
             ),
           );
