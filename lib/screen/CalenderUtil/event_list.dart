@@ -21,7 +21,10 @@ class EventList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Event> selectedEvents = events[selectedDay!] ?? []; // 선택된 날짜의 이벤트만 가져옴
+    // 선택된 날짜가 null이 아닐 경우 해당 날짜의 이벤트를 가져옴
+    List<Event> selectedEvents = (selectedDay != null)
+        ? events[selectedDay!.toUtc()] ?? [] // 선택된 날짜를 UTC로 변환
+        : [];
 
     return Expanded(
       child: selectedDay != null && selectedEvents.isNotEmpty
@@ -78,15 +81,18 @@ class EventList extends StatelessWidget {
                   if (value == 'edit') {
                     showDialog(
                       context: context,
-                      builder: (context) => EventModal(
-                        selectedDate: selectedDay!,
-                        initialValue: event.name,
-                        initialTime: event.time,
-                        editMode: true,
-                        onSave: (updatedEvent, updatedTime, updatedStartDate, updatedEndDate, repeat) {
-                          editEvent(index, updatedEvent, updatedTime, updatedStartDate, updatedEndDate, repeat);
-                        },
-                      ),
+                      builder: (context) =>
+                          EventModal(
+                            selectedDate: selectedDay!,
+                            initialValue: event.name,
+                            initialTime: event.time,
+                            editMode: true,
+                            onSave: (updatedEvent, updatedTime,
+                                updatedStartDate, updatedEndDate, repeat) {
+                              editEvent(index, updatedEvent, updatedTime,
+                                  updatedStartDate, updatedEndDate, repeat);
+                            },
+                          ),
                     );
                   } else if (value == 'delete') {
                     deleteEvent(index);
@@ -105,7 +111,6 @@ class EventList extends StatelessWidget {
                   ];
                 },
               ),
-
             ),
           );
         },

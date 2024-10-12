@@ -43,7 +43,12 @@ class _CalenderScreenState extends State<CalenderScreen>
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
       _selectedDay = selectedDay; // 선택된 날짜 업데이트
-      _focusedDay = focusedDay;   // 포커스된 날짜 업데이트
+      _focusedDay = focusedDay; // 포커스된 날짜 업데이트
+
+      // 선택한 날짜 로그 출력
+      if (kDebugMode) {
+        print('선택한 날짜: ${_selectedDay!}');
+      }
     });
   }
 
@@ -61,19 +66,22 @@ class _CalenderScreenState extends State<CalenderScreen>
   }
 
   // 이벤트 추가 시 팝업에서 선택한 날짜 기반으로 이벤트를 추가하는 함수
-  void _addEvent(String event, String time, DateTime startDate, DateTime endDate, String repeat) {
+  // 팝업에서 이벤트를 추가할 때 사용되는 함수
+  void _addEvent(String event, String time, DateTime startDate,
+      DateTime endDate, String repeat) {
     setState(() {
-      DateTime currentDate = startDate;
+      DateTime currentDate = startDate.toUtc(); // UTC로 변환
 
-      while (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
+      while (
+          currentDate.isBefore(endDate.toUtc().add(const Duration(days: 1)))) {
         if (_events[currentDate] != null) {
           _events[currentDate]!.add(Event(
             name: event,
             time: time,
             isCompleted: false,
-            startDate: startDate,
-            endDate: endDate,
-            repeat: repeat,  // repeat 필드를 추가
+            startDate: startDate.toUtc(),
+            endDate: endDate.toUtc(),
+            repeat: repeat,
           ));
         } else {
           _events[currentDate] = [
@@ -81,18 +89,18 @@ class _CalenderScreenState extends State<CalenderScreen>
               name: event,
               time: time,
               isCompleted: false,
-              startDate: startDate,
-              endDate: endDate,
-              repeat: repeat,  // repeat 필드를 추가
+              startDate: startDate.toUtc(),
+              endDate: endDate.toUtc(),
+              repeat: repeat,
             ),
           ];
         }
         currentDate = currentDate.add(const Duration(days: 1));
       }
 
-      // 선택된 날짜를 이벤트의 시작 날짜로 설정
-      _selectedDay = startDate;
-      _focusedDay = startDate; // 포커스된 날짜도 시작 날짜로 설정
+      // 선택된 날짜를 이벤트의 시작 날짜로 변경
+      _selectedDay = startDate; // 선택된 날짜 업데이트
+      _focusedDay = startDate; // 포커스된 날짜 업데이트
 
       // 디버그 메시지
       if (kDebugMode) {
@@ -107,23 +115,27 @@ class _CalenderScreenState extends State<CalenderScreen>
     setState(() {
       // 선택된 날짜 범위에 해당하는 이벤트를 업데이트
       DateTime currentDate = updatedStartDate;
-      while (currentDate.isBefore(updatedEndDate) || currentDate.isAtSameMomentAs(updatedEndDate)) {
-        if (_events[currentDate] != null && _events[currentDate]!.length > index) {
+      while (currentDate.isBefore(updatedEndDate) ||
+          currentDate.isAtSameMomentAs(updatedEndDate)) {
+        if (_events[currentDate] != null &&
+            _events[currentDate]!.length > index) {
           // Event 객체를 새로 생성하여 업데이트
           _events[currentDate]![index] = Event(
             name: updatedEvent,
             time: updatedTime,
-            isCompleted: _events[currentDate]![index].isCompleted, // 기존 완료 상태 유지
-            startDate: updatedStartDate, // 새 시작 날짜
-            endDate: updatedEndDate,     // 새 종료 날짜
-            repeat: repeat,              // repeat 필드를 추가
+            isCompleted: _events[currentDate]![index].isCompleted,
+            // 기존 완료 상태 유지
+            startDate: updatedStartDate,
+            // 새 시작 날짜
+            endDate: updatedEndDate,
+            // 새 종료 날짜
+            repeat: repeat, // repeat 필드를 추가
           );
         }
         currentDate = currentDate.add(const Duration(days: 1));
       }
     });
   }
-
 
   void _deleteEvent(int index) {
     if (_selectedDay != null && _events[_selectedDay!] != null) {
@@ -146,7 +158,8 @@ class _CalenderScreenState extends State<CalenderScreen>
         _events[_selectedDay!]![index] = Event(
           name: currentEvent.name,
           time: currentEvent.time,
-          isCompleted: isCompleted, // 새로운 완료 상태로 업데이트
+          isCompleted: isCompleted,
+          // 새로운 완료 상태로 업데이트
           startDate: currentEvent.startDate,
           endDate: currentEvent.endDate,
           repeat: currentEvent.repeat, // repeat 필드 추가
@@ -154,7 +167,6 @@ class _CalenderScreenState extends State<CalenderScreen>
       }
     });
   }
-
 
   void _showCompletionStats() {
     int completedEvents = 0;
@@ -174,7 +186,7 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
 
     double completionRate =
-    totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+        totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
 
     // 팝업창 띄우기
     showDialog(
