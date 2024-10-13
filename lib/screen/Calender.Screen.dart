@@ -1,4 +1,5 @@
 // Calendar.Screen.dart
+
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,7 @@ class _CalenderScreenState extends State<CalenderScreen>
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay; // 앱 시작 시 _selectedDay를 오늘 날짜로 설정
+    _selectedDay = _focusedDay; // 앱 시작 시 _selectedDay 오늘 날짜로 설정
   }
 
   @override
@@ -43,10 +44,9 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
-      _selectedDay = selectedDay; // 선택된 날짜 업데이트
-      _focusedDay = focusedDay; // 포커스된 날짜 업데이트
+      _selectedDay = selectedDay.toUtc(); // 선택된 날짜를 UTC로 변환
+      _focusedDay = focusedDay.toUtc(); // 포커스된 날짜를 UTC로 변환
 
-      // 선택한 날짜 로그 출력
       if (kDebugMode) {
         print('선택한 날짜: ${_selectedDay!}');
       }
@@ -68,31 +68,31 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   // 이벤트 추가 시 팝업에서 선택한 날짜 기반으로 이벤트를 추가하는 함수
   // 팝업에서 이벤트를 추가할 때 사용되는 함수
-  void _addEvent(String event, String time, DateTime startDate,
-      DateTime endDate, String repeat, int repeatCount) {
+  void _addEvent(String event, String time, DateTime startDate, DateTime endDate, String repeat, int repeatCount) {
     setState(() {
-      DateTime currentDate = startDate.toUtc(); // UTC로 변환
+      DateTime currentDate = DateTime.utc(startDate.year, startDate.month, startDate.day); // UTC로 변환하되 시간은 00:00:00으로 고정
 
       // 반복 로직
       for (int count = 0; count < repeatCount; count++) {
-        // 선택한 날짜에 이벤트 추가
-        if (_events[currentDate] != null) {
-          _events[currentDate]!.add(Event(
+        DateTime eventDate = currentDate;
+
+        if (_events[eventDate] != null) {
+          _events[eventDate]!.add(Event(
             name: event,
             time: time,
             isCompleted: false,
-            startDate: startDate.toUtc(),
-            endDate: endDate.toUtc(),
+            startDate: currentDate,
+            endDate: currentDate,
             repeat: repeat,
           ));
         } else {
-          _events[currentDate] = [
+          _events[eventDate] = [
             Event(
               name: event,
               time: time,
               isCompleted: false,
-              startDate: startDate.toUtc(),
-              endDate: endDate.toUtc(),
+              startDate: currentDate,
+              endDate: currentDate,
               repeat: repeat,
             ),
           ];
@@ -107,31 +107,31 @@ class _CalenderScreenState extends State<CalenderScreen>
             currentDate = currentDate.add(const Duration(days: 7));
             break;
           case '매월':
-          // 현재 월의 마지막 날을 확인
             int nextMonth = currentDate.month == 12 ? 1 : currentDate.month + 1;
             int year = currentDate.month == 12 ? currentDate.year + 1 : currentDate.year;
 
-            // 새로운 날짜를 설정
-            DateTime newDate = DateTime(year, nextMonth, currentDate.day);
-            // 새로운 날짜가 다음 달의 마지막 날 이후인지 확인
-            if (newDate.month != nextMonth) {
-              newDate = DateTime(year, nextMonth + 1, 0); // 다음 달의 마지막 날
+            // 다음 달의 마지막 날짜를 계산
+            int lastDayOfNextMonth = DateTime(year, nextMonth + 1, 0).day;
+
+            // 현재 날짜에 따라 다음 달의 날짜 설정
+            if (currentDate.day <= lastDayOfNextMonth) {
+              currentDate = DateTime.utc(year, nextMonth, currentDate.day); // 동일한 날짜
+            } else {
+              currentDate = DateTime.utc(year, nextMonth, lastDayOfNextMonth); // 마지막 날짜
             }
-            currentDate = newDate;
+
             break;
           case '매년':
-            currentDate = DateTime(currentDate.year + 1, currentDate.month, currentDate.day);
+            currentDate = DateTime.utc(currentDate.year + 1, currentDate.month, currentDate.day);
             break;
           default:
-            break; // 더 이상의 반복 없음
+            break;
         }
       }
 
-      // 선택된 날짜를 이벤트의 시작 날짜로 변경
-      _selectedDay = startDate; // 선택된 날짜 업데이트
-      _focusedDay = startDate; // 포커스된 날짜 업데이트
+      _selectedDay = startDate.toUtc(); // 선택된 날짜를 UTC로 변환
+      _focusedDay = startDate.toUtc(); // 포커스된 날짜를 UTC로 변환
 
-      // 디버그 메시지
       if (kDebugMode) {
         print('일정 등록됨: $event from $startDate to $endDate (반복: $repeat, 횟수: $repeatCount)');
         print('현재 이벤트: $_events');
