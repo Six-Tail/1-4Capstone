@@ -76,6 +76,13 @@ class _CalenderScreenState extends State<CalenderScreen>
       for (int count = 0; count < repeatCount; count++) {
         DateTime eventDate = currentDate;
 
+        // 2월 30일에 대한 검사 추가
+        if (currentDate.month == 2 && currentDate.day > 28) {
+          // 2월은 최대 28일 (윤년인 경우 29일) 이므로 등록하지 않음
+          currentDate = currentDate.add(const Duration(days: 28)); // 다음 반복으로 넘어감
+          continue;
+        }
+
         if (_events[eventDate] != null) {
           _events[eventDate]!.add(Event(
             name: event,
@@ -117,15 +124,26 @@ class _CalenderScreenState extends State<CalenderScreen>
             if (currentDate.day <= lastDayOfNextMonth) {
               currentDate = DateTime.utc(year, nextMonth, currentDate.day); // 동일한 날짜
             } else {
-              currentDate = DateTime.utc(year, nextMonth, lastDayOfNextMonth); // 마지막 날짜
+              // 31일 등록 시 해당 월의 마지막 날짜로 조정
+              currentDate = DateTime.utc(year, nextMonth, lastDayOfNextMonth);
             }
-
             break;
           case '매년':
             currentDate = DateTime.utc(currentDate.year + 1, currentDate.month, currentDate.day);
             break;
           default:
             break;
+        }
+
+        // 현재 날짜가 해당 월에 유효한지 확인
+        if (currentDate.month != eventDate.month) {
+          // 유효하지 않은 경우 해당 월의 마지막 날로 설정
+          int lastDayOfMonth = DateTime(currentDate.year, currentDate.month + 1, 0).day;
+
+          // 현재 날짜가 29일인 경우, 30일이나 31일이 유효한 경우에만 설정
+          if (currentDate.day > lastDayOfMonth) {
+            currentDate = DateTime.utc(currentDate.year, currentDate.month, lastDayOfMonth);
+          }
         }
       }
 
@@ -138,7 +156,6 @@ class _CalenderScreenState extends State<CalenderScreen>
       }
     });
   }
-
 
   void _editEvent(int index, String updatedEvent, String updatedTime,
       DateTime updatedStartDate, DateTime updatedEndDate, String repeat) {
