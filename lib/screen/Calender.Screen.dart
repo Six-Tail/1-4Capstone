@@ -68,64 +68,60 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   // 이벤트 추가 시 팝업에서 선택한 날짜 기반으로 이벤트를 추가하는 함수
   // 팝업에서 이벤트를 추가할 때 사용되는 함수
-  void _addEvent(String event, String time, DateTime startDate, DateTime endDate, String repeat, int repeatCount) {
+  void _addEvent(String event, String time, DateTime startDate, DateTime? endDate, String repeat, int repeatCount) {
     setState(() {
-      DateTime currentDate = DateTime.utc(startDate.year, startDate.month, startDate.day); // UTC로 변환하되 시간은 00:00:00으로 고정
+      DateTime currentDate = DateTime.utc(startDate.year, startDate.month, startDate.day); // UTC로 변환하여 시간 고정
+      DateTime? lastDate = endDate != null ? DateTime.utc(endDate.year, endDate.month, endDate.day) : null; // endDate가 있을 때만 사용
 
-      // 반복 로직
-      for (int count = 0; count < repeatCount; count++) {
-        DateTime eventDate = currentDate;
-
-        if (_events[eventDate] != null) {
-          _events[eventDate]!.add(Event(
-            name: event,
-            time: time,
-            isCompleted: false,
-            startDate: currentDate,
-            endDate: currentDate,
-            repeat: repeat,
-          ));
-        } else {
-          _events[eventDate] = [
-            Event(
-              name: event,
-              time: time,
-              isCompleted: false,
-              startDate: currentDate,
-              endDate: currentDate,
-              repeat: repeat,
-            ),
-          ];
+      // 반복이 "반복 없음"일 때 시작일과 종료일까지 이벤트 등록
+      if (repeat == '반복 없음' && lastDate != null) {
+        while (!currentDate.isAfter(lastDate)) {
+          _addEventToCalendar(event, time, currentDate, repeat);
+          // 다음 날로 이동
+          currentDate = currentDate.add(const Duration(days: 1));
         }
+      }
+      // 반복이 활성화된 경우
+      else {
+        // 반복 횟수에 따른 이벤트 등록 로직
+        for (int count = 0; count < repeatCount; count++) {
+          // 반복에 따른 날짜 변경
+          switch (repeat) {
+            case '매일':
+              _addEventToCalendar(event, time, currentDate, repeat);
+              currentDate = currentDate.add(const Duration(days: 1));
+              break;
+            case '매주':
+              _addEventToCalendar(event, time, currentDate, repeat);
+              currentDate = currentDate.add(const Duration(days: 7));
+              break;
+            case '매월':
+            // 현재 월의 마지막 날 계산
+              int lastDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month + 1, 0).day;
+              // 현재 날짜가 마지막 날일 경우
+              if (currentDate.day == lastDayOfCurrentMonth) {
+                _addEventToCalendar(event, time, DateTime.utc(currentDate.year, currentDate.month, lastDayOfCurrentMonth), repeat);
+                // 다음 달의 마지막 날로 이동
+                currentDate = DateTime.utc(currentDate.year, currentDate.month + 1, lastDayOfCurrentMonth);
+              } else {
+                // 마지막 날이 아닐 경우에는 해당 날짜에 등록
+                _addEventToCalendar(event, time, currentDate, repeat);
+                // 다음 달로 이동
+                currentDate = DateTime.utc(currentDate.year, currentDate.month + 1, currentDate.day);
+              }
+              break;
+            case '매년':
+              _addEventToCalendar(event, time, currentDate, repeat);
+              currentDate = DateTime.utc(currentDate.year + 1, currentDate.month, currentDate.day);
+              break;
+            default:
+              break;
+          }
 
-        // 반복에 따른 날짜 변경
-        switch (repeat) {
-          case '매일':
-            currentDate = currentDate.add(const Duration(days: 1));
-            break;
-          case '매주':
-            currentDate = currentDate.add(const Duration(days: 7));
-            break;
-          case '매월':
-            int nextMonth = currentDate.month == 12 ? 1 : currentDate.month + 1;
-            int year = currentDate.month == 12 ? currentDate.year + 1 : currentDate.year;
-
-            // 다음 달의 마지막 날짜를 계산
-            int lastDayOfNextMonth = DateTime(year, nextMonth + 1, 0).day;
-
-            // 현재 날짜에 따라 다음 달의 날짜 설정
-            if (currentDate.day <= lastDayOfNextMonth) {
-              currentDate = DateTime.utc(year, nextMonth, currentDate.day); // 동일한 날짜
-            } else {
-              currentDate = DateTime.utc(year, nextMonth, lastDayOfNextMonth); // 마지막 날짜
-            }
-
-            break;
-          case '매년':
-            currentDate = DateTime.utc(currentDate.year + 1, currentDate.month, currentDate.day);
-            break;
-          default:
-            break;
+          // currentDate.day 값을 출력
+          if (kDebugMode) {
+            print('현재 currentDate.day: ${currentDate.day}');
+          }
         }
       }
 
@@ -133,12 +129,36 @@ class _CalenderScreenState extends State<CalenderScreen>
       _focusedDay = startDate.toUtc(); // 포커스된 날짜를 UTC로 변환
 
       if (kDebugMode) {
-        print('일정 등록됨: $event from $startDate to $endDate (반복: $repeat, 횟수: $repeatCount)');
+        print('일정 등록됨: $event from $startDate to ${endDate ?? '반복 종료 없음'} (반복: $repeat, 횟수: $repeatCount)');
         print('현재 이벤트: $_events');
       }
     });
   }
 
+// 이벤트를 캘린더에 추가하는 헬퍼 함수
+  void _addEventToCalendar(String event, String time, DateTime date, String repeat) {
+    if (_events[date] != null) {
+      _events[date]!.add(Event(
+        name: event,
+        time: time,
+        isCompleted: false,
+        startDate: date,
+        endDate: date,
+        repeat: repeat,
+      ));
+    } else {
+      _events[date] = [
+        Event(
+          name: event,
+          time: time,
+          isCompleted: false,
+          startDate: date,
+          endDate: date,
+          repeat: repeat,
+        ),
+      ];
+    }
+  }
 
   void _editEvent(int index, String updatedEvent, String updatedTime,
       DateTime updatedStartDate, DateTime updatedEndDate, String repeat) {
@@ -199,6 +219,36 @@ class _CalenderScreenState extends State<CalenderScreen>
   }
 
   void _showCompletionStats() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('통계 선택'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('월 통계'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showMonthlyStats(); // 월 통계 표시
+                },
+              ),
+              ListTile(
+                title: const Text('전체 통계'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showTotalStatsDialog(); // 전체 통계 기간 선택
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showMonthlyStats() {
     int completedEvents = 0;
     int totalEvents = 0;
 
@@ -215,8 +265,7 @@ class _CalenderScreenState extends State<CalenderScreen>
       }
     });
 
-    double completionRate =
-    totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+    double completionRate = totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
 
     // 팝업창 띄우기
     showDialog(
@@ -224,6 +273,103 @@ class _CalenderScreenState extends State<CalenderScreen>
       builder: (BuildContext context) {
         return AlertDialog(
           title: Center(child: Text('$currentYear년 $currentMonth월 통계')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('완료한 일정: $completedEvents / $totalEvents'),
+              const SizedBox(height: 10),
+              Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showTotalStatsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('전체 통계 기간 선택'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('3개월'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showTotalStats(DateTime.now().subtract(const Duration(days: 90)), DateTime.now());
+                },
+              ),
+              ListTile(
+                title: const Text('6개월'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showTotalStats(DateTime.now().subtract(const Duration(days: 180)), DateTime.now());
+                },
+              ),
+              ListTile(
+                title: const Text('1년'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showTotalStats(DateTime.now().subtract(const Duration(days: 365)), DateTime.now());
+                },
+              ),
+              ListTile(
+                title: const Text('기간 설정'),
+                onTap: () async {
+                  DateTime today = DateTime.now();
+                  final DateTimeRange? picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2000), // 과거 선택 가능 시작일을 2000년으로 설정
+                    lastDate: DateTime(today.year + 10), // 오늘부터 10년 후까지 선택 가능
+                    initialDateRange: DateTimeRange(
+                      start: today.subtract(const Duration(days: 30)), // 기본적으로 30일 전부터
+                      end: today, // 오늘 날짜
+                    ),
+                  );
+
+                  if (picked != null) {
+                    _showTotalStats(picked.start, picked.end); // 선택된 날짜 범위로 통계 표시
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showTotalStats(DateTime startDate, DateTime endDate) {
+    int completedEvents = 0;
+    int totalEvents = 0;
+
+    // 이벤트를 날짜별로 반복하여 완료된 일정과 총 일정을 세어줍니다.
+    _events.forEach((day, events) {
+      if (day.isAfter(startDate.subtract(const Duration(days: 1))) && day.isBefore(endDate.add(const Duration(days: 1)))) {
+        completedEvents += events.where((event) => event.isCompleted).length;
+        totalEvents += events.length;
+      }
+    });
+
+    double completionRate = totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+
+    // 팝업창 띄우기
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(child: Text('${startDate.year}년 ${startDate.month}월 ${startDate.day}일 ~ ${endDate.year}년 ${endDate.month}월 ${endDate.day}일 통계')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
