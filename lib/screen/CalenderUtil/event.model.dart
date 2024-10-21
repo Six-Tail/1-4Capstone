@@ -8,7 +8,7 @@ class Event {
   DateTime startDate;
   DateTime endDate;
   String repeat;
-  final bool isCompleted;
+  late final bool isCompleted;
   int repeatCount; // 반복 횟수 추가
 
   Event({

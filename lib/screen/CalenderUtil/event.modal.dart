@@ -43,6 +43,12 @@ class _EventModalState extends State<EventModal> {
   String _errorMessage = ''; // 에러 메시지 내용
   String _selectedRepeat = '반복 없음'; // 기본 반복 주기
   int _repeatCount = 1; // 기본 반복 횟수 1로 설정
+  DateTime? repeatEndDate; // 반복 종료 날짜
+
+  final List<bool> _selectedWeekdays = List.generate(7, (_) => false); // 요일 선택용
+  final List<bool> _selectedDaysOfMonth = List.generate(31, (_) => false); // 날짜 선택용
+  final List<bool> _selectedMonths = List.generate(12, (_) => false); // 월 선택용
+
 
   final List<String> _repeatOptions = [
     '반복 없음',
@@ -203,7 +209,6 @@ class _EventModalState extends State<EventModal> {
     }
   }
 
-  // Firestore에 이벤트 추가 또는 수정
   // Firestore에 이벤트 추가 또는 수정
   Future<void> _addOrUpdateEventToFirestore(Event event,
       {String? eventId}) async {

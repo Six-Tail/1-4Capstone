@@ -1,11 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart'
+    as firebase; // Firebase Auth에 별칭 부여
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase; // Firebase Auth에 별칭 부여
 import 'package:todobest_home/screen/Calender.Screen.dart'; // Main app screen
 import 'package:todobest_home/screen/First.Screen.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +48,8 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<firebase.User?>(
-      stream: firebase.FirebaseAuth.instance.authStateChanges(), // Firebase Auth 상태 변화 감지
+      stream: firebase.FirebaseAuth.instance.authStateChanges(),
+      // Firebase Auth 상태 변화 감지
       builder: (context, snapshot) {
         // 사용자가 로그인되어 있으면 캘린더 화면으로 이동, 아니면 로그인 화면으로 이동
         if (snapshot.connectionState == ConnectionState.waiting) {
