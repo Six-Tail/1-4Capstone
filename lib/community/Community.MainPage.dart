@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:todobest_home/screen/Calender.Screen.dart';
 import '../utils/Themes.Colors.dart';
 import 'WritePost.Screen.dart';
 import 'FreeBoard.Screen.dart';
@@ -29,10 +27,11 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
   bool isHotSelected = false;
   bool isMyPostsSelected = false;
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme1Colors.mainColor,
+      backgroundColor: const Color(0xffc6dff5),
       appBar: AppBar(
         title: Text(
           'ToDoBest', // 플래너 앱 제목을 ToDoBest로 변경

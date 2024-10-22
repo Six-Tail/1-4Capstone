@@ -1,6 +1,4 @@
 // Calendar.Screen.dart
-
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -27,7 +25,6 @@ class _CalenderScreenState extends State<CalenderScreen> {
   double _rotationAngle = 0.0; // 버튼의 회전 각도
   final Map<DateTime, List<Event>> _events = {};
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
   @override
   void initState() {
@@ -572,17 +569,6 @@ class _CalenderScreenState extends State<CalenderScreen> {
             ),
           );
         },
-      ),
-      bottomNavigationBar: CurvedNavigationBar(
-        color: const Color(0xffb7d3e8),
-        backgroundColor: const Color(0xffffffff), // 네이게이션 바 배경색
-        key: _bottomNavigationKey,
-        items: const <Widget>[
-          Icon(Icons.home, size: 30),
-          Icon(Icons.chat, size: 30),
-          Icon(Icons.star_border, size: 30),
-          Icon(Icons.more_horiz, size: 30),
-        ],
       ),
     );
   }

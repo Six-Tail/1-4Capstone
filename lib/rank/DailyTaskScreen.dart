@@ -10,6 +10,7 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
     Task(name: 'Exercise', isCompleted: false, xp: 50),
     Task(name: 'Read a book', isCompleted: false, xp: 30),
     Task(name: 'Meditation', isCompleted: false, xp: 20),
+
   ];
 
   void completeTask(int index) {
