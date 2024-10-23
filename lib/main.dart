@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:todobest_home/screen/Calender.Screen.dart'; // Main app screen
+import 'package:todobest_home/Router.dart'; // Main app screen
 import 'package:todobest_home/screen/First.Screen.dart';
 
 void main() async {
@@ -56,7 +56,7 @@ class AuthWrapper extends StatelessWidget {
           return const Center(child: CircularProgressIndicator()); // 로딩 중 화면
         } else if (snapshot.hasData) {
           // 사용자가 이미 로그인되어 있는 경우
-          return const CalenderScreen(); // 로그인한 경우 캘린더 화면
+          return RouterPage(); // 로그인한 경우 캘린더 화면
         } else {
           // 사용자가 로그인하지 않은 경우
           return const FirstScreen(); // 로그인하지 않은 경우 로그인 화면
