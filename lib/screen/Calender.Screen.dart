@@ -1,6 +1,4 @@
 // Calendar.Screen.dart
-
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -27,7 +25,6 @@ class _CalenderScreenState extends State<CalenderScreen> {
   double _rotationAngle = 0.0; // 버튼의 회전 각도
   final Map<DateTime, List<Event>> _events = {};
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
   @override
   void initState() {
@@ -99,13 +96,16 @@ class _CalenderScreenState extends State<CalenderScreen> {
               currentDate = currentDate.add(const Duration(days: 7));
               break;
             case '매월':
-            // 현재 월의 마지막 날 계산
+              // 현재 월의 마지막 날 계산
               int lastDayOfCurrentMonth =
                   DateTime(currentDate.year, currentDate.month + 1, 0).day;
               // 현재 날짜가 마지막 날일 경우
               if (currentDate.day == lastDayOfCurrentMonth) {
-                _addEventToCalendar(event, time,
-                    DateTime.utc(currentDate.year, currentDate.month, lastDayOfCurrentMonth),
+                _addEventToCalendar(
+                    event,
+                    time,
+                    DateTime.utc(currentDate.year, currentDate.month,
+                        lastDayOfCurrentMonth),
                     repeat);
                 // 다음 달의 마지막 날로 이동
                 currentDate = DateTime.utc(currentDate.year,
@@ -277,7 +277,7 @@ class _CalenderScreenState extends State<CalenderScreen> {
     });
 
     double completionRate =
-    totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+        totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
 
     // 팝업창 띄우기
     showDialog(
@@ -352,11 +352,14 @@ class _CalenderScreenState extends State<CalenderScreen> {
 
                   // 모든 날짜에 있는 이벤트들을 계산
                   _events.forEach((day, events) {
-                    completedEvents += events.where((event) => event.isCompleted).length;
+                    completedEvents +=
+                        events.where((event) => event.isCompleted).length;
                     totalEvents += events.length;
                   });
 
-                  double completionRate = totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+                  double completionRate = totalEvents > 0
+                      ? (completedEvents / totalEvents) * 100
+                      : 0;
 
                   // 팝업창 띄우기
                   showDialog(
@@ -429,7 +432,7 @@ class _CalenderScreenState extends State<CalenderScreen> {
     });
 
     double completionRate =
-    totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+        totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
 
     // 팝업창 띄우기
     showDialog(
@@ -464,7 +467,7 @@ class _CalenderScreenState extends State<CalenderScreen> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color(0xffc6dff5),
+      backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
         title: Text(
           'ToDoBest',
