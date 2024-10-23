@@ -5,7 +5,7 @@ import 'event.model.dart';
 
 class EventList extends StatelessWidget {
   final DateTime? selectedDay;
-  final Map<DateTime, List<Event>> events; // 전체 이벤트를 받음
+  final Map<DateTime, List<Event>> events;
   final Function(
       int index,
       String updatedEvent,
@@ -27,10 +27,20 @@ class EventList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 선택된 날짜가 null이 아닐 경우 해당 날짜의 이벤트를 가져옴
     List<Event> selectedEvents = (selectedDay != null)
-        ? events[selectedDay!.toUtc()] ?? [] // 선택된 날짜를 UTC로 변환
+        ? events[selectedDay!.toUtc()] ?? []
         : [];
+
+    final List<PopupMenuEntry<String>> menuItems = [
+      const PopupMenuItem(
+        value: 'edit',
+        child: Text('수정'),
+      ),
+      const PopupMenuItem(
+        value: 'delete',
+        child: Text('삭제'),
+      ),
+    ];
 
     return Expanded(
       child: selectedDay != null && selectedEvents.isNotEmpty
@@ -59,7 +69,8 @@ class EventList extends StatelessWidget {
                   Checkbox(
                     value: event.isCompleted,
                     onChanged: (bool? value) {
-                      toggleEventCompletion(index, value ?? false);
+                      int eventIndex = selectedEvents.indexOf(event);
+                      toggleEventCompletion(eventIndex, value ?? false);
                     },
                   ),
                   Expanded(
@@ -85,6 +96,7 @@ class EventList extends StatelessWidget {
               ),
               trailing: PopupMenuButton<String>(
                 onSelected: (value) {
+                  final eventIndex = selectedEvents.indexOf(event);
                   if (value == 'edit') {
                     showDialog(
                       context: context,
@@ -97,29 +109,17 @@ class EventList extends StatelessWidget {
                             updatedTime,
                             updatedStartDate,
                             updatedEndDate,
-                            repeat,
-                            index) {
-                          editEvent(index, updatedEvent, updatedTime,
-                              updatedStartDate, updatedEndDate, repeat);
+                            repeat, index) {
+                          // 인덱스를 추가하여 editEvent 호출
+                          editEvent(eventIndex, updatedEvent, updatedTime, updatedStartDate, updatedEndDate, repeat);
                         },
                       ),
                     );
                   } else if (value == 'delete') {
-                    deleteEvent(index);
+                    deleteEvent(eventIndex);
                   }
                 },
-                itemBuilder: (BuildContext context) {
-                  return [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Text('수정'),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Text('삭제'),
-                    ),
-                  ];
-                },
+                itemBuilder: (BuildContext context) => menuItems,
               ),
             ),
           );
