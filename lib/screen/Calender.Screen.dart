@@ -465,7 +465,7 @@ class _CalenderScreenState extends State<CalenderScreen>
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color(0xffffffff),
+      backgroundColor: const Color(0xffc6dff5),
       appBar: AppBar(
         title: Text(
           'ToDoBest',
@@ -568,7 +568,16 @@ class _CalenderScreenState extends State<CalenderScreen>
           );
         },
       ),
-
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: const Color(0xffc6dff5), // 네이게이션 바 배경색
+        key: _bottomNavigationKey,
+        items: const <Widget>[
+          Icon(Icons.home, size: 30),
+          Icon(Icons.chat, size: 30),
+          Icon(Icons.star_border, size: 30),
+          Icon(Icons.more_horiz, size: 30),
+        ],
+      ),
     );
   }
 }

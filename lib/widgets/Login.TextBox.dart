@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:todobest_home/Router.dart';
 import 'package:todobest_home/mainUI/Calendar.Screen.dart';
 import 'package:todobest_home/screen/Calender.Screen.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
@@ -162,7 +163,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                       if (kDebugMode) {
                         print('이메일로 로그인 성공!');
                       }
-                      Get.offAll(() => const CalenderScreen());
+                      Get.offAll(() =>  RouterPage());
                     }
                   } catch (e) {
                     if (kDebugMode) {
