@@ -26,7 +26,9 @@ class _RouterPageState extends State<RouterPage> {
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: const Color(0xffc6dff5), // 네비게이션 바 배경색을 설정
+        color: Color(0xff73b1e7),
+        backgroundColor: const Color(0xffffffff)
+        , // 네비게이션 바 배경색을 설정
         key: _bottomNavigationKey,
         items: const <Widget>[
           Icon(Icons.home, size: 30),

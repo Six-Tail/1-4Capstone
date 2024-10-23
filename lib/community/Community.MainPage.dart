@@ -35,23 +35,22 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
         title: Text(
-          'ToDoBest', // 플래너 앱 제목을 ToDoBest로 변경
-          style: TextStyle(
-            fontSize: 26,
-            color: Theme1Colors.textColor,
-          ),
+          'ToDoBest',
+          style: TextStyle(fontSize: 26, color: Theme1Colors.textColor),
         ),
         centerTitle: true,
-        backgroundColor: Theme1Colors.mainColor,
-        leading: BackButton(
-          color: Theme1Colors.textColor, // 뒤로가기 버튼 색상
+        backgroundColor: const Color(0xff73b1e7),
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset('assets/images/icon.png'),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // 알림 기능 추가 가능
-            },
+            icon: const Icon(
+              Icons.notification_add,
+              color: Colors.greenAccent,
+              size: 20,
+            ), onPressed: () {  }, // 아이콘 클릭 시 팝업창 띄우는 함수 호출
           ),
         ],
       ),
@@ -202,6 +201,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xff73b1e7),
         onPressed: () async {
           final result = await Navigator.push(
             context,

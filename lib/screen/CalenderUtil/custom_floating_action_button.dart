@@ -122,7 +122,7 @@ class _CustomFloatingActionButtonState extends State<CustomFloatingActionButton>
               duration: const Duration(milliseconds: 300),
               child: FloatingActionButton(
                 onPressed: _toggleMenu,  // 토글 동작 수정
-                backgroundColor: Theme1Colors.textColor,
+                backgroundColor: Color(0xff73b1e7),
                 child: Icon(_isExpanded ? Icons.close : Icons.add),
               ),
             ),
