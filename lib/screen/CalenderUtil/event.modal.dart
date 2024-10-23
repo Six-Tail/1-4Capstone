@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -44,11 +43,6 @@ class _EventModalState extends State<EventModal> {
   String _errorMessage = ''; // 에러 메시지 내용
   String _selectedRepeat = '반복 없음'; // 기본 반복 주기
   int _repeatCount = 1; // 기본 반복 횟수 1로 설정
-  DateTime? repeatEndDate; // 반복 종료 날짜
-
-  // final List<bool> _selectedWeekdays = List.generate(7, (_) => false); // 요일 선택용
-  // final List<bool> _selectedDaysOfMonth = List.generate(31, (_) => false); // 날짜 선택용
-  // final List<bool> _selectedMonths = List.generate(12, (_) => false); // 월 선택용
 
   final List<String> _repeatOptions = [
     '반복 없음',
@@ -133,7 +127,7 @@ class _EventModalState extends State<EventModal> {
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
               initialDateTime:
-                  DateTime(0, 0, 0, selectedTime.hour, selectedTime.minute),
+              DateTime(0, 0, 0, selectedTime.hour, selectedTime.minute),
               onDateTimeChanged: (DateTime newDateTime) {
                 selectedTime = TimeOfDay(
                     hour: newDateTime.hour, minute: newDateTime.minute);
@@ -210,57 +204,67 @@ class _EventModalState extends State<EventModal> {
   }
 
   // Firestore에 이벤트 추가 또는 수정
-  Future<void> _addOrUpdateEventToFirestore(Event event, {String? eventId}) async {
-    if (eventId != null) {
-      // 이벤트 ID가 있을 경우, 해당 이벤트 업데이트
-      await FirebaseFirestore.instance.collection('events').doc(eventId).update(event.toFirestore());
-      if (kDebugMode) {
-        print('이벤트가 Firestore에서 수정되었습니다.');
-      }
-    } else {
-      // 새 이벤트 추가
-      final userId = FirebaseAuth.instance.currentUser?.uid; // 현재 사용자 UID 가져오기
-      if (userId != null) {
-        Event newEvent = Event(
-          name: event.name,
-          time: event.time,
-          startDate: event.startDate,
-          endDate: event.endDate,
-          repeat: event.repeat,
-          repeatCount: event.repeatCount,
-          userId: userId, // UID 추가
-        );
-        await FirebaseFirestore.instance.collection('events').add(newEvent.toFirestore());
+  // Firestore에 이벤트 추가 또는 수정
+  Future<void> _addOrUpdateEventToFirestore(Event event,
+      {String? eventId}) async {
+    final eventCollection = FirebaseFirestore.instance.collection('events');
+
+    try {
+      if (widget.editMode && eventId != null) {
+        // 이벤트 ID가 있을 경우, 해당 이벤트 업데이트
+        await eventCollection.doc(eventId).update(event.toFirestore());
+        if (kDebugMode) {
+          print('이벤트가 Firestore에서 수정되었습니다.');
+        }
+      } else {
+        // 새 이벤트 추가
+        await eventCollection.add(event.toFirestore());
         if (kDebugMode) {
           print('이벤트가 Firestore에 등록되었습니다.');
         }
-      } else {
-        if (kDebugMode) {
-          print('사용자 UID가 없습니다.');
+      }
+
+      // Handle repeats
+      if (_selectedRepeat != '반복 없음' && _repeatCount > 1) {
+        for (int i = 1; i < _repeatCount; i++) {
+          DateTime newStartDate = startDate!;
+          DateTime newEndDate = endDate!;
+
+          if (_selectedRepeat == '매일') {
+            newStartDate = startDate!.add(Duration(days: i));
+            newEndDate = endDate!.add(Duration(days: i));
+          } else if (_selectedRepeat == '매주') {
+            newStartDate = startDate!.add(Duration(days: i * 7));
+            newEndDate = endDate!.add(Duration(days: i * 7));
+          } else if (_selectedRepeat == '매월') {
+            newStartDate = _addMonths(startDate!, i);
+            newEndDate = _addMonths(endDate!, i);
+          } else if (_selectedRepeat == '매년') {
+            newStartDate = _addYears(startDate!, i);
+            newEndDate = _addYears(endDate!, i);
+          }
+
+          // Create a new event with updated dates
+          Event repeatedEvent = Event(
+            name: event.name,
+            time: event.time,
+            startDate: newStartDate,
+            endDate: newEndDate,
+            repeat: _selectedRepeat,
+            repeatCount: event.repeatCount, // 추가된 반복 횟수
+          );
+
+          await eventCollection.add(repeatedEvent.toFirestore());
+          if (kDebugMode) {
+            print('반복 이벤트가 Firestore에 등록되었습니다. ($i)');
+          }
         }
       }
+    } catch (e) {
+      if (kDebugMode) {
+        print('이벤트 등록 또는 수정에 실패했습니다. 오류: $e');
+      }
     }
-  }
-
-
-  // _saveEvent 메서드 추가
-  void _saveEvent() {
-    final event = Event(
-      name: eventController.text,
-      // 이벤트 이름
-      time: _isAllDay
-          ? '하루 종일'
-          : '${startTime?.hour.toString().padLeft(2, '0')}:${startTime?.minute.toString().padLeft(2, '0')} - ${endTime?.hour.toString().padLeft(2, '0')}:${endTime?.minute.toString().padLeft(2, '0')}',
-      // 이벤트 시간
-      startDate: startDate!,
-      endDate: endDate!,
-      repeat: _selectedRepeat,
-      repeatCount: _repeatCount,
-      userId: '', // userId는 Firestore에 저장될 때 포함됩니다.
-    );
-
-    _addOrUpdateEventToFirestore(event,
-        eventId: widget.eventId); // 수정할 때 eventId 전달
   }
 
   @override
@@ -289,7 +293,8 @@ class _EventModalState extends State<EventModal> {
                 SizedBox(height: screenHeight * 0.01),
                 TextField(
                   controller: eventController,
-                  decoration: const InputDecoration(hintText: '일정 내용을 입력하세요'),
+                  decoration: const InputDecoration(
+                      hintText: '일정 내용을 입력하세요'),
                   maxLines: 3,
                 ),
                 SizedBox(height: screenHeight * 0.01),
@@ -443,7 +448,7 @@ class _EventModalState extends State<EventModal> {
                             setState(() {
                               _showError = true;
                               _errorMessage =
-                                  '시작 시간과 종료 시간을 모두 선택해 주세요.'; // 경고 메시지 설정
+                              '시작 시간과 종료 시간을 모두 선택해 주세요.'; // 경고 메시지 설정
                             });
                             return; // 이벤트 등록을 중단
                           } else {
@@ -480,8 +485,15 @@ class _EventModalState extends State<EventModal> {
                             repeat: _selectedRepeat,
                             repeatCount: _repeatCount, // 추가된 반복 횟수
                           );
-                          // _saveEvent 메서드 호출
-                          _saveEvent();
+
+                          // Firestore에 이벤트 추가 또는 수정
+                          if (widget.editMode && widget.eventId != null) {
+                            _addOrUpdateEventToFirestore(newEvent,
+                                eventId: widget.eventId); // 수정할 때 이벤트 ID 전달
+                          } else {
+                            _addOrUpdateEventToFirestore(newEvent); // 새 이벤트 추가
+                          }
+
                           // onSave 콜백 호출하여 수정된 이벤트 전달
                           widget.onSave(
                             eventController.text,

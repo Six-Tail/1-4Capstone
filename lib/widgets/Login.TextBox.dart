@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:todobest_home/mainUI/Calendar.Screen.dart';
 import 'package:todobest_home/screen/Calender.Screen.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
 
@@ -152,7 +153,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
 
                   try {
                     final newUser =
-                        await _authentication.signInWithEmailAndPassword(
+                    await _authentication.signInWithEmailAndPassword(
                       email: userEmail,
                       password: userPassword,
                     );
@@ -160,7 +161,6 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                     if (newUser.user != null) {
                       if (kDebugMode) {
                         print('이메일로 로그인 성공!');
-                        print('로그인한 사용자: ${newUser.user!.email}, UID: ${newUser.user!.uid}');
                       }
                       Get.offAll(() => const CalenderScreen());
                     }

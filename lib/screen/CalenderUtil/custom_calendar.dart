@@ -37,16 +37,16 @@ class CustomCalendar extends StatelessWidget {
       eventLoader: (day) {
         final eventList = events[day] ?? [];
 
-        // // 디버그 메시지 출력
-        // if (eventList.isNotEmpty) {
-        //   if (kDebugMode) {
-        //     print('로드된 날짜: $day, 이벤트 수: ${eventList.length}');
-        //   }
-        // } else {
-        //   if (kDebugMode) {
-        //     print('로드된 날짜: $day, 이벤트 없음');
-        //   }
-        // }
+        // 디버그 메시지 출력
+        if (eventList.isNotEmpty) {
+          if (kDebugMode) {
+            print('로드된 날짜: $day, 이벤트 수: ${eventList.length}');
+          }
+        } else {
+          if (kDebugMode) {
+            print('로드된 날짜: $day, 이벤트 없음');
+          }
+        }
         return eventList;
       },
       headerStyle: const HeaderStyle(

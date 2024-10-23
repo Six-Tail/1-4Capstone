@@ -1,5 +1,6 @@
+// event.model.dart
+// 이벤트 아이템
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class Event {
   String name;
@@ -7,9 +8,8 @@ class Event {
   DateTime startDate;
   DateTime endDate;
   String repeat;
-  late final bool isCompleted;
+  final bool isCompleted;
   int repeatCount; // 반복 횟수 추가
-  String? userId; // 사용자의 UID 추가
 
   Event({
     required this.name,
@@ -19,7 +19,6 @@ class Event {
     required this.repeat,
     this.isCompleted = false,
     this.repeatCount = 1, // 기본 반복 횟수 1
-    this.userId, // 사용자의 UID를 전달받음
   });
 
   // Firestore로 변환하기 위한 메서드
@@ -32,7 +31,6 @@ class Event {
       'repeat': repeat,
       'isCompleted': isCompleted,
       'repeatCount': repeatCount, // Firestore에 반복 횟수 저장
-      'userId': userId, // 사용자 UID를 Firestore에 저장
     };
   }
 
@@ -46,7 +44,6 @@ class Event {
       repeat: data['repeat'],
       isCompleted: data['isCompleted'] ?? false,
       repeatCount: data['repeatCount'] ?? 1, // Firestore에서 반복 횟수 가져옴
-      userId: data['userId'], // Firestore에서 사용자 UID 가져옴
     );
   }
 }
