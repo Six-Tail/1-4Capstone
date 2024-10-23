@@ -325,6 +325,54 @@ class _CalenderScreenState extends State<CalenderScreen>
                 },
               ),
               ListTile(
+                title: const Text('전체 기간'),
+                onTap: () {
+                  Navigator.of(context).pop();
+
+                  int completedEvents = 0;
+                  int totalEvents = 0;
+
+                  // 모든 날짜에 있는 이벤트들을 계산
+                  _events.forEach((day, events) {
+                    completedEvents +=
+                        events.where((event) => event.isCompleted).length;
+                    totalEvents += events.length;
+                  });
+
+                  double completionRate = totalEvents > 0
+                      ? (completedEvents / totalEvents) * 100
+                      : 0;
+
+                  // 팝업창 띄우기
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Center(child: Text('전체 기간')),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('전체 일정: $totalEvents'),
+                            const SizedBox(height: 10),
+                            Text('완료한 일정: $completedEvents'),
+                            const SizedBox(height: 10),
+                            Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            child: const Text('확인'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+              ListTile(
                 title: const Text('기간 설정'),
                 onTap: () async {
                   DateTime today = DateTime.now();
