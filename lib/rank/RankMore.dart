@@ -19,7 +19,7 @@ class RankMore extends StatelessWidget {
     double expRatio = currentExp / maxExp;
 
     return Scaffold(
-      backgroundColor: Theme1Colors.mainColor,
+      backgroundColor: const Color(0xffc6dff5),
       appBar: AppBar(
         title: Text(
           'ToDoBest',

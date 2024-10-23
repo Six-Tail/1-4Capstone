@@ -1,6 +1,10 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:todobest_home/Setting.MainPage.dart';
+import 'package:todobest_home/community/Community.MainPage.dart';
+import 'package:todobest_home/rank/RankMore.dart';
+import 'package:todobest_home/screen/Calender.Screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,10 +31,10 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _pageOptions = [
-      _buildCalendarPage(), // 캘린더 화면
-      _buildChatPage(),     // 채팅 화면
-      _buildFavoritesPage(), // 즐겨찾기 화면
-      _buildMorePage(),     // 기타 페이지
+       _buildCalendarPage(), // 캘린더 화면
+       CommunityMainPage(),     // 채팅 화면
+       RankMore(), // 즐겨찾기 화면
+       SettingMainPage(),     // 기타 페이지
     ];
   }
 
