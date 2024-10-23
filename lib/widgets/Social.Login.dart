@@ -11,8 +11,7 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // 추가된 부분
-import 'package:todobest_home/mainUI/Calendar.Screen.dart';
-import 'package:todobest_home/screen/Calender.Screen.dart';
+import 'package:todobest_home/Router.dart';
 import 'package:uni_links2/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -113,7 +112,7 @@ class _SocialLoginState extends State<SocialLogin> {
   }
 
   void navigatorToMainPage() {
-    Get.off(() => const CalenderScreen());
+    Get.off(() => RouterPage());
   }
 
   Future<void> signInWithNaver() async {
@@ -127,7 +126,9 @@ class _SocialLoginState extends State<SocialLogin> {
     base64Url.encode(List<int>.generate(16, (_) => Random().nextInt(255)));
     Uri url = Uri.parse(
         'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=$clientID&redirect_uri=$redirectUri&state=$state');
-    print("네이버 로그인 열기 & 클라우드 함수 호출");
+    if (kDebugMode) {
+      print("네이버 로그인 열기 & 클라우드 함수 호출");
+    }
     await launchUrl(url);
     initUniLinks();
   }
@@ -302,8 +303,8 @@ class SocialIcon extends StatelessWidget {
   const SocialIcon({
     required this.assetName,
     required this.iconSize,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

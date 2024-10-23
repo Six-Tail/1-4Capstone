@@ -27,9 +27,9 @@ class EventList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 선택된 날짜가 null이 아닐 경우 해당 날짜의 이벤트를 가져옴 (UTC 변환 제거)
+    // 선택된 날짜가 null이 아닐 경우 해당 날짜의 이벤트를 가져옴
     List<Event> selectedEvents = (selectedDay != null)
-        ? events[selectedDay] ?? [] // 선택된 날짜를 그대로 사용
+        ? events[selectedDay!.toUtc()] ?? [] // 선택된 날짜를 UTC로 변환
         : [];
 
     return Expanded(
