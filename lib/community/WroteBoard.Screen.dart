@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/Themes.Colors.dart';
-import 'Post.Detail.dart'; // Import the PostDetailPage
+import 'Post.Detail.dart';
 
 class WroteBoardScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> posts;
+  final String userId; // 사용자의 ID를 받아와야 합니다.
 
-  WroteBoardScreen({required this.posts});
+  WroteBoardScreen({required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +14,7 @@ class WroteBoardScreen extends StatelessWidget {
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
         title: Text(
-          '내가 쓴 글', // 플래너 앱 제목을 ToDoBest로 변경
+          '내가 쓴 글',
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.bold,
@@ -23,7 +24,7 @@ class WroteBoardScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Theme1Colors.mainColor,
         leading: BackButton(
-          color: Theme1Colors.textColor, // 뒤로가기 버튼 색상
+          color: Theme1Colors.textColor,
         ),
         actions: [
           IconButton(
@@ -36,37 +37,53 @@ class WroteBoardScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: posts.length,
-          itemBuilder: (context, index) {
-            final post = posts[index];
-            return Card(
-              child: ListTile(
-                title: Text(
-                  post['title'],
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Row(
-                  children: [
-                    Icon(Icons.thumb_up, size: 18),
-                    SizedBox(width: 4),
-                    Text(post['likes'].toString()),
-                    SizedBox(width: 16),
-                    Icon(Icons.comment, size: 18),
-                    SizedBox(width: 4),
-                    Text(post['comments'].length.toString()),
-                  ],
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PostDetail(post: post),
+        child: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection('posts')
+              .where('userId', isEqualTo: userId) // 특정 사용자 ID로 필터링
+              .snapshots(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return Center(child: Text('내가 쓴 게시글이 없습니다.'));
+            }
+            final posts = snapshot.data!.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+            return ListView.builder(
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                final post = posts[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                      post['title'] ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  );
-                },
-              ),
+                    subtitle: Row(
+                      children: [
+                        const Icon(Icons.thumb_up, size: 18),
+                        const SizedBox(width: 4),
+                        Text(post['likes'].toString()),
+                        const SizedBox(width: 16),
+                        const Icon(Icons.comment, size: 18),
+                        const SizedBox(width: 4),
+                        Text((post['comments'] as List).length.toString()),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PostDetail(post: post),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             );
           },
         ),

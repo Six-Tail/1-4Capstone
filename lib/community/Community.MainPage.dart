@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:todobest_home/screen/Calender.Screen.dart';
 import '../utils/Themes.Colors.dart';
 import 'WritePost.Screen.dart';
 import 'FreeBoard.Screen.dart';
@@ -10,15 +8,7 @@ import 'MentoringBoard.Screen.dart';
 import 'PromotionBoard.Screen.dart';
 import 'HotBoard.Screen.dart';
 import 'WroteBoard.Screen.dart';
-
-final Map<String, List<Map<String, dynamic>>> boardPosts = {
-  '자유 게시판': [],
-  '목표 공유 게시판': [],
-  '자기계발 팁 게시판': [],
-  '멘토링 요청 게시판': [],
-  '홍보 게시판': [],
-  '내가 쓴 글': [],
-};
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CommunityMainPage extends StatefulWidget {
   @override
@@ -50,7 +40,8 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
               Icons.notification_add,
               color: Colors.greenAccent,
               size: 20,
-            ), onPressed: () {  }, // 아이콘 클릭 시 팝업창 띄우는 함수 호출
+            ),
+            onPressed: () {},
           ),
         ],
       ),
@@ -70,7 +61,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HotBoardScreen(posts: getHotPosts()),
+                          builder: (context) => HotBoardScreen(),
                         ),
                       );
                     },
@@ -102,7 +93,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => WroteBoardScreen(posts: boardPosts['내가 쓴 글']!),
+                          builder: (context) => WroteBoardScreen(userId: '',),
                         ),
                       );
                     },
@@ -127,7 +118,6 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
             ),
             const SizedBox(height: 16),
 
-            // "게시판" 텍스트와 접기/펼치기 기능 추가 (선 없앰)
             Theme(
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
@@ -135,9 +125,9 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                   '게시판',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                initiallyExpanded: true,  // 기본값을 펼치기로 설정
-                tilePadding: const EdgeInsets.symmetric(horizontal: 0),  // 패딩 조정
-                childrenPadding: const EdgeInsets.symmetric(horizontal: 0),  // 패딩 조정
+                initiallyExpanded: true,
+                tilePadding: const EdgeInsets.symmetric(horizontal: 0),
+                childrenPadding: const EdgeInsets.symmetric(horizontal: 0),
                 children: [
                   ListTile(
                     title: const Text('자유 게시판'),
@@ -145,7 +135,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FreeBoardScreen(posts: boardPosts['자유 게시판']!),
+                          builder: (context) => FreeBoardScreen(),
                         ),
                       );
                     },
@@ -156,7 +146,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => GoalShareBoardScreen(posts: boardPosts['목표 공유 게시판']!),
+                          builder: (context) => GoalShareBoardScreen(),
                         ),
                       );
                     },
@@ -167,7 +157,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SdTipBoardScreen(posts: boardPosts['자기계발 팁 게시판']!),
+                          builder: (context) => SdTipBoardScreen(),
                         ),
                       );
                     },
@@ -178,7 +168,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MentoringBoardScreen(posts: boardPosts['멘토링 요청 게시판']!),
+                          builder: (context) => MentoringBoardScreen(),
                         ),
                       );
                     },
@@ -189,7 +179,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PromotionBoardScreen(posts: boardPosts['홍보 게시판']!),
+                          builder: (context) => PromotionBoardScreen(),
                         ),
                       );
                     },
@@ -201,53 +191,16 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xff73b1e7),
+        backgroundColor: const Color(0xff73b1e7),
         onPressed: () async {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => WritePostScreen()),
           );
-          if (result != null && result['board'] != null) {
-            setState(() {
-              boardPosts[result['board']]!.add({
-                'title': result['title'],
-                'content': result['content'],
-                'likes': 0,
-                'comments': [], // 댓글 리스트 초기화
-              });
-              // '내가 쓴 글'에 추가
-              boardPosts['내가 쓴 글']!.add({
-                'title': result['title'],
-                'content': result['content'],
-                'likes': 0,
-                'comments': [], // 댓글 리스트 초기화
-              });
-            });
-          }
+          // Firestore에 새 게시글 저장 후 자동으로 업데이트되므로 추가 작업 불필요
         },
         child: const Icon(Icons.add),
       ),
-    );
-  }
-
-
-
-  List<Map<String, dynamic>> getHotPosts() {
-    return boardPosts.values
-        .expand((posts) => posts)
-        .where((post) => post['likes'] >= 10)
-        .toList();
-  }
-
-  ListTile buildListTile(BuildContext context, String boardName, Widget page) {
-    return ListTile(
-      title: Text(boardName),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
     );
   }
 }
