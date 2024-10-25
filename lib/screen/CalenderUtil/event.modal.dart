@@ -1,10 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import 'event.model.dart'; // Firestore 추가
 
 class EventModal extends StatefulWidget {
   final DateTime selectedDate;
@@ -160,110 +156,6 @@ class _EventModalState extends State<EventModal> {
           endTime = pickedTime;
         }
       });
-    }
-  }
-
-  // Helper function to add months safely
-  DateTime _addMonths(DateTime date, int months) {
-    int newYear = date.year + ((date.month + months - 1) ~/ 12);
-    int newMonth = (date.month + months - 1) % 12 + 1;
-    int newDay = date.day;
-
-    // Handle end of month
-    while (true) {
-      try {
-        return DateTime(newYear, newMonth, newDay, date.hour, date.minute);
-      } catch (e) {
-        newDay -= 1;
-        if (newDay < 1) {
-          // Fallback to first day of the month
-          return DateTime(newYear, newMonth, 1, date.hour, date.minute);
-        }
-      }
-    }
-  }
-
-  // Helper function to add years safely
-  DateTime _addYears(DateTime date, int years) {
-    int newYear = date.year + years;
-    int newMonth = date.month;
-    int newDay = date.day;
-
-    // Handle leap years, etc.
-    while (true) {
-      try {
-        return DateTime(newYear, newMonth, newDay, date.hour, date.minute);
-      } catch (e) {
-        newDay -= 1;
-        if (newDay < 1) {
-          // Fallback to first day of the month
-          return DateTime(newYear, newMonth, 1, date.hour, date.minute);
-        }
-      }
-    }
-  }
-
-  // Firestore에 이벤트 추가 또는 수정
-  // Firestore에 이벤트 추가 또는 수정
-  Future<void> _addOrUpdateEventToFirestore(Event event,
-      {String? eventId}) async {
-    final eventCollection = FirebaseFirestore.instance.collection('events');
-
-    try {
-      if (widget.editMode && eventId != null) {
-        // 이벤트 ID가 있을 경우, 해당 이벤트 업데이트
-        await eventCollection.doc(eventId).update(event.toFirestore());
-        if (kDebugMode) {
-          print('이벤트가 Firestore에서 수정되었습니다.');
-        }
-      } else {
-        // 새 이벤트 추가
-        await eventCollection.add(event.toFirestore());
-        if (kDebugMode) {
-          print('이벤트가 Firestore에 등록되었습니다.');
-        }
-      }
-
-      // Handle repeats
-      if (_selectedRepeat != '반복 없음' && _repeatCount > 1) {
-        for (int i = 1; i < _repeatCount; i++) {
-          DateTime newStartDate = startDate!;
-          DateTime newEndDate = endDate!;
-
-          if (_selectedRepeat == '매일') {
-            newStartDate = startDate!.add(Duration(days: i));
-            newEndDate = endDate!.add(Duration(days: i));
-          } else if (_selectedRepeat == '매주') {
-            newStartDate = startDate!.add(Duration(days: i * 7));
-            newEndDate = endDate!.add(Duration(days: i * 7));
-          } else if (_selectedRepeat == '매월') {
-            newStartDate = _addMonths(startDate!, i);
-            newEndDate = _addMonths(endDate!, i);
-          } else if (_selectedRepeat == '매년') {
-            newStartDate = _addYears(startDate!, i);
-            newEndDate = _addYears(endDate!, i);
-          }
-
-          // Create a new event with updated dates
-          Event repeatedEvent = Event(
-            name: event.name,
-            time: event.time,
-            startDate: newStartDate,
-            endDate: newEndDate,
-            repeat: _selectedRepeat,
-            repeatCount: event.repeatCount, // 추가된 반복 횟수
-          );
-
-          await eventCollection.add(repeatedEvent.toFirestore());
-          if (kDebugMode) {
-            print('반복 이벤트가 Firestore에 등록되었습니다. ($i)');
-          }
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('이벤트 등록 또는 수정에 실패했습니다. 오류: $e');
-      }
     }
   }
 
@@ -473,26 +365,6 @@ class _EventModalState extends State<EventModal> {
                           String endTimeString = _isAllDay
                               ? '하루 종일'
                               : '${endTime?.hour.toString().padLeft(2, '0')}:${endTime?.minute.toString().padLeft(2, '0')}';
-
-                          // Event 객체 생성
-                          Event newEvent = Event(
-                            name: eventController.text,
-                            time: _isAllDay
-                                ? '하루 종일'
-                                : '$startTimeString - $endTimeString',
-                            startDate: startDate!,
-                            endDate: endDate!,
-                            repeat: _selectedRepeat,
-                            repeatCount: _repeatCount, // 추가된 반복 횟수
-                          );
-
-                          // Firestore에 이벤트 추가 또는 수정
-                          if (widget.editMode && widget.eventId != null) {
-                            _addOrUpdateEventToFirestore(newEvent,
-                                eventId: widget.eventId); // 수정할 때 이벤트 ID 전달
-                          } else {
-                            _addOrUpdateEventToFirestore(newEvent); // 새 이벤트 추가
-                          }
 
                           // onSave 콜백 호출하여 수정된 이벤트 전달
                           widget.onSave(

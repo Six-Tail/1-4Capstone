@@ -1,4 +1,6 @@
 // Calendar.Screen.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -26,11 +28,13 @@ class _CalenderScreenState extends State<CalenderScreen>
   final Map<DateTime, List<Event>> _events = {};
   final ScrollController _scrollController = ScrollController();
   double _rotationAngle = 0.0; // 버튼의 회전 각도
+  final FirebaseAuth _auth = FirebaseAuth.instance; // FirebaseAuth 인스턴스 생성
 
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay; // 앱 시작 시 _selectedDay를 오늘 날짜로 설정
+    _loadUserEvents(); // 사용자 이벤트 로드
   }
 
   @override
@@ -39,7 +43,73 @@ class _CalenderScreenState extends State<CalenderScreen>
     super.dispose();
   }
 
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+  // Firestore에서 사용자 이벤트 로드하는 함수
+  void _loadUserEvents() async {
+    final eventCollection = FirebaseFirestore.instance.collection('events');
+    final userUid = FirebaseAuth.instance.currentUser?.uid; // 현재 사용자 UID 가져오기
+
+    if (userUid != null) {
+      try {
+        final querySnapshot = await eventCollection
+            .where('uid', isEqualTo: userUid) // 현재 사용자 UID에 해당하는 이벤트 조회
+            .get();
+
+        // 이벤트를 _events 맵에 추가
+        for (var doc in querySnapshot.docs) {
+          final eventData = doc.data();
+          DateTime startDate = (eventData['startDate'] as Timestamp).toDate(); // Firestore의 Timestamp를 DateTime으로 변환
+          String uniqueId = doc.id; // 문서 ID
+
+          // UTC로 변환하여 _events에 추가
+          DateTime localDate = DateTime.utc(startDate.year, startDate.month, startDate.day);
+
+          // mounted 속성 체크 후 setState 호출
+          if (mounted) {
+            setState(() {
+              if (_events[localDate] != null) {
+                _events[localDate]!.add(Event(
+                  id: uniqueId, // Firestore 문서 ID 사용
+                  name: eventData['name'],
+                  time: eventData['time'],
+                  isCompleted: eventData['isCompleted'],
+                  startDate: localDate,
+                  endDate: localDate,
+                  repeat: eventData['repeat'],
+                  uid: userUid,
+                ));
+              } else {
+                _events[localDate] = [
+                  Event(
+                    id: uniqueId, // Firestore 문서 ID 사용
+                    name: eventData['name'],
+                    time: eventData['time'],
+                    isCompleted: eventData['isCompleted'],
+                    startDate: localDate,
+                    endDate: localDate,
+                    repeat: eventData['repeat'],
+                    uid: userUid,
+                  ),
+                ];
+              }
+            });
+          }
+        }
+        if (kDebugMode) {
+          print('사용자 이벤트 로드됨: $_events');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('이벤트 로드 실패: $e');
+        }
+      }
+    } else {
+      if (kDebugMode) {
+        print('사용자 UID를 가져올 수 없습니다.');
+      }
+    }
+  }
+
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) async {
     setState(() {
       _selectedDay = selectedDay; // 선택된 날짜 업데이트
       _focusedDay = focusedDay; // 포커스된 날짜 업데이트
@@ -49,6 +119,20 @@ class _CalenderScreenState extends State<CalenderScreen>
         print('선택한 날짜: ${_selectedDay!}');
       }
     });
+
+    // 선택한 날짜에 대한 이벤트 확인 (UTC로 변환)
+    DateTime utcSelectedDay = DateTime.utc(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+
+    if (_events[utcSelectedDay] != null) {
+      // 해당 날짜에 이벤트가 존재할 경우 추가적인 작업을 여기에 넣을 수 있음.
+      if (kDebugMode) {
+        print('선택한 날짜에 등록된 이벤트가 있습니다: ${_events[utcSelectedDay]}');
+      }
+    } else {
+      if (kDebugMode) {
+        print('선택한 날짜에 등록된 이벤트가 없습니다.');
+      }
+    }
   }
 
   void _onPageChanged(DateTime focusedDay) {
@@ -67,7 +151,7 @@ class _CalenderScreenState extends State<CalenderScreen>
   // 이벤트 추가 시 팝업에서 선택한 날짜 기반으로 이벤트를 추가하는 함수
   // 팝업에서 이벤트를 추가할 때 사용되는 함수
   void _addEvent(String event, String time, DateTime startDate,
-      DateTime? endDate, String repeat, int repeatCount) {
+      DateTime? endDate, String repeat, int repeatCount, String userId) {
     setState(() {
       DateTime currentDate = DateTime.utc(
           startDate.year, startDate.month, startDate.day); // UTC로 변환하여 시간 고정
@@ -75,10 +159,13 @@ class _CalenderScreenState extends State<CalenderScreen>
           ? DateTime.utc(endDate.year, endDate.month, endDate.day)
           : null; // endDate가 있을 때만 사용
 
+      // 사용자 UID를 가져옵니다.
+      String userId = _auth.currentUser?.uid ?? '알 수 없음'; // 현재 사용자 UID
+
       // 반복이 "반복 없음"일 때 시작일과 종료일까지 이벤트 등록
       if (repeat == '반복 없음' && lastDate != null) {
         while (!currentDate.isAfter(lastDate)) {
-          _addEventToCalendar(event, time, currentDate, repeat);
+          _addEventToCalendar(event, time, currentDate, repeat, userId);
           // 다음 날로 이동
           currentDate = currentDate.add(const Duration(days: 1));
         }
@@ -90,15 +177,15 @@ class _CalenderScreenState extends State<CalenderScreen>
           // 반복에 따른 날짜 변경
           switch (repeat) {
             case '매일':
-              _addEventToCalendar(event, time, currentDate, repeat);
+              _addEventToCalendar(event, time, currentDate, repeat, userId);
               currentDate = currentDate.add(const Duration(days: 1));
               break;
             case '매주':
-              _addEventToCalendar(event, time, currentDate, repeat);
+              _addEventToCalendar(event, time, currentDate, repeat, userId);
               currentDate = currentDate.add(const Duration(days: 7));
               break;
             case '매월':
-              // 현재 월의 마지막 날 계산
+            // 현재 월의 마지막 날 계산
               int lastDayOfCurrentMonth =
                   DateTime(currentDate.year, currentDate.month + 1, 0).day;
               // 현재 날짜가 마지막 날일 경우
@@ -108,20 +195,21 @@ class _CalenderScreenState extends State<CalenderScreen>
                     time,
                     DateTime.utc(currentDate.year, currentDate.month,
                         lastDayOfCurrentMonth),
-                    repeat);
+                    repeat,
+                    userId);
                 // 다음 달의 마지막 날로 이동
                 currentDate = DateTime.utc(currentDate.year,
                     currentDate.month + 1, lastDayOfCurrentMonth);
               } else {
                 // 마지막 날이 아닐 경우에는 해당 날짜에 등록
-                _addEventToCalendar(event, time, currentDate, repeat);
+                _addEventToCalendar(event, time, currentDate, repeat, userId);
                 // 다음 달로 이동
                 currentDate = DateTime.utc(
                     currentDate.year, currentDate.month + 1, currentDate.day);
               }
               break;
             case '매년':
-              _addEventToCalendar(event, time, currentDate, repeat);
+              _addEventToCalendar(event, time, currentDate, repeat, userId);
               currentDate = DateTime.utc(
                   currentDate.year + 1, currentDate.month, currentDate.day);
               break;
@@ -141,88 +229,188 @@ class _CalenderScreenState extends State<CalenderScreen>
 
       if (kDebugMode) {
         print(
-            '일정 등록됨: $event from $startDate to ${endDate ?? '반복 종료 없음'} (반복: $repeat, 횟수: $repeatCount)');
+            '일정 등록됨: $event from $startDate to ${endDate ?? '반복 종료 없음'} (반복: $repeat, 횟수: $repeatCount, 사용자 UID: $userId)');
         print('현재 이벤트: $_events');
       }
     });
   }
 
-// 이벤트를 캘린더에 추가하는 헬퍼 함수
+  // 이벤트를 캘린더에 추가하는 헬퍼 함수
+  // Event 클래스의 생성자에 id 매개변수가 포함되어 있다고 가정
   void _addEventToCalendar(
-      String event, String time, DateTime date, String repeat) {
-    if (_events[date] != null) {
-      _events[date]!.add(Event(
-        name: event,
-        time: time,
-        isCompleted: false,
-        startDate: date,
-        endDate: date,
-        repeat: repeat,
-      ));
-    } else {
-      _events[date] = [
-        Event(
-          name: event,
-          time: time,
-          isCompleted: false,
-          startDate: date,
-          endDate: date,
-          repeat: repeat,
-        ),
-      ];
-    }
-  }
+      String event,
+      String time,
+      DateTime date,
+      String repeat,
+      String userId,
+      ) {
+    // Firestore에 이벤트 추가
+    FirebaseFirestore.instance.collection('events').add({
+      'uid': userId,
+      'name': event,
+      'time': time,
+      'startDate': date,
+      'endDate': date,
+      'repeat': repeat,
+      'isCompleted': false,
+    }).then((value) {
+      // 생성된 문서 ID 가져오기
+      String uniqueId = value.id;
 
-  void _editEvent(int index, String updatedEvent, String updatedTime,
-      DateTime updatedStartDate, DateTime updatedEndDate, String repeat) {
-    setState(() {
-      if (_selectedDay != null && _events[_selectedDay!] != null) {
-        DateTime currentDate = _selectedDay!;
-
-        // 인덱스 유효성 검사
-        if (index >= 0 && index < _events[currentDate]!.length) {
-          Event currentEvent = _events[currentDate]![index];
-
-          // 기존 이벤트를 업데이트
-          _events[currentDate]![index] = Event(
-            name: updatedEvent,
-            time: updatedTime,
-            isCompleted: currentEvent.isCompleted,
-            startDate: updatedStartDate,
-            endDate: updatedEndDate,
+      // 로컬 캘린더 이벤트 추가
+      setState(() {
+        if (_events[date] != null) {
+          _events[date]!.add(Event(
+            id: uniqueId, // Firestore 문서 ID 사용
+            name: event,
+            time: time,
+            isCompleted: false,
+            startDate: date,
+            endDate: date,
             repeat: repeat,
-          );
+            uid: userId,
+          ));
+        } else {
+          _events[date] = [
+            Event(
+              id: uniqueId, // Firestore 문서 ID 사용
+              name: event,
+              time: time,
+              isCompleted: false,
+              startDate: date,
+              endDate: date,
+              repeat: repeat,
+              uid: userId,
+            ),
+          ];
         }
+      });
+
+      if (kDebugMode) {
+        print("Firestore에 이벤트 추가됨: $uniqueId");
+      }
+    }).catchError((error) {
+      if (kDebugMode) {
+        print("Firestore에 이벤트 추가 실패: $error");
       }
     });
   }
 
-  void _deleteEvent(int index) {
+  void _editEvent(int index, String updatedEvent, String updatedTime,
+      DateTime updatedStartDate, DateTime updatedEndDate, String repeat) async {
     if (_selectedDay != null && _events[_selectedDay!] != null) {
-      setState(() {
-        _events[_selectedDay!]!.removeAt(index);
-        // 삭제 후, 이벤트가 없을 경우 해당 날짜에 대한 항목 삭제
-        if (_events[_selectedDay!]!.isEmpty) {
-          _events.remove(_selectedDay); // 비어있으면 해당 날짜의 이벤트를 맵에서 삭제
+      DateTime currentDate = _selectedDay!;
+
+      // 인덱스 유효성 검사
+      if (index >= 0 && index < _events[currentDate]!.length) {
+        Event currentEvent = _events[currentDate]![index];
+
+        // Firestore에서 문서가 존재하는지 확인
+        try {
+          final eventDoc = await FirebaseFirestore.instance
+              .collection('events')
+              .doc(currentEvent.id)
+              .get();
+
+          if (eventDoc.exists) {
+            // 문서가 존재하면 업데이트합니다.
+            await eventDoc.reference.update({
+              'name': updatedEvent,
+              'time': updatedTime,
+              'startDate': updatedStartDate,
+              'endDate': updatedEndDate,
+              'repeat': repeat,
+            });
+
+            // 상태를 업데이트
+            setState(() {
+              _events[currentDate]![index] = Event(
+                id: currentEvent.id, // 기존 이벤트의 ID를 사용
+                name: updatedEvent,
+                time: updatedTime,
+                isCompleted: currentEvent.isCompleted,
+                startDate: updatedStartDate,
+                endDate: updatedEndDate,
+                repeat: repeat,
+                uid: currentEvent.uid, // 사용자 ID도 유지
+              );
+            });
+
+            if (kDebugMode) {
+              print('Firebase에서 이벤트가 성공적으로 업데이트되었습니다.');
+            }
+          } else {
+            if (kDebugMode) {
+              print('문서가 존재하지 않습니다: ${currentEvent.id}');
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('Firebase 이벤트 업데이트 실패: $e'); // 오류 메시지 출력
+          }
         }
-      });
+      }
     }
   }
 
-  void _toggleEventCompletion(int index, bool isCompleted) {
+  void _deleteEvent(int index) async {
+    if (_selectedDay != null && _events[_selectedDay!] != null) {
+      final eventToDelete = _events[_selectedDay!]![index];
+
+      setState(() {
+        _events[_selectedDay!]!.removeAt(index);
+        if (_events[_selectedDay!]!.isEmpty) {
+          _events.remove(_selectedDay);
+        }
+      });
+
+      // Firebase에서 이벤트 문서를 삭제합니다.
+      try {
+        final eventCollection = FirebaseFirestore.instance.collection('events');
+        await eventCollection.doc(eventToDelete.id).delete();
+        if (kDebugMode) {
+          print('Firebase에서 이벤트가 성공적으로 삭제되었습니다.');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Firebase 이벤트 삭제 실패: $e');  // 오류 메시지 출력
+        }
+      }
+    }
+  }
+
+  void _toggleEventCompletion(int index, bool isCompleted) async {
     setState(() {
       if (_selectedDay != null && _events[_selectedDay!] != null) {
-        // 기존 완료 상태를 토글
+        // 현재 이벤트 가져오기
         Event currentEvent = _events[_selectedDay!]![index];
 
+        // Firestore에서 문서가 존재하는지 확인
+        FirebaseFirestore.instance.collection('events').doc(currentEvent.id).get().then((eventDoc) {
+          if (eventDoc.exists) {
+            // Firestore에서 isCompleted 값을 업데이트
+            eventDoc.reference.update({'isCompleted': isCompleted}).then((_) {
+              if (kDebugMode) {
+                print('Firebase에서 이벤트 완료 상태가 성공적으로 업데이트되었습니다.');
+              }
+            }).catchError((error) {
+              if (kDebugMode) {
+                print('Firebase 이벤트 완료 상태 업데이트 실패: $error');
+              }
+            });
+          }
+        });
+
+        // 기존 이벤트 업데이트
         _events[_selectedDay!]![index] = Event(
+          id: currentEvent.id, // 기존 ID 유지
           name: currentEvent.name,
           time: currentEvent.time,
-          isCompleted: isCompleted,
-          // 새로운 완료 상태로 업데이트
+          isCompleted: isCompleted, // 새로운 완료 상태로 업데이트
           startDate: currentEvent.startDate,
           endDate: currentEvent.endDate,
-          repeat: currentEvent.repeat, // repeat 필드 추가
+          repeat: currentEvent.repeat, // repeat 필드 유지
+          uid: currentEvent.uid, // 사용자 ID 유지
         );
       }
     });
@@ -558,12 +746,13 @@ class _CalenderScreenState extends State<CalenderScreen>
         rotationAngle: _rotationAngle,
         toggleMenu: _toggleMenu,
         addEvent: () {
+          String userId = "현재 사용자 UID"; // 여기서 현재 사용자의 UID를 가져와야 합니다.
           showDialog(
             context: context,
             builder: (context) => EventModal(
               selectedDate: _selectedDay ?? _focusedDay,
               onSave: (event, time, startDate, endDate, repeat, repeatCount) {
-                _addEvent(event, time, startDate, endDate, repeat, repeatCount);
+                _addEvent(event, time, startDate, endDate, repeat, repeatCount, userId);
               },
             ),
           );

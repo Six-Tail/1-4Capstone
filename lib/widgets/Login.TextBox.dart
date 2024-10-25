@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/Router.dart';
-import 'package:todobest_home/screen/Calender.Screen.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
 
 class LoginTextBox extends StatefulWidget {
@@ -161,6 +160,9 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                     if (newUser.user != null) {
                       if (kDebugMode) {
                         print('이메일로 로그인 성공!');
+                        print('사용자 이메일: ${newUser.user!.email}');
+                        print('사용자 이름: ${newUser.user!.displayName ?? "이름 없음"}');
+                        print('사용자 : ${newUser.user!.uid}');
                       }
                       Get.offAll(() => RouterPage());
                     }

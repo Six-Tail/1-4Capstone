@@ -156,27 +156,65 @@ class _SocialLoginState extends State<SocialLogin> {
     if (uri.authority == 'login-callback') {
       String? firebaseToken = uri.queryParameters['firebaseToken'];
       String? name = uri.queryParameters['name'];
+      String? email = uri.queryParameters['email'];
       String? profileImage = uri.queryParameters['profileImage'];
+
       if (kDebugMode) {
         print("name $name");
+        print("email $email");
+        print("profileImage $profileImage");
       }
-      await FirebaseAuth.instance
-          .signInWithCustomToken(firebaseToken!)
-          .then((value) {
+
+      try {
+        final auth = FirebaseAuth.instance;
+
+        // 이메일 중복 체크 및 처리
+        final signInMethods = await auth.fetchSignInMethodsForEmail(email!);
+        if (signInMethods.isNotEmpty) {
+          // 이메일이 이미 Firebase에 존재하는 경우
+          if (kDebugMode) {
+            print("이미 존재하는 이메일입니다. 기존 계정과 연결합니다.");
+          }
+
+          final userCredential = await auth.signInWithCredential(
+            EmailAuthProvider.credential(email: email, password: '비밀번호'), // 기존 계정의 비밀번호를 알아야 합니다.
+          );
+
+          if (userCredential.user != null) {
+            if (kDebugMode) {
+              print("기존 계정으로 로그인 성공");
+              print("사용자 UID: ${userCredential.user!.uid}");
+            }
+          }
+        } else {
+          // 이메일이 존재하지 않는 경우
+          await auth.signInWithCustomToken(firebaseToken!).then((value) {
+            final user = auth.currentUser;
+            if (user != null && kDebugMode) {
+              if (kDebugMode) {
+                print("네이버 로그인 성공");
+                print("사용자 UID: ${user.uid}");
+                print("사용자 이메일: ${user.email ?? '이메일 없음'}");
+                print("사용자 이름: ${user.displayName ?? name ?? '이름 없음'}");
+              }
+            }
+          });
+        }
         navigatorToMainPage();
         setState(() {
-          isLoginAttempt = false; // 로그인 시도 상태를 초기화
+          isLoginAttempt = false; // 로그인 시도 상태 초기화
         });
-      }).onError((error, stackTrace) {
+      } catch (error) {
         if (kDebugMode) {
-          print("error $error");
+          print("네이버 로그인 실패 $error");
         }
         setState(() {
-          isLoginAttempt = false; // 로그인 시도 상태를 초기화
+          isLoginAttempt = false; // 로그인 시도 상태 초기화
         });
-      });
+      }
     }
   }
+
 
   Future<void> signInWithKakao() async {
     setState(() {
@@ -240,14 +278,22 @@ class _SocialLoginState extends State<SocialLogin> {
         accessToken: token.accessToken,
       );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user != null && kDebugMode) {
+        if (kDebugMode) {
+          print('카카오 계정 로그인 성공');
+          print('사용자 UID: ${user.uid}');
+          print('사용자 이메일: ${user.email ?? "이메일 없음"}');
+          print('사용자 이름: ${user.displayName ?? "이름 없음"}');
+        }
+      }
+
       navigatorToMainPage();
       setState(() {
         isLoginAttempt = false; // 로그인 시도 상태를 초기화
       });
-      if (kDebugMode) {
-        print('카카오 계정 로그인 성공');
-      }
     } catch (error) {
       if (kDebugMode) {
         print('카카오 계정 로그인 실패 $error');
@@ -264,23 +310,33 @@ class _SocialLoginState extends State<SocialLogin> {
     });
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
       if (googleAuth == null) {
         setState(() {
           isLoginAttempt = false; // 로그인 시도 상태를 초기화
         });
         return;
       }
+
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      await FirebaseAuth.instance.signInWithCredential(credential);
-      navigatorToMainPage();
-      if (kDebugMode) {
-        print('Google 로그인 성공');
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user != null && kDebugMode) {
+        if (kDebugMode) {
+          print('Google 로그인 성공');
+          print('사용자 UID: ${user.uid}');
+          print('사용자 이메일: ${user.email ?? "이메일 없음"}');
+          print('사용자 이름: ${user.displayName ?? "이름 없음"}');
+        }
       }
+
+      navigatorToMainPage();
     } catch (error) {
       if (kDebugMode) {
         print('Google 로그인 실패 $error');
