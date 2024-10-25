@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/Themes.Colors.dart';
 
 class PostDetail extends StatefulWidget {
-  final String postId; // 게시글 ID를 받아옵니다.
+  final String postId;
 
   const PostDetail({Key? key, required this.postId}) : super(key: key);
 
@@ -14,32 +14,76 @@ class PostDetail extends StatefulWidget {
 class _PostDetailState extends State<PostDetail> {
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
-  final Map<int, bool> _isReplying = {}; // 각 댓글의 답글 입력창 표시 여부
-  final Map<int, TextEditingController> _replyControllers = {}; // 각 댓글별 답글 컨트롤러
+  final Map<int, bool> _isReplying = {};
+  final Map<int, TextEditingController> _replyControllers = {};
 
-  // 댓글 추가 기능
-  Future<void> _addComment(String content) async {
-    if (content.isEmpty) return;
+  // Firestore에서 게시글 좋아요 업데이트
+  Future<void> _togglePostLike(bool isLiked, int currentLikes) async {
     try {
       await FirebaseFirestore.instance
           .collection('posts')
           .doc(widget.postId)
-          .collection('comments')
-          .add({
-        'userName': '사용자닉네임', // 실제 유저 닉네임을 추가
-        'userImage': 'https://example.com/user_image.png', // 실제 유저 이미지
+          .update({
+        'isLiked': !isLiked,
+        'likes': isLiked ? currentLikes - 1 : currentLikes + 1,
+      });
+    } catch (e) {
+      print("좋아요 업데이트 오류: $e");
+    }
+  }
+
+  // Firestore에 댓글 추가 및 댓글 수 업데이트
+  Future<void> _addComment(String content) async {
+    if (content.isEmpty) return;
+    try {
+      final commentsCollection = FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .collection('comments');
+
+      // 댓글 추가
+      await commentsCollection.add({
+        'userName': '사용자닉네임',
+        'userImage': 'https://example.com/user_image.png',
         'content': content,
         'timeStamp': FieldValue.serverTimestamp(),
         'likes': 0,
         'isLiked': false,
       });
+
+      // 댓글 수 업데이트
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .update({
+        'commentsCount': FieldValue.increment(1),
+      });
+
       _commentController.clear();
     } catch (e) {
       print("댓글 추가 오류: $e");
     }
   }
 
-  // 답글 추가 기능
+  // Firestore에서 댓글 좋아요 업데이트
+  Future<void> _toggleCommentLike(
+      String commentId, bool isLiked, int currentLikes) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .collection('comments')
+          .doc(commentId)
+          .update({
+        'isLiked': !isLiked,
+        'likes': isLiked ? currentLikes - 1 : currentLikes + 1,
+      });
+    } catch (e) {
+      print("댓글 좋아요 업데이트 오류: $e");
+    }
+  }
+
+  // Firestore에 답글 추가
   Future<void> _addReply(String content, String commentId) async {
     if (content.isEmpty) return;
     try {
@@ -60,7 +104,7 @@ class _PostDetailState extends State<PostDetail> {
     }
   }
 
-  // 시간 표시 포맷 함수
+  // 시간 표시 함수
   String _timeAgo(Timestamp timestamp) {
     final DateTime date = timestamp.toDate();
     final Duration difference = DateTime.now().difference(date);
@@ -93,7 +137,10 @@ class _PostDetailState extends State<PostDetail> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       StreamBuilder<DocumentSnapshot>(
-                        stream: FirebaseFirestore.instance.collection('posts').doc(widget.postId).snapshots(),
+                        stream: FirebaseFirestore.instance
+                            .collection('posts')
+                            .doc(widget.postId)
+                            .snapshots(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
                           final post = snapshot.data!.data() as Map<String, dynamic>;
@@ -107,6 +154,23 @@ class _PostDetailState extends State<PostDetail> {
                               ),
                               const SizedBox(height: 10),
                               Text(post['content'] ?? ''),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      post['isLiked'] ?? false
+                                          ? Icons.thumb_up
+                                          : Icons.thumb_up_off_alt,
+                                    ),
+                                    onPressed: () => _togglePostLike(
+                                        post['isLiked'] ?? false, post['likes'] ?? 0),
+                                  ),
+                                  Text(post['likes'].toString()),
+                                  const SizedBox(width: 16),
+                                  const Icon(Icons.comment),
+                                  Text(post['commentsCount'].toString()),
+                                ],
+                              ),
                               const Divider(color: Colors.black),
                             ],
                           );
@@ -160,9 +224,11 @@ class _PostDetailState extends State<PostDetail> {
                                                         ? Icons.thumb_up
                                                         : Icons.thumb_up_off_alt,
                                                   ),
-                                                  onPressed: () {
-                                                    // 좋아요 기능 구현 가능
-                                                  },
+                                                  onPressed: () => _toggleCommentLike(
+                                                    commentId,
+                                                    commentData['isLiked'] ?? false,
+                                                    commentData['likes'] ?? 0,
+                                                  ),
                                                 ),
                                                 Text(commentData['likes'].toString()),
                                                 TextButton(
