@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/Themes.Colors.dart';
 import 'Post.Detail.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FreeBoardScreen extends StatelessWidget {
   @override
@@ -33,21 +33,27 @@ class FreeBoardScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('posts').snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('posts')
+              .where('board', isEqualTo: '자유 게시판') // '자유 게시판' 게시글만 가져오기
+              .snapshots(),
+          builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return Center(child: Text('게시글이 없습니다.'));
             }
-            final posts = snapshot.data!.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+            final posts = snapshot.data!.docs;
 
             return ListView.builder(
               itemCount: posts.length,
               itemBuilder: (context, index) {
-                final post = posts[index];
+                final post = posts[index].data() as Map<String, dynamic>;
+                final postId = posts[index].id; // 각 게시글의 postId
+
                 return Card(
                   child: ListTile(
                     title: Text(
@@ -63,16 +69,16 @@ class FreeBoardScreen extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Row(
                           children: [
-                            Icon(Icons.thumb_up, size: 18),
-                            SizedBox(width: 4),
+                            const Icon(Icons.thumb_up, size: 18),
+                            const SizedBox(width: 4),
                             Text(post['likes'].toString()),
-                            SizedBox(width: 16),
-                            Icon(Icons.comment, size: 18),
-                            SizedBox(width: 4),
-                            Text((post['comments'] as List).length.toString()),
+                            const SizedBox(width: 16),
+                            const Icon(Icons.comment, size: 18),
+                            const SizedBox(width: 4),
+                            Text(post['commentsCount'].toString()), // 댓글 수
                           ],
                         ),
                       ],
@@ -81,7 +87,7 @@ class FreeBoardScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostDetail(post: post),
+                          builder: (context) => PostDetail(postId: postId), // postId 전달
                         ),
                       );
                     },

@@ -37,24 +37,27 @@ class WroteBoardScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: StreamBuilder(
+        child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('posts')
               .where('userId', isEqualTo: userId) // 특정 사용자 ID로 필터링
               .snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return Center(child: Text('내가 쓴 게시글이 없습니다.'));
             }
-            final posts = snapshot.data!.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+            final posts = snapshot.data!.docs;
 
             return ListView.builder(
               itemCount: posts.length,
               itemBuilder: (context, index) {
-                final post = posts[index];
+                final post = posts[index].data() as Map<String, dynamic>;
+                final postId = posts[index].id; // 각 게시글의 postId
+
                 return Card(
                   child: ListTile(
                     title: Text(
@@ -70,14 +73,14 @@ class WroteBoardScreen extends StatelessWidget {
                         const SizedBox(width: 16),
                         const Icon(Icons.comment, size: 18),
                         const SizedBox(width: 4),
-                        Text((post['comments'] as List).length.toString()),
+                        Text(post['commentsCount'].toString()), // 댓글 수
                       ],
                     ),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostDetail(post: post),
+                          builder: (context) => PostDetail(postId: postId), // postId 전달
                         ),
                       );
                     },

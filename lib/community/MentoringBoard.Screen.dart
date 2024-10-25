@@ -33,24 +33,27 @@ class MentoringBoardScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: StreamBuilder(
+        child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('posts')
-              .where('board', isEqualTo: '멘토링 요청 게시판')
+              .where('board', isEqualTo: '멘토링 요청 게시판') // '멘토링 요청 게시판' 게시글만 필터링
               .snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return Center(child: Text('게시글이 없습니다.'));
             }
-            final posts = snapshot.data!.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+            final posts = snapshot.data!.docs;
 
             return ListView.builder(
               itemCount: posts.length,
               itemBuilder: (context, index) {
-                final post = posts[index];
+                final post = posts[index].data() as Map<String, dynamic>;
+                final postId = posts[index].id; // 각 게시글의 postId
+
                 return Card(
                   child: ListTile(
                     title: Text(
@@ -75,7 +78,7 @@ class MentoringBoardScreen extends StatelessWidget {
                             const SizedBox(width: 16),
                             const Icon(Icons.comment, size: 18),
                             const SizedBox(width: 4),
-                            Text((post['comments'] as List).length.toString()),
+                            Text(post['commentsCount'].toString()), // 댓글 수
                           ],
                         ),
                       ],
@@ -84,7 +87,7 @@ class MentoringBoardScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostDetail(post: post),
+                          builder: (context) => PostDetail(postId: postId), // postId 전달
                         ),
                       );
                     },
