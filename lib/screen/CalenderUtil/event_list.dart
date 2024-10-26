@@ -104,15 +104,9 @@ class EventList extends StatelessWidget {
                               initialValue: event.name,
                               initialTime: event.time,
                               editMode: true,
-                              onSave: (updatedEvent,
-                                  updatedTime,
-                                  updatedStartDate,
-                                  updatedEndDate,
-                                  repeat,
-                                  index) {
+                              onSave: (updatedEvent, updatedTime, updatedStartDate, updatedEndDate, repeat, repeatCount, selectedDays, selectedDaysInMonth, selectedMonths) {
                                 // 인덱스를 추가하여 editEvent 호출
-                                editEvent(eventIndex, updatedEvent, updatedTime,
-                                    updatedStartDate, updatedEndDate, repeat);
+                                editEvent(eventIndex, updatedEvent, updatedTime, updatedStartDate, updatedEndDate, repeat);
                               },
                             ),
                           );

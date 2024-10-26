@@ -150,82 +150,125 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   // 이벤트 추가 시 팝업에서 선택한 날짜 기반으로 이벤트를 추가하는 함수
   // 팝업에서 이벤트를 추가할 때 사용되는 함수
-  void _addEvent(String event, String time, DateTime startDate,
-      DateTime? endDate, String repeat, int repeatCount, String userId) {
+  void _addEvent(
+      String event,
+      String time,
+      DateTime startDate,
+      DateTime? endDate,
+      String repeat,
+      int repeatCount,
+      String userId,
+      List<String> selectedDays,
+      List<int> selectedDaysInMonth,
+      List<int> selectedMonths,
+      ) {
     setState(() {
       DateTime currentDate = DateTime.utc(
-          startDate.year, startDate.month, startDate.day); // UTC로 변환하여 시간 고정
+          startDate.year, startDate.month, startDate.day);
       DateTime? lastDate = endDate != null
           ? DateTime.utc(endDate.year, endDate.month, endDate.day)
-          : null; // endDate가 있을 때만 사용
+          : null;
 
-      // 사용자 UID를 가져옵니다.
-      String userId = _auth.currentUser?.uid ?? '알 수 없음'; // 현재 사용자 UID
+      String userId = _auth.currentUser?.uid ?? '알 수 없음';
 
-      // 반복이 "반복 없음"일 때 시작일과 종료일까지 이벤트 등록
       if (repeat == '반복 없음' && lastDate != null) {
         while (!currentDate.isAfter(lastDate)) {
           _addEventToCalendar(event, time, currentDate, repeat, userId);
-          // 다음 날로 이동
           currentDate = currentDate.add(const Duration(days: 1));
         }
-      }
-      // 반복이 활성화된 경우
-      else {
-        // 반복 횟수에 따른 이벤트 등록 로직
+      } else {
         for (int count = 0; count < repeatCount; count++) {
-          // 반복에 따른 날짜 변경
           switch (repeat) {
             case '매일':
               _addEventToCalendar(event, time, currentDate, repeat, userId);
               currentDate = currentDate.add(const Duration(days: 1));
               break;
+
             case '매주':
-              _addEventToCalendar(event, time, currentDate, repeat, userId);
+              for (String day in selectedDays) {
+                DateTime nextOccurrence = currentDate;
+                while (true) {
+                  int targetDay = {
+                    '월': 1,
+                    '화': 2,
+                    '수': 3,
+                    '목': 4,
+                    '금': 5,
+                    '토': 6,
+                    '일': 7,
+                  }[day]!;
+                  if (nextOccurrence.weekday == targetDay) {
+                    _addEventToCalendar(
+                        event, time, nextOccurrence, repeat, userId);
+                    break;
+                  }
+                  nextOccurrence = nextOccurrence.add(const Duration(days: 1));
+                }
+              }
               currentDate = currentDate.add(const Duration(days: 7));
               break;
+
             case '매월':
-            // 현재 월의 마지막 날 계산
-              int lastDayOfCurrentMonth =
-                  DateTime(currentDate.year, currentDate.month + 1, 0).day;
-              // 현재 날짜가 마지막 날일 경우
-              if (currentDate.day == lastDayOfCurrentMonth) {
-                _addEventToCalendar(
-                    event,
-                    time,
-                    DateTime.utc(currentDate.year, currentDate.month,
-                        lastDayOfCurrentMonth),
-                    repeat,
-                    userId);
-                // 다음 달의 마지막 날로 이동
-                currentDate = DateTime.utc(currentDate.year,
-                    currentDate.month + 1, lastDayOfCurrentMonth);
-              } else {
-                // 마지막 날이 아닐 경우에는 해당 날짜에 등록
-                _addEventToCalendar(event, time, currentDate, repeat, userId);
-                // 다음 달로 이동
-                currentDate = DateTime.utc(
-                    currentDate.year, currentDate.month + 1, currentDate.day);
+              for (int count = 0; count < repeatCount; count++) {
+                for (int day in selectedDaysInMonth) {
+                  try {
+                    DateTime eventDate = DateTime(
+                      currentDate.year,
+                      currentDate.month + count, // 반복 횟수에 따라 월을 증가
+                      day,
+                    );
+
+                    // 선택된 날짜가 유효한지 확인
+                    if (eventDate.day <= DateTime(eventDate.year, eventDate.month + 1, 0).day) {
+                      // 이미 등록된 이벤트인지 확인
+                      if (!_events.containsKey(eventDate)) {
+                        _addEventToCalendar(event, time, eventDate, repeat, userId);
+                      }
+                    }
+                  } catch (e) {
+                    if (kDebugMode) {
+                      print('유효하지 않은 날짜: ${currentDate.year}-${currentDate.month + count}-$day'); // 로그 추가
+                    }
+                  }
+                }
               }
               break;
+
             case '매년':
-              _addEventToCalendar(event, time, currentDate, repeat, userId);
-              currentDate = DateTime.utc(
-                  currentDate.year + 1, currentDate.month, currentDate.day);
+              for (int count = 0; count < repeatCount; count++) {
+                for (int month in selectedMonths) {
+                  // 각 반복마다 연도를 증가시키고, 월과 일을 고정
+                  DateTime eventDate = DateTime(
+                    currentDate.year + count, // 반복 횟수에 따라 연도를 증가
+                    month,
+                    currentDate.day,
+                  );
+
+                  // 선택된 날짜가 유효한지 확인
+                  if (eventDate.day <= DateTime(eventDate.year, month + 1, 0).day) {
+                    // 이미 등록된 이벤트인지 확인
+                    // 같은 날짜와 같은 이벤트가 등록되지 않도록 체크
+                    if (!_events.containsKey(eventDate) ||
+                        !_events[eventDate]!.any((e) => e.time == event)) {
+                      _addEventToCalendar(event, time, eventDate, repeat, userId);
+                    }
+                  }
+                }
+              }
               break;
+
+
             default:
               break;
           }
-
-          // currentDate.day 값을 출력
           if (kDebugMode) {
             print('현재 currentDate.day: ${currentDate.day}');
           }
         }
       }
 
-      _selectedDay = startDate.toUtc(); // 선택된 날짜를 UTC로 변환
-      _focusedDay = startDate.toUtc(); // 포커스된 날짜를 UTC로 변환
+      _selectedDay = startDate.toUtc();
+      _focusedDay = startDate.toUtc();
 
       if (kDebugMode) {
         print(
@@ -746,13 +789,14 @@ class _CalenderScreenState extends State<CalenderScreen>
         rotationAngle: _rotationAngle,
         toggleMenu: _toggleMenu,
         addEvent: () {
-          String userId = "현재 사용자 UID"; // 여기서 현재 사용자의 UID를 가져와야 합니다.
+          String userId = "현재 사용자 UID"; // 현재 사용자의 UID를 가져와야 합니다.
           showDialog(
             context: context,
             builder: (context) => EventModal(
               selectedDate: _selectedDay ?? _focusedDay,
-              onSave: (event, time, startDate, endDate, repeat, repeatCount) {
-                _addEvent(event, time, startDate, endDate, repeat, repeatCount, userId);
+              onSave: (event, time, startDate, endDate, repeat, repeatCount, selectedDays, selectedDaysInMonth, selectedMonths) {
+                // selectedDaysInMonth 추가
+                _addEvent(event, time, startDate, endDate, repeat, repeatCount, userId, selectedDays, selectedDaysInMonth, selectedMonths);
               },
             ),
           );
