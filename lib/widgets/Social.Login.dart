@@ -1,22 +1,19 @@
-// Social.Login.dart
-// Social.Login.dart
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore import 추가
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todobest_home/Router.dart';
 import 'package:uni_links2/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../service/User_Service.dart';
 
 class SocialLogin extends StatefulWidget {
   const SocialLogin({super.key});
@@ -26,7 +23,6 @@ class SocialLogin extends StatefulWidget {
 }
 
 class _SocialLoginState extends State<SocialLogin> {
-  final UserService userService = UserService(); // UserService instance 생성
   StreamSubscription<String?>? _linkSubscription;
   bool isLoginAttempt = false;
   bool isLoggedIn = false;
@@ -34,7 +30,7 @@ class _SocialLoginState extends State<SocialLogin> {
   @override
   void initState() {
     super.initState();
-    checkLoginStatus(); // 앱 시작 시 로그인 상태 확인
+    checkLoginStatus();
   }
 
   Future<void> checkLoginStatus() async {
@@ -86,9 +82,6 @@ class _SocialLoginState extends State<SocialLogin> {
             GestureDetector(
               onTap: () async {
                 await signInWithNaver();
-                if (kDebugMode) {
-                  print('naver');
-                }
               },
               child: SocialIcon(
                 assetName: 'assets/images/naver.svg',
@@ -118,116 +111,6 @@ class _SocialLoginState extends State<SocialLogin> {
     Get.off(() => RouterPage());
   }
 
-  Future<void> signInWithGoogle() async {
-    setState(() {
-      isLoginAttempt = true;
-    });
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-
-      if (googleAuth == null) {
-        setState(() {
-          isLoginAttempt = false;
-        });
-        return;
-      }
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      final user = userCredential.user;
-
-      if (user != null) {
-        await userService.saveUserIfNew(user); // Firestore에 사용자 정보 저장
-        if (kDebugMode) {
-          print('Google 로그인 성공');
-          print('사용자 UID: ${user.uid}');
-          print('사용자 이메일: ${user.email ?? "이메일 없음"}');
-          print('사용자 이름: ${user.displayName ?? "이름 없음"}');
-        }
-      }
-
-      navigatorToMainPage();
-    } catch (error) {
-      if (kDebugMode) {
-        print('Google 로그인 실패 $error');
-      }
-    }
-  }
-
-  Future<void> signInWithKakao() async {
-    setState(() {
-      isLoginAttempt = true;
-    });
-
-    if (await isKakaoTalkInstalled()) {
-      try {
-        await UserApi.instance.loginWithKakaoTalk().then((value) async {
-          await _handleSuccessfulLogin(value);
-        });
-      } catch (error) {
-        if (error is PlatformException && error.code == 'CANCELED') {
-          setState(() {
-            isLoginAttempt = false;
-          });
-          return;
-        }
-        await UserApi.instance.loginWithKakaoAccount().then((value) async {
-          await _handleSuccessfulLogin(value);
-        });
-      }
-    } else {
-      try {
-        OAuthToken token = await UserApi.instance.loginWithKakaoAccount();
-        await _handleSuccessfulLogin(token);
-      } catch (error) {
-        setState(() {
-          isLoginAttempt = false;
-        });
-      }
-    }
-    initUniLinks();
-  }
-
-  Future<void> _handleSuccessfulLogin(OAuthToken token) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
-
-      var provider = OAuthProvider('oidc.todobest');
-      var credential = provider.credential(
-        idToken: token.idToken,
-        accessToken: token.accessToken,
-      );
-
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      final user = userCredential.user;
-
-      if (user != null) {
-        await userService.saveUserIfNew(user); // Firestore에 사용자 정보 저장
-        if (kDebugMode) {
-          print('카카오 계정 로그인 성공');
-          print('사용자 UID: ${user.uid}');
-          print('사용자 이메일: ${user.email ?? "이메일 없음"}');
-          print('사용자 이름: ${user.displayName ?? "이름 없음"}');
-        }
-      }
-
-      navigatorToMainPage();
-      setState(() {
-        isLoginAttempt = false;
-      });
-    } catch (error) {
-      setState(() {
-        isLoginAttempt = false;
-      });
-    }
-  }
-
   Future<void> signInWithNaver() async {
     setState(() {
       isLoginAttempt = true;
@@ -235,12 +118,16 @@ class _SocialLoginState extends State<SocialLogin> {
     String clientID = '3zEWgueywUQAaMf0tcK7';
     String redirectUri =
         'https://us-central1-to-do-best-72308.cloudfunctions.net/naverLoginCallback';
-    String state =
-    base64Url.encode(List<int>.generate(16, (_) => Random().nextInt(255)));
+    String state = base64Url.encode(List<int>.generate(16, (_) => Random().nextInt(255)));
     Uri url = Uri.parse(
         'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=$clientID&redirect_uri=$redirectUri&state=$state');
+
+    if (kDebugMode) {
+      print("네이버 로그인 요청: $url");
+    }
+
     await launchUrl(url);
-    initUniLinks();
+    await initUniLinks();
   }
 
   Future<void> initUniLinks() async {
@@ -250,44 +137,195 @@ class _SocialLoginState extends State<SocialLogin> {
       if (isLoginAttempt) {
         _handleDeepLink(link!);
       }
+    }, onError: (err) {
+      if (kDebugMode) {
+        print("딥링크 수신 오류: $err");
+      }
     });
   }
 
   Future<void> _handleDeepLink(String link) async {
+    if (kDebugMode) {
+      print("딥링크 수신: $link");
+    }
     final Uri uri = Uri.parse(link);
     if (uri.authority == 'login-callback') {
       String? firebaseToken = uri.queryParameters['firebaseToken'];
-      String? email = uri.queryParameters['email'];
+      String? name = uri.queryParameters['name'];
+      String? profileImage = uri.queryParameters['profileImage'];
 
-      try {
-        final auth = FirebaseAuth.instance;
-        final signInMethods = await auth.fetchSignInMethodsForEmail(email!);
+      await firebase_auth.FirebaseAuth.instance.signInWithCustomToken(firebaseToken!).then((value) async {
+        final firebase_auth.User? user = firebase_auth.FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await user.updateDisplayName(name);
+          await user.updatePhotoURL(profileImage);
 
-        if (signInMethods.isEmpty) {
-          await auth.signInWithCustomToken(firebaseToken!).then((value) async {
-            final user = auth.currentUser;
-            if (user != null) {
-              await userService.saveUserIfNew(user); // Firestore에 사용자 정보 저장
-              print("네이버 로그인 성공");
-            }
-          });
+          await saveUserToFirestore(user.uid, name, profileImage); // Firestore에 사용자 정보 저장
+
+          if (kDebugMode) {
+            print("네이버 로그인 성공: ${user.email}, UID: ${user.uid}");
+          }
+          await _saveLoginState();
+          navigatorToMainPage();
         }
-        navigatorToMainPage();
+      }).onError((error, stackTrace) {
+        if (kDebugMode) {
+          print("네이버 로그인 실패: $error");
+        }
         setState(() {
           isLoginAttempt = false;
+        });
+      });
+    }
+  }
+
+  Future<void> saveUserToFirestore(String uid, String? name, String? profileImage) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+    final userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      await userRef.set({
+        'userName': name ?? '',
+        'userImage': profileImage ?? '',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      if (kDebugMode) {
+        print("사용자 정보가 Firestore에 저장되었습니다.");
+      }
+    } else {
+      if (kDebugMode) {
+        print("Firestore에 이미 사용자 정보가 존재합니다.");
+      }
+    }
+  }
+
+  Future<void> signInWithKakao() async {
+    setState(() {
+      isLoginAttempt = true;
+    });
+
+    if (await kakao.isKakaoTalkInstalled()) {
+      try {
+        await kakao.UserApi.instance.loginWithKakaoTalk().then((value) async {
+          await _handleSuccessfulLogin(value);
         });
       } catch (error) {
         setState(() {
           isLoginAttempt = false;
         });
       }
+    } else {
+      try {
+        kakao.OAuthToken token = await kakao.UserApi.instance.loginWithKakaoAccount();
+        await _handleSuccessfulLogin(token);
+      } catch (error) {
+        setState(() {
+          isLoginAttempt = false;
+        });
+      }
     }
+
+    try {
+      kakao.User user = await kakao.UserApi.instance.me();
+      firebase_auth.User? currentUser = firebase_auth.FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        if (user.kakaoAccount?.email != null) {
+          await currentUser.verifyBeforeUpdateEmail(user.kakaoAccount!.email!);
+        }
+        if (user.kakaoAccount?.profile?.nickname != null) {
+          await currentUser.updateDisplayName(user.kakaoAccount!.profile!.nickname!);
+        }
+        if (user.kakaoAccount?.profile?.profileImageUrl != null) {
+          await currentUser.updatePhotoURL(user.kakaoAccount!.profile!.profileImageUrl);
+        }
+        await saveUserToFirestore(
+          currentUser.uid,
+          user.kakaoAccount?.profile?.nickname,
+          user.kakaoAccount?.profile?.profileImageUrl,
+        );
+        if (kDebugMode) {
+          print('Firebase 사용자 프로필 업데이트 및 Firestore에 저장 완료');
+        }
+      }
+    } catch (error) {
+      if (kDebugMode) {
+        print('사용자 정보 요청 또는 Firebase 프로필 업데이트 실패: $error');
+      }
+    }
+
+    initUniLinks();
+  }
+
+  Future<void> _handleSuccessfulLogin(kakao.OAuthToken token) async {
+    try {
+      var provider = firebase_auth.OAuthProvider('oidc.todobest');
+      var credential = provider.credential(
+        idToken: token.idToken,
+        accessToken: token.accessToken,
+      );
+
+      await firebase_auth.FirebaseAuth.instance.signInWithCredential(credential);
+      await _saveLoginState();
+
+      final firebase_auth.User? user = firebase_auth.FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await saveUserToFirestore(user.uid, user.displayName, user.photoURL);
+        if (kDebugMode) {
+          print('카카오 계정 Firestore 저장 성공');
+        }
+      }
+      navigatorToMainPage();
+    } catch (error) {
+      setState(() {
+        isLoginAttempt = false;
+      });
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    setState(() {
+      isLoginAttempt = true;
+    });
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+      if (googleAuth == null) {
+        setState(() {
+          isLoginAttempt = false;
+        });
+        return;
+      }
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      await firebase_auth.FirebaseAuth.instance.signInWithCredential(credential);
+      await _saveLoginState();
+
+      final firebase_auth.User? user = firebase_auth.FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await saveUserToFirestore(user.uid, user.displayName, user.photoURL);
+        if (kDebugMode) {
+          print('Google Firestore 저장 성공');
+        }
+      }
+      navigatorToMainPage();
+    } catch (error) {
+      if (kDebugMode) {
+        print('Google 로그인 실패 $error');
+      }
+    }
+  }
+
+  Future<void> _saveLoginState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true);
   }
 
   Future<void> signOut() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
-    await FirebaseAuth.instance.signOut();
+    await firebase_auth.FirebaseAuth.instance.signOut();
   }
 }
 
