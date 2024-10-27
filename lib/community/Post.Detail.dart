@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/Themes.Colors.dart';
@@ -14,16 +15,15 @@ class PostDetail extends StatefulWidget {
 class _PostDetailState extends State<PostDetail> {
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
-  final Map<int, bool> _isReplying = {};
-  final Map<int, TextEditingController> _replyControllers = {};
+  final Map<String, bool> _isReplying = {};
+  final Map<String, TextEditingController> _replyControllers = {};
+  final Map<String, bool> _isReplyLoading = {}; // 각 댓글별 답글 로딩 상태
+  bool _isCommentLoading = false;
 
   // Firestore에서 게시글 좋아요 업데이트
   Future<void> _togglePostLike(bool isLiked, int currentLikes) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.postId)
-          .update({
+      await FirebaseFirestore.instance.collection('posts').doc(widget.postId).update({
         'isLiked': !isLiked,
         'likes': isLiked ? currentLikes - 1 : currentLikes + 1,
       });
@@ -35,13 +35,13 @@ class _PostDetailState extends State<PostDetail> {
   // Firestore에 댓글 추가 및 댓글 수 업데이트
   Future<void> _addComment(String content) async {
     if (content.isEmpty) return;
+    setState(() => _isCommentLoading = true);
     try {
       final commentsCollection = FirebaseFirestore.instance
           .collection('posts')
           .doc(widget.postId)
           .collection('comments');
 
-      // 댓글 추가
       await commentsCollection.add({
         'userName': '사용자닉네임',
         'userImage': 'https://example.com/user_image.png',
@@ -51,23 +51,20 @@ class _PostDetailState extends State<PostDetail> {
         'isLiked': false,
       });
 
-      // 댓글 수 업데이트
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.postId)
-          .update({
+      await FirebaseFirestore.instance.collection('posts').doc(widget.postId).update({
         'commentsCount': FieldValue.increment(1),
       });
 
       _commentController.clear();
     } catch (e) {
       print("댓글 추가 오류: $e");
+    } finally {
+      setState(() => _isCommentLoading = false);
     }
   }
 
   // Firestore에서 댓글 좋아요 업데이트
-  Future<void> _toggleCommentLike(
-      String commentId, bool isLiked, int currentLikes) async {
+  Future<void> _toggleCommentLike(String commentId, bool isLiked, int currentLikes) async {
     try {
       await FirebaseFirestore.instance
           .collection('posts')
@@ -83,9 +80,10 @@ class _PostDetailState extends State<PostDetail> {
     }
   }
 
-  // Firestore에 답글 추가
+  // Firestore에 답글 추가 및 로딩 상태 업데이트
   Future<void> _addReply(String content, String commentId) async {
     if (content.isEmpty) return;
+    setState(() => _isReplyLoading[commentId] = true);
     try {
       await FirebaseFirestore.instance
           .collection('posts')
@@ -99,12 +97,18 @@ class _PostDetailState extends State<PostDetail> {
         'content': content,
         'timeStamp': FieldValue.serverTimestamp(),
       });
+
+      _replyControllers[commentId]?.clear();
+      setState(() {
+        _isReplying[commentId] = false;
+      });
     } catch (e) {
       print("답글 추가 오류: $e");
+    } finally {
+      setState(() => _isReplyLoading[commentId] = false);
     }
   }
 
-  // 시간 표시 함수
   String _timeAgo(Timestamp timestamp) {
     final DateTime date = timestamp.toDate();
     final Duration difference = DateTime.now().difference(date);
@@ -234,36 +238,33 @@ class _PostDetailState extends State<PostDetail> {
                                                 TextButton(
                                                   onPressed: () {
                                                     setState(() {
-                                                      _isReplying[index] = !(_isReplying[index] ?? false);
+                                                      _isReplying[commentId] = !(_isReplying[commentId] ?? false);
                                                     });
                                                   },
                                                   child: const Text('답글 달기'),
                                                 ),
                                               ],
                                             ),
-                                            if (_isReplying[index] ?? false)
+                                            if (_isReplying[commentId] ?? false)
                                               Padding(
                                                 padding: const EdgeInsets.only(left: 40.0),
                                                 child: Row(
                                                   children: [
                                                     Expanded(
                                                       child: TextField(
-                                                        controller: _replyControllers[index] ??=
-                                                            TextEditingController(),
+                                                        controller: _replyControllers[commentId] ??= TextEditingController(),
                                                         decoration: const InputDecoration(labelText: '답글을 입력하세요'),
                                                       ),
                                                     ),
-                                                    IconButton(
+                                                    _isReplyLoading[commentId] == true
+                                                        ? const CircularProgressIndicator() // 답글 로딩 표시
+                                                        : IconButton(
                                                       icon: const Icon(Icons.send),
                                                       onPressed: () {
                                                         _addReply(
-                                                          _replyControllers[index]!.text,
+                                                          _replyControllers[commentId]!.text,
                                                           commentId,
                                                         );
-                                                        _replyControllers[index]!.clear();
-                                                        setState(() {
-                                                          _isReplying[index] = false;
-                                                        });
                                                       },
                                                     ),
                                                   ],
@@ -279,7 +280,7 @@ class _PostDetailState extends State<PostDetail> {
                                                   .orderBy('timeStamp', descending: true)
                                                   .snapshots(),
                                               builder: (context, replySnapshot) {
-                                                if (!replySnapshot.hasData) return SizedBox.shrink();
+                                                if (!replySnapshot.hasData) return const SizedBox.shrink();
                                                 final replies = replySnapshot.data!.docs;
                                                 return ListView.builder(
                                                   shrinkWrap: true,
@@ -304,8 +305,7 @@ class _PostDetailState extends State<PostDetail> {
                                                                 Text(replyData['content'] ?? ''),
                                                                 Text(
                                                                   _timeAgo(replyData['timeStamp']),
-                                                                  style: const TextStyle(
-                                                                      color: Colors.grey, fontSize: 12),
+                                                                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                                                                 ),
                                                               ],
                                                             ),
@@ -334,6 +334,7 @@ class _PostDetailState extends State<PostDetail> {
                 ),
               ),
             ),
+            if (_isCommentLoading) const LinearProgressIndicator(),
             Container(
               padding: const EdgeInsets.all(8.0),
               decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))),
