@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../service/User_Service.dart';
 import '../utils/Themes.Colors.dart';
 
 class PostDetail extends StatefulWidget {
@@ -17,8 +18,31 @@ class _PostDetailState extends State<PostDetail> {
   final FocusNode _commentFocusNode = FocusNode();
   final Map<String, bool> _isReplying = {};
   final Map<String, TextEditingController> _replyControllers = {};
-  final Map<String, bool> _isReplyLoading = {}; // 각 댓글별 답글 로딩 상태
+  final Map<String, bool> _isReplyLoading = {};
   bool _isCommentLoading = false;
+  final UserService userService = UserService(); // UserService instance 생성
+  String userName = '';
+  String userImage = '';
+
+  // UserService를 통해 사용자 정보 가져오기
+  Future<void> _fetchUserDetails() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final userInfo = await userService.getUserInfo(currentUser.uid); // UserService 사용
+      if (userInfo != null) {
+        setState(() {
+          userName = userInfo['userName'];
+          userImage = userInfo['userImage'];
+        });
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserDetails(); // 초기화 시 사용자 정보 불러오기
+  }
 
   // Firestore에서 게시글 좋아요 업데이트
   Future<void> _togglePostLike(bool isLiked, int currentLikes) async {
@@ -43,8 +67,8 @@ class _PostDetailState extends State<PostDetail> {
           .collection('comments');
 
       await commentsCollection.add({
-        'userName': '사용자닉네임',
-        'userImage': 'https://example.com/user_image.png',
+        'userName': userName,
+        'userImage': userImage,
         'content': content,
         'timeStamp': FieldValue.serverTimestamp(),
         'likes': 0,
@@ -92,8 +116,8 @@ class _PostDetailState extends State<PostDetail> {
           .doc(commentId)
           .collection('replies')
           .add({
-        'userName': '사용자닉네임',
-        'userImage': 'https://example.com/user_image.png',
+        'userName': userName,
+        'userImage': userImage,
         'content': content,
         'timeStamp': FieldValue.serverTimestamp(),
       });
@@ -257,7 +281,7 @@ class _PostDetailState extends State<PostDetail> {
                                                       ),
                                                     ),
                                                     _isReplyLoading[commentId] == true
-                                                        ? const CircularProgressIndicator() // 답글 로딩 표시
+                                                        ? const CircularProgressIndicator()
                                                         : IconButton(
                                                       icon: const Icon(Icons.send),
                                                       onPressed: () {

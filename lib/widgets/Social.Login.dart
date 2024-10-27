@@ -1,4 +1,331 @@
 // Social.Login.dart
+// Social.Login.dart
+
+import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todobest_home/Router.dart';
+import 'package:uni_links2/uni_links.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../service/User_Service.dart';
+
+class SocialLogin extends StatefulWidget {
+  const SocialLogin({super.key});
+
+  @override
+  State<SocialLogin> createState() => _SocialLoginState();
+}
+
+class _SocialLoginState extends State<SocialLogin> {
+  final UserService userService = UserService(); // UserService instance 생성
+  StreamSubscription<String?>? _linkSubscription;
+  bool isLoginAttempt = false;
+  bool isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    checkLoginStatus(); // 앱 시작 시 로그인 상태 확인
+  }
+
+  Future<void> checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    });
+    if (isLoggedIn) {
+      navigatorToMainPage();
+    }
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final iconSize = screenWidth * 0.14;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () async {
+                await signInWithGoogle();
+              },
+              child: SocialIcon(
+                assetName: 'assets/images/google.svg',
+                iconSize: iconSize,
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                await signInWithKakao();
+              },
+              child: SocialIcon(
+                assetName: 'assets/images/kakao.svg',
+                iconSize: iconSize,
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                await signInWithNaver();
+                if (kDebugMode) {
+                  print('naver');
+                }
+              },
+              child: SocialIcon(
+                assetName: 'assets/images/naver.svg',
+                iconSize: iconSize,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: screenHeight * 0.03),
+        const Text(
+          '간편 로그인',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.black26,
+            fontSize: 13,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w700,
+            height: 1,
+            letterSpacing: 0.25,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void navigatorToMainPage() {
+    Get.off(() => RouterPage());
+  }
+
+  Future<void> signInWithGoogle() async {
+    setState(() {
+      isLoginAttempt = true;
+    });
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+      if (googleAuth == null) {
+        setState(() {
+          isLoginAttempt = false;
+        });
+        return;
+      }
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user != null) {
+        await userService.saveUserIfNew(user); // Firestore에 사용자 정보 저장
+        if (kDebugMode) {
+          print('Google 로그인 성공');
+          print('사용자 UID: ${user.uid}');
+          print('사용자 이메일: ${user.email ?? "이메일 없음"}');
+          print('사용자 이름: ${user.displayName ?? "이름 없음"}');
+        }
+      }
+
+      navigatorToMainPage();
+    } catch (error) {
+      if (kDebugMode) {
+        print('Google 로그인 실패 $error');
+      }
+    }
+  }
+
+  Future<void> signInWithKakao() async {
+    setState(() {
+      isLoginAttempt = true;
+    });
+
+    if (await isKakaoTalkInstalled()) {
+      try {
+        await UserApi.instance.loginWithKakaoTalk().then((value) async {
+          await _handleSuccessfulLogin(value);
+        });
+      } catch (error) {
+        if (error is PlatformException && error.code == 'CANCELED') {
+          setState(() {
+            isLoginAttempt = false;
+          });
+          return;
+        }
+        await UserApi.instance.loginWithKakaoAccount().then((value) async {
+          await _handleSuccessfulLogin(value);
+        });
+      }
+    } else {
+      try {
+        OAuthToken token = await UserApi.instance.loginWithKakaoAccount();
+        await _handleSuccessfulLogin(token);
+      } catch (error) {
+        setState(() {
+          isLoginAttempt = false;
+        });
+      }
+    }
+    initUniLinks();
+  }
+
+  Future<void> _handleSuccessfulLogin(OAuthToken token) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+
+      var provider = OAuthProvider('oidc.todobest');
+      var credential = provider.credential(
+        idToken: token.idToken,
+        accessToken: token.accessToken,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user != null) {
+        await userService.saveUserIfNew(user); // Firestore에 사용자 정보 저장
+        if (kDebugMode) {
+          print('카카오 계정 로그인 성공');
+          print('사용자 UID: ${user.uid}');
+          print('사용자 이메일: ${user.email ?? "이메일 없음"}');
+          print('사용자 이름: ${user.displayName ?? "이름 없음"}');
+        }
+      }
+
+      navigatorToMainPage();
+      setState(() {
+        isLoginAttempt = false;
+      });
+    } catch (error) {
+      setState(() {
+        isLoginAttempt = false;
+      });
+    }
+  }
+
+  Future<void> signInWithNaver() async {
+    setState(() {
+      isLoginAttempt = true;
+    });
+    String clientID = '3zEWgueywUQAaMf0tcK7';
+    String redirectUri =
+        'https://us-central1-to-do-best-72308.cloudfunctions.net/naverLoginCallback';
+    String state =
+    base64Url.encode(List<int>.generate(16, (_) => Random().nextInt(255)));
+    Uri url = Uri.parse(
+        'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=$clientID&redirect_uri=$redirectUri&state=$state');
+    await launchUrl(url);
+    initUniLinks();
+  }
+
+  Future<void> initUniLinks() async {
+    final initialLink = await getInitialLink();
+    if (initialLink != null) _handleDeepLink(initialLink);
+    _linkSubscription = linkStream.listen((String? link) {
+      if (isLoginAttempt) {
+        _handleDeepLink(link!);
+      }
+    });
+  }
+
+  Future<void> _handleDeepLink(String link) async {
+    final Uri uri = Uri.parse(link);
+    if (uri.authority == 'login-callback') {
+      String? firebaseToken = uri.queryParameters['firebaseToken'];
+      String? email = uri.queryParameters['email'];
+
+      try {
+        final auth = FirebaseAuth.instance;
+        final signInMethods = await auth.fetchSignInMethodsForEmail(email!);
+
+        if (signInMethods.isEmpty) {
+          await auth.signInWithCustomToken(firebaseToken!).then((value) async {
+            final user = auth.currentUser;
+            if (user != null) {
+              await userService.saveUserIfNew(user); // Firestore에 사용자 정보 저장
+              print("네이버 로그인 성공");
+            }
+          });
+        }
+        navigatorToMainPage();
+        setState(() {
+          isLoginAttempt = false;
+        });
+      } catch (error) {
+        setState(() {
+          isLoginAttempt = false;
+        });
+      }
+    }
+  }
+
+  Future<void> signOut() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+    await FirebaseAuth.instance.signOut();
+  }
+}
+
+class SocialIcon extends StatelessWidget {
+  final String assetName;
+  final double iconSize;
+
+  const SocialIcon({
+    required this.assetName,
+    required this.iconSize,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20.0),
+      width: iconSize,
+      height: iconSize,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            offset: Offset(0, 2),
+            blurRadius: 0.6,
+          ),
+        ],
+      ),
+      child: SvgPicture.asset(
+        assetName,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+}
+
+/*
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -385,3 +712,4 @@ class SocialIcon extends StatelessWidget {
     );
   }
 }
+*/
