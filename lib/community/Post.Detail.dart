@@ -19,16 +19,19 @@ class _PostDetailState extends State<PostDetail> {
   final Map<String, bool> _isReplying = {};
   final Map<String, TextEditingController> _replyControllers = {};
   final Map<String, bool> _isReplyLoading = {};
+  final Map<String, TextEditingController> _editControllers = {};
+  final Map<String, TextEditingController> _replyEditControllers = {};
   bool _isCommentLoading = false;
   final UserService userService = UserService();
   String userName = '';
   String userImage = '';
+  String userId = '';
 
-  // UserService를 통해 사용자 정보 가져오기
   Future<void> _fetchUserDetails() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      final userInfo = await userService.getUserInfo(currentUser.uid);
+      userId = currentUser.uid; // 현재 사용자 ID 설정
+      final userInfo = await userService.getUserInfo(userId);
       if (userInfo != null) {
         setState(() {
           userName = userInfo['userName'];
@@ -44,7 +47,6 @@ class _PostDetailState extends State<PostDetail> {
     _fetchUserDetails();
   }
 
-  // Firestore에서 게시글 좋아요 업데이트
   Future<void> _togglePostLike(bool isLiked, int currentLikes) async {
     try {
       await FirebaseFirestore.instance.collection('posts').doc(widget.postId).update({
@@ -56,7 +58,6 @@ class _PostDetailState extends State<PostDetail> {
     }
   }
 
-  // Firestore에 댓글 추가 및 댓글 수 업데이트
   Future<void> _addComment(String content) async {
     if (content.isEmpty) return;
     setState(() => _isCommentLoading = true);
@@ -67,6 +68,7 @@ class _PostDetailState extends State<PostDetail> {
           .collection('comments');
 
       await commentsCollection.add({
+        'userId': userId,
         'userName': userName,
         'userImage': userImage,
         'content': content,
@@ -87,24 +89,37 @@ class _PostDetailState extends State<PostDetail> {
     }
   }
 
-  // Firestore에서 댓글 좋아요 업데이트
-  Future<void> _toggleCommentLike(String commentId, bool isLiked, int currentLikes) async {
+  Future<void> _editComment(String commentId, String newContent) async {
+    if (newContent.isEmpty) return;
     try {
       await FirebaseFirestore.instance
           .collection('posts')
           .doc(widget.postId)
           .collection('comments')
           .doc(commentId)
-          .update({
-        'isLiked': !isLiked,
-        'likes': isLiked ? currentLikes - 1 : currentLikes + 1,
-      });
+          .update({'content': newContent});
     } catch (e) {
-      print("댓글 좋아요 업데이트 오류: $e");
+      print("댓글 수정 오류: $e");
     }
   }
 
-  // Firestore에 답글 추가 및 로딩 상태 업데이트
+  Future<void> _deleteComment(String commentId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .collection('comments')
+          .doc(commentId)
+          .delete();
+
+      await FirebaseFirestore.instance.collection('posts').doc(widget.postId).update({
+        'commentsCount': FieldValue.increment(-1),
+      });
+    } catch (e) {
+      print("댓글 삭제 오류: $e");
+    }
+  }
+
   Future<void> _addReply(String content, String commentId) async {
     if (content.isEmpty) return;
     setState(() => _isReplyLoading[commentId] = true);
@@ -116,6 +131,7 @@ class _PostDetailState extends State<PostDetail> {
           .doc(commentId)
           .collection('replies')
           .add({
+        'userId': userId,
         'userName': userName,
         'userImage': userImage,
         'content': content,
@@ -130,6 +146,37 @@ class _PostDetailState extends State<PostDetail> {
       print("답글 추가 오류: $e");
     } finally {
       setState(() => _isReplyLoading[commentId] = false);
+    }
+  }
+
+  Future<void> _editReply(String commentId, String replyId, String newContent) async {
+    if (newContent.isEmpty) return;
+    try {
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .collection('comments')
+          .doc(commentId)
+          .collection('replies')
+          .doc(replyId)
+          .update({'content': newContent});
+    } catch (e) {
+      print("답글 수정 오류: $e");
+    }
+  }
+
+  Future<void> _deleteReply(String commentId, String replyId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .collection('comments')
+          .doc(commentId)
+          .collection('replies')
+          .doc(replyId)
+          .delete();
+    } catch (e) {
+      print("답글 삭제 오류: $e");
     }
   }
 
@@ -209,7 +256,7 @@ class _PostDetailState extends State<PostDetail> {
                             .collection('posts')
                             .doc(widget.postId)
                             .collection('comments')
-                            .orderBy('timeStamp', descending: false) // 최신 댓글이 아래로 오도록 설정
+                            .orderBy('timeStamp', descending: false)
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
@@ -223,6 +270,7 @@ class _PostDetailState extends State<PostDetail> {
                               final comment = comments[index];
                               final commentData = (comment.data() ?? {}) as Map<String, dynamic>;
                               final commentId = comment.id;
+                              final isUserComment = commentData['userId'] == userId;
 
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,24 +298,14 @@ class _PostDetailState extends State<PostDetail> {
                                               children: [
                                                 IconButton(
                                                   icon: Icon(
-                                                    (commentData['isLiked'] == true)
-                                                        ? Icons.thumb_up
-                                                        : Icons.thumb_up_off_alt,
+                                                    Icons.reply,
+                                                    color: Colors.grey,
                                                   ),
-                                                  onPressed: () => _toggleCommentLike(
-                                                    commentId,
-                                                    commentData['isLiked'] == true,
-                                                    commentData['likes'] ?? 0,
-                                                  ),
-                                                ),
-                                                Text(commentData['likes']?.toString() ?? '0'),
-                                                TextButton(
                                                   onPressed: () {
                                                     setState(() {
                                                       _isReplying[commentId] = !(_isReplying[commentId] ?? false);
                                                     });
                                                   },
-                                                  child: const Text('답글 달기'),
                                                 ),
                                               ],
                                             ),
@@ -296,61 +334,153 @@ class _PostDetailState extends State<PostDetail> {
                                                   ],
                                                 ),
                                               ),
-                                            StreamBuilder<QuerySnapshot>(
-                                              stream: FirebaseFirestore.instance
-                                                  .collection('posts')
-                                                  .doc(widget.postId)
-                                                  .collection('comments')
-                                                  .doc(commentId)
-                                                  .collection('replies')
-                                                  .orderBy('timeStamp', descending: false) // 최신 답글이 아래로 오도록 설정
-                                                  .snapshots(),
-                                              builder: (context, replySnapshot) {
-                                                if (!replySnapshot.hasData) return const SizedBox.shrink();
-                                                final replies = replySnapshot.data!.docs;
-                                                return ListView.builder(
-                                                  shrinkWrap: true,
-                                                  physics: const NeverScrollableScrollPhysics(),
-                                                  itemCount: replies.length,
-                                                  itemBuilder: (context, replyIndex) {
-                                                    final replyData = (replies[replyIndex].data() ?? {}) as Map<String, dynamic>;
-                                                    return Padding(
-                                                      padding: const EdgeInsets.only(left: 40.0),
-                                                      child: Row(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: [
-                                                          CircleAvatar(
-                                                            backgroundImage: NetworkImage(replyData['userImage'] ?? ''),
-                                                          ),
-                                                          const SizedBox(width: 10),
-                                                          Expanded(
-                                                            child: Column(
-                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                              children: [
-                                                                Text(replyData['userName'] ?? '익명'),
-                                                                Text(replyData['content'] ?? ''),
-                                                                Text(
-                                                                  replyData['timeStamp'] != null
-                                                                      ? _timeAgo(replyData['timeStamp'])
-                                                                      : '방금 전',
-                                                                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    );
-                                                  },
-                                                );
-                                              },
-                                            ),
                                           ],
                                         ),
                                       ),
+                                      if (isUserComment)
+                                        PopupMenuButton<String>(
+                                          onSelected: (value) {
+                                            if (value == 'edit') {
+                                              _editControllers[commentId] = TextEditingController(text: commentData['content']);
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) => AlertDialog(
+                                                  title: Text("댓글 수정"),
+                                                  content: TextField(
+                                                    controller: _editControllers[commentId],
+                                                    decoration: InputDecoration(hintText: "댓글 수정"),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        _editComment(commentId, _editControllers[commentId]!.text);
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                      child: Text("저장"),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () => Navigator.of(context).pop(),
+                                                      child: Text("취소"),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            } else if (value == 'delete') {
+                                              _deleteComment(commentId);
+                                            }
+                                          },
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              value: 'edit',
+                                              child: Text("수정"),
+                                            ),
+                                            PopupMenuItem(
+                                              value: 'delete',
+                                              child: Text("삭제"),
+                                            ),
+                                          ],
+                                          icon: Icon(Icons.more_vert),
+                                        ),
                                     ],
                                   ),
                                   const SizedBox(height: 10),
+                                  StreamBuilder<QuerySnapshot>(
+                                    stream: FirebaseFirestore.instance
+                                        .collection('posts')
+                                        .doc(widget.postId)
+                                        .collection('comments')
+                                        .doc(commentId)
+                                        .collection('replies')
+                                        .orderBy('timeStamp', descending: false)
+                                        .snapshots(),
+                                    builder: (context, replySnapshot) {
+                                      if (!replySnapshot.hasData) return const SizedBox.shrink();
+                                      final replies = replySnapshot.data!.docs;
+
+                                      return ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemCount: replies.length,
+                                        itemBuilder: (context, replyIndex) {
+                                          final replyData = (replies[replyIndex].data() ?? {}) as Map<String, dynamic>;
+                                          final replyId = replies[replyIndex].id;
+                                          final isUserReply = replyData['userId'] == userId;
+
+                                          return Padding(
+                                            padding: const EdgeInsets.only(left: 40.0),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                CircleAvatar(
+                                                  backgroundImage: NetworkImage(replyData['userImage'] ?? ''),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(replyData['userName'] ?? '익명'),
+                                                      Text(replyData['content'] ?? ''),
+                                                      Text(
+                                                        replyData['timeStamp'] != null
+                                                            ? _timeAgo(replyData['timeStamp'])
+                                                            : '방금 전',
+                                                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                if (isUserReply)
+                                                  PopupMenuButton<String>(
+                                                    onSelected: (value) {
+                                                      if (value == 'edit') {
+                                                        _replyEditControllers[replyId] = TextEditingController(text: replyData['content']);
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (context) => AlertDialog(
+                                                            title: Text("답글 수정"),
+                                                            content: TextField(
+                                                              controller: _replyEditControllers[replyId],
+                                                              decoration: InputDecoration(hintText: "답글 수정"),
+                                                            ),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  _editReply(commentId, replyId, _replyEditControllers[replyId]!.text);
+                                                                  Navigator.of(context).pop();
+                                                                },
+                                                                child: Text("저장"),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () => Navigator.of(context).pop(),
+                                                                child: Text("취소"),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      } else if (value == 'delete') {
+                                                        _deleteReply(commentId, replyId);
+                                                      }
+                                                    },
+                                                    itemBuilder: (context) => [
+                                                      PopupMenuItem(
+                                                        value: 'edit',
+                                                        child: Text("수정"),
+                                                      ),
+                                                      PopupMenuItem(
+                                                        value: 'delete',
+                                                        child: Text("삭제"),
+                                                      ),
+                                                    ],
+                                                    icon: Icon(Icons.more_vert),
+                                                  ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
                                 ],
                               );
                             },
