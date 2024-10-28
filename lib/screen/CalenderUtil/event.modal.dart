@@ -345,9 +345,9 @@ class _EventModalState extends State<EventModal> {
                     spacing: 8.0, // 동그라미 간의 간격
                     runSpacing: 8.0, // 줄 간격
                     alignment: WrapAlignment.start,
-                    children: List.generate(31, (index) {
-                      // 1부터 31까지 생성
-                      int day = index + 1; // 실제 일수
+                    // 수정
+                    children: List.generate(_daysInMonth.length, (index) {
+                      int day = int.parse(_daysInMonth[index]);
                       double circleSize = day < 10 ? 28.0 : 28.0; // 한 자리 숫자와 두 자리 숫자에 따라 크기 조정
                       return GestureDetector(
                         onTap: () {
@@ -443,12 +443,10 @@ class _EventModalState extends State<EventModal> {
                     TextButton(
                       onPressed: () {
                         if (eventController.text.isNotEmpty) {
-                          if (!_isAllDay &&
-                              (startTime == null || endTime == null)) {
+                          if (!_isAllDay && (startTime == null || endTime == null)) {
                             setState(() {
                               _showError = true;
-                              _errorMessage =
-                              '시작 시간과 종료 시간을 모두 선택해 주세요.';
+                              _errorMessage = '시작 시간과 종료 시간을 모두 선택해 주세요.';
                             });
                             return;
                           } else {
@@ -465,6 +463,34 @@ class _EventModalState extends State<EventModal> {
                             return;
                           }
 
+                          // Weekly repeat validation: at least one day of the week must be selected
+                          if (_selectedRepeat == '매주' && !_selectedDays.contains(true)) {
+                            setState(() {
+                              _showError = true;
+                              _errorMessage = '반복 하고 싶은 요일을 선택하세요.';
+                            });
+                            return;
+                          }
+
+                          // Monthly repeat validation: at least one day of the month must be selected
+                          if (_selectedRepeat == '매월' && !_selectedDaysInMonth.contains(true)) {
+                            setState(() {
+                              _showError = true;
+                              _errorMessage = '반복 하고 싶은 일수를 선택하세요.';
+                            });
+                            return;
+                          }
+
+                          // Yearly repeat validation: at least one month must be selected
+                          if (_selectedRepeat == '매년' && !_selectedMonths.contains(true)) {
+                            setState(() {
+                              _showError = true;
+                              _errorMessage = '반복 하고 싶은 월을 선택하세요.';
+                            });
+                            return;
+                          }
+
+                          // If all validations pass, continue with event saving
                           String startTimeString = _isAllDay
                               ? '하루 종일'
                               : '${startTime?.hour.toString().padLeft(2, '0')}:${startTime?.minute.toString().padLeft(2, '0')}';
@@ -472,7 +498,6 @@ class _EventModalState extends State<EventModal> {
                               ? '하루 종일'
                               : '${endTime?.hour.toString().padLeft(2, '0')}:${endTime?.minute.toString().padLeft(2, '0')}';
 
-                          // 선택된 요일 목록
                           List<String> selectedDays = [];
                           for (int i = 0; i < _selectedDays.length; i++) {
                             if (_selectedDays[i]) {
@@ -480,32 +505,30 @@ class _EventModalState extends State<EventModal> {
                             }
                           }
 
-                          // 선택된 일수를 리스트로 변환
                           List<int> selectedDaysInMonth = [];
                           for (int i = 0; i < _selectedDaysInMonth.length; i++) {
                             if (_selectedDaysInMonth[i]) {
-                              selectedDaysInMonth.add(i + 1); // 1부터 시작하기 위해 +1
+                              selectedDaysInMonth.add(i + 1);
                             }
                           }
 
-                          // 선택된 월 수집
                           List<int> selectedMonths = [];
                           for (int i = 0; i < _months.length; i++) {
                             if (_selectedMonths[i]) {
-                              selectedMonths.add(i + 1); // 1월은 0번째 인덱스
+                              selectedMonths.add(i + 1);
                             }
                           }
 
                           widget.onSave(
-                            eventController.text,
-                            _isAllDay ? '하루 종일' : '$startTimeString - $endTimeString',
-                            startDate!,
-                            endDate!,
-                            _selectedRepeat,
-                            _repeatCount,
-                            selectedDays,
-                            selectedDaysInMonth,
-                            selectedMonths// 추가된 부분
+                              eventController.text,
+                              _isAllDay ? '하루 종일' : '$startTimeString - $endTimeString',
+                              startDate!,
+                              endDate!,
+                              _selectedRepeat,
+                              _repeatCount,
+                              selectedDays,
+                              selectedDaysInMonth,
+                              selectedMonths
                           );
                           Navigator.of(context).pop();
                         } else {

@@ -111,20 +111,17 @@ class _CalenderScreenState extends State<CalenderScreen>
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) async {
     setState(() {
-      _selectedDay = selectedDay; // 선택된 날짜 업데이트
-      _focusedDay = focusedDay; // 포커스된 날짜 업데이트
-
-      // 선택한 날짜 로그 출력
-      if (kDebugMode) {
-        print('선택한 날짜: ${_selectedDay!}');
-      }
+      _selectedDay = selectedDay;
+      _focusedDay = focusedDay;
     });
 
-    // 선택한 날짜에 대한 이벤트 확인 (UTC로 변환)
-    DateTime utcSelectedDay = DateTime.utc(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+    DateTime utcSelectedDay = DateTime.utc(selectedDay.year, selectedDay.month, selectedDay.day);
+    if (kDebugMode) {
+      print('선택한 UTC 날짜: $utcSelectedDay');
+      print('현재 _events 맵: $_events');
+    }
 
     if (_events[utcSelectedDay] != null) {
-      // 해당 날짜에 이벤트가 존재할 경우 추가적인 작업을 여기에 넣을 수 있음.
       if (kDebugMode) {
         print('선택한 날짜에 등록된 이벤트가 있습니다: ${_events[utcSelectedDay]}');
       }
@@ -148,8 +145,6 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
   }
 
-  // 이벤트 추가 시 팝업에서 선택한 날짜 기반으로 이벤트를 추가하는 함수
-  // 팝업에서 이벤트를 추가할 때 사용되는 함수
   Future<void> _addEvent(
       String event,
       String time,
@@ -166,16 +161,43 @@ class _CalenderScreenState extends State<CalenderScreen>
     DateTime? lastDate = endDate != null ? DateTime.utc(endDate.year, endDate.month, endDate.day) : null;
     String userId = _auth.currentUser?.uid ?? '알 수 없음';
 
+    if (kDebugMode) print("이벤트 추가 시작: $event, 반복: $repeat, 시작일: $startDate");
+
+    await _addEventsBasedOnRepeat(
+        event, time, currentDate, lastDate, repeat, repeatCount, userId, selectedDays, selectedDaysInMonth, selectedMonths
+    );
+
+    setState(() {
+      _selectedDay = startDate;
+      _focusedDay = startDate;
+      _calendarFormat = CalendarFormat.month;
+    });
+
+    if (kDebugMode) print('이벤트 등록 완료: $event from $startDate to ${endDate ?? '반복 종료 없음'}');
+  }
+
+  Future<void> _addEventsBasedOnRepeat(
+      String event,
+      String time,
+      DateTime currentDate,
+      DateTime? lastDate,
+      String repeat,
+      int repeatCount,
+      String userId,
+      List<String> selectedDays,
+      List<int> selectedDaysInMonth,
+      List<int> selectedMonths,
+      ) async {
     if (repeat == '반복 없음' && lastDate != null) {
       while (!currentDate.isAfter(lastDate)) {
-        _addEventToCalendar(event, time, currentDate, repeat, userId);
+        await _addEventToCalendar(event, time, currentDate, repeat, userId);
         currentDate = currentDate.add(const Duration(days: 1));
       }
     } else {
       for (int count = 0; count < repeatCount; count++) {
         switch (repeat) {
           case '매일':
-            _addEventToCalendar(event, time, currentDate, repeat, userId);
+            await _addEventToCalendar(event, time, currentDate, repeat, userId);
             currentDate = currentDate.add(const Duration(days: 1));
             break;
 
@@ -187,7 +209,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                   '월': 1, '화': 2, '수': 3, '목': 4, '금': 5, '토': 6, '일': 7,
                 }[day]!;
                 if (nextOccurrence.weekday == targetDay) {
-                  _addEventToCalendar(event, time, nextOccurrence, repeat, userId);
+                  await _addEventToCalendar(event, time, nextOccurrence, repeat, userId);
                   break;
                 }
                 nextOccurrence = nextOccurrence.add(const Duration(days: 1));
@@ -198,61 +220,30 @@ class _CalenderScreenState extends State<CalenderScreen>
 
           case '매월':
             for (int day in selectedDaysInMonth) {
-              try {
-                DateTime eventDate = DateTime(
-                  currentDate.year,
-                  currentDate.month + count,
-                  day,
-                );
-
-                // 날짜 유효성 검사
-                if (eventDate.day <= DateTime(eventDate.year, eventDate.month + 1, 0).day) {
-                  await _addEventToCalendar(event, time, eventDate, repeat, userId); // 비동기 호출
-                }
-              } catch (e) {
-                if (kDebugMode) {
-                  print('유효하지 않은 날짜: ${currentDate.year}-${currentDate.month + count}-$day');
-                }
+              DateTime eventDate = DateTime(currentDate.year, currentDate.month + count, day);
+              if (eventDate.day <= DateTime(eventDate.year, eventDate.month + 1, 0).day) {
+                await _addEventToCalendar(event, time, eventDate, repeat, userId);
+              } else if (kDebugMode) {
+                print("매월 이벤트 날짜 오류: $eventDate는 유효하지 않음.");
               }
             }
             break;
 
           case '매년':
             for (int month in selectedMonths) {
-              try {
-                DateTime eventDate = DateTime(
-                  currentDate.year + count,
-                  month,
-                  currentDate.day,
-                );
-
-                // 날짜 유효성 검사
-                if (eventDate.day <= DateTime(eventDate.year, month + 1, 0).day) {
-                  await _addEventToCalendar(event, time, eventDate, repeat, userId); // 비동기 호출
-                }
-              } catch (e) {
-                if (kDebugMode) {
-                  print('유효하지 않은 날짜: ${currentDate.year + count}-$month-${currentDate.day}');
-                }
+              DateTime eventDate = DateTime(currentDate.year + count, month, currentDate.day);
+              if (eventDate.day <= DateTime(eventDate.year, month + 1, 0).day) {
+                await _addEventToCalendar(event, time, eventDate, repeat, userId);
+              } else if (kDebugMode) {
+                print("매년 이벤트 날짜 오류: $eventDate는 유효하지 않음.");
               }
             }
             break;
         }
       }
     }
-
-    // 마지막에 UI 업데이트
-    _selectedDay = startDate.toUtc();
-    _focusedDay = startDate.toUtc();
-
-    if (kDebugMode) {
-      print('일정 등록됨: $event from $startDate to ${endDate ?? '반복 종료 없음'} (반복: $repeat, 횟수: $repeatCount, 사용자 UID: $userId)');
-      print('현재 이벤트: $_events');
-    }
   }
 
-  // 이벤트를 캘린더에 추가하는 헬퍼 함수
-  // Event 클래스의 생성자에 id 매개변수가 포함되어 있다고 가정
   Future<void> _addEventToCalendar(
       String event,
       String time,
@@ -260,8 +251,9 @@ class _CalenderScreenState extends State<CalenderScreen>
       String repeat,
       String userId,
       ) async {
+    if (kDebugMode) print("Firestore에 이벤트 추가 시도: $event, 날짜: $date");
+
     try {
-      // Firestore에 이벤트 추가
       DocumentReference value = await FirebaseFirestore.instance.collection('events').add({
         'uid': userId,
         'name': event,
@@ -272,48 +264,46 @@ class _CalenderScreenState extends State<CalenderScreen>
         'isCompleted': false,
       });
 
-      // 생성된 문서 ID 가져오기
       String uniqueId = value.id;
+      DateTime utcDate = DateTime.utc(date.year, date.month, date.day);
 
-      // 로컬 캘린더 이벤트 추가 후 즉시 UI 갱신
       setState(() {
-        if (_events[date] != null) {
-          _events[date]!.add(Event(
-            id: uniqueId, // Firestore 문서 ID 사용
+        if (_events[utcDate] != null) {
+          _events[utcDate]!.add(Event(
+            id: uniqueId,
             name: event,
             time: time,
             isCompleted: false,
-            startDate: date,
-            endDate: date,
+            startDate: utcDate,
+            endDate: utcDate,
             repeat: repeat,
             uid: userId,
           ));
         } else {
-          _events[date] = [
+          _events[utcDate] = [
             Event(
-              id: uniqueId, // Firestore 문서 ID 사용
+              id: uniqueId,
               name: event,
               time: time,
               isCompleted: false,
-              startDate: date,
-              endDate: date,
+              startDate: utcDate,
+              endDate: utcDate,
               repeat: repeat,
               uid: userId,
             ),
           ];
         }
-
-        if (kDebugMode) {
-          print("Firestore에 이벤트 추가됨: $uniqueId, 날짜: $date");
-          print("현재 이벤트: $_events");
-        }
       });
-    } catch (error) {
+
       if (kDebugMode) {
-        print("Firestore에 이벤트 추가 실패: $error");
+        print("Firestore에 이벤트 추가됨: $uniqueId, 날짜: $utcDate");
+        print("현재 _events 맵에 저장된 이벤트: $_events");
       }
+    } catch (error) {
+      if (kDebugMode) print("Firestore에 이벤트 추가 실패: $error");
     }
   }
+
 
   void _editEvent(int index, String updatedEvent, String updatedTime,
       DateTime updatedStartDate, DateTime updatedEndDate, String repeat) async {
