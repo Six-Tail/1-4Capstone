@@ -20,7 +20,7 @@ class _PostDetailState extends State<PostDetail> {
   final Map<String, TextEditingController> _replyControllers = {};
   final Map<String, bool> _isReplyLoading = {};
   bool _isCommentLoading = false;
-  final UserService userService = UserService(); // UserService instance 생성
+  final UserService userService = UserService();
   String userName = '';
   String userImage = '';
 
@@ -28,7 +28,7 @@ class _PostDetailState extends State<PostDetail> {
   Future<void> _fetchUserDetails() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      final userInfo = await userService.getUserInfo(currentUser.uid); // UserService 사용
+      final userInfo = await userService.getUserInfo(currentUser.uid);
       if (userInfo != null) {
         setState(() {
           userName = userInfo['userName'];
@@ -41,7 +41,7 @@ class _PostDetailState extends State<PostDetail> {
   @override
   void initState() {
     super.initState();
-    _fetchUserDetails(); // 초기화 시 사용자 정보 불러오기
+    _fetchUserDetails();
   }
 
   // Firestore에서 게시글 좋아요 업데이트
@@ -171,7 +171,7 @@ class _PostDetailState extends State<PostDetail> {
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-                          final post = snapshot.data!.data() as Map<String, dynamic>;
+                          final post = (snapshot.data!.data() ?? {}) as Map<String, dynamic>;
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,17 +186,17 @@ class _PostDetailState extends State<PostDetail> {
                                 children: [
                                   IconButton(
                                     icon: Icon(
-                                      post['isLiked'] ?? false
+                                      post['isLiked'] == true
                                           ? Icons.thumb_up
                                           : Icons.thumb_up_off_alt,
                                     ),
                                     onPressed: () => _togglePostLike(
-                                        post['isLiked'] ?? false, post['likes'] ?? 0),
+                                        post['isLiked'] == true, post['likes'] ?? 0),
                                   ),
-                                  Text(post['likes'].toString()),
+                                  Text(post['likes']?.toString() ?? '0'),
                                   const SizedBox(width: 16),
                                   const Icon(Icons.comment),
-                                  Text(post['commentsCount'].toString()),
+                                  Text(post['commentsCount']?.toString() ?? '0'),
                                 ],
                               ),
                               const Divider(color: Colors.black),
@@ -209,7 +209,7 @@ class _PostDetailState extends State<PostDetail> {
                             .collection('posts')
                             .doc(widget.postId)
                             .collection('comments')
-                            .orderBy('timeStamp', descending: true)
+                            .orderBy('timeStamp', descending: false) // 최신 댓글이 아래로 오도록 설정
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
@@ -221,7 +221,7 @@ class _PostDetailState extends State<PostDetail> {
                             itemCount: comments.length,
                             itemBuilder: (context, index) {
                               final comment = comments[index];
-                              final commentData = comment.data() as Map<String, dynamic>;
+                              final commentData = (comment.data() ?? {}) as Map<String, dynamic>;
                               final commentId = comment.id;
 
                               return Column(
@@ -231,34 +231,36 @@ class _PostDetailState extends State<PostDetail> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       CircleAvatar(
-                                        backgroundImage: NetworkImage(commentData['userImage']),
+                                        backgroundImage: NetworkImage(commentData['userImage'] ?? ''),
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(commentData['userName'] ?? ''),
+                                            Text(commentData['userName'] ?? '익명'),
                                             Text(commentData['content'] ?? ''),
                                             Text(
-                                              _timeAgo(commentData['timeStamp']),
+                                              commentData['timeStamp'] != null
+                                                  ? _timeAgo(commentData['timeStamp'])
+                                                  : '방금 전',
                                               style: const TextStyle(color: Colors.grey, fontSize: 12),
                                             ),
                                             Row(
                                               children: [
                                                 IconButton(
                                                   icon: Icon(
-                                                    (commentData['isLiked'] ?? false)
+                                                    (commentData['isLiked'] == true)
                                                         ? Icons.thumb_up
                                                         : Icons.thumb_up_off_alt,
                                                   ),
                                                   onPressed: () => _toggleCommentLike(
                                                     commentId,
-                                                    commentData['isLiked'] ?? false,
+                                                    commentData['isLiked'] == true,
                                                     commentData['likes'] ?? 0,
                                                   ),
                                                 ),
-                                                Text(commentData['likes'].toString()),
+                                                Text(commentData['likes']?.toString() ?? '0'),
                                                 TextButton(
                                                   onPressed: () {
                                                     setState(() {
@@ -269,7 +271,7 @@ class _PostDetailState extends State<PostDetail> {
                                                 ),
                                               ],
                                             ),
-                                            if (_isReplying[commentId] ?? false)
+                                            if (_isReplying[commentId] == true)
                                               Padding(
                                                 padding: const EdgeInsets.only(left: 40.0),
                                                 child: Row(
@@ -301,7 +303,7 @@ class _PostDetailState extends State<PostDetail> {
                                                   .collection('comments')
                                                   .doc(commentId)
                                                   .collection('replies')
-                                                  .orderBy('timeStamp', descending: true)
+                                                  .orderBy('timeStamp', descending: false) // 최신 답글이 아래로 오도록 설정
                                                   .snapshots(),
                                               builder: (context, replySnapshot) {
                                                 if (!replySnapshot.hasData) return const SizedBox.shrink();
@@ -311,24 +313,26 @@ class _PostDetailState extends State<PostDetail> {
                                                   physics: const NeverScrollableScrollPhysics(),
                                                   itemCount: replies.length,
                                                   itemBuilder: (context, replyIndex) {
-                                                    final replyData = replies[replyIndex].data() as Map<String, dynamic>;
+                                                    final replyData = (replies[replyIndex].data() ?? {}) as Map<String, dynamic>;
                                                     return Padding(
                                                       padding: const EdgeInsets.only(left: 40.0),
                                                       child: Row(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
                                                           CircleAvatar(
-                                                            backgroundImage: NetworkImage(replyData['userImage']),
+                                                            backgroundImage: NetworkImage(replyData['userImage'] ?? ''),
                                                           ),
                                                           const SizedBox(width: 10),
                                                           Expanded(
                                                             child: Column(
                                                               crossAxisAlignment: CrossAxisAlignment.start,
                                                               children: [
-                                                                Text(replyData['userName'] ?? ''),
+                                                                Text(replyData['userName'] ?? '익명'),
                                                                 Text(replyData['content'] ?? ''),
                                                                 Text(
-                                                                  _timeAgo(replyData['timeStamp']),
+                                                                  replyData['timeStamp'] != null
+                                                                      ? _timeAgo(replyData['timeStamp'])
+                                                                      : '방금 전',
                                                                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                                                                 ),
                                                               ],
