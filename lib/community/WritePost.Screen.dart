@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/Themes.Colors.dart';
 import 'Post.Detail.dart'; // 상세 페이지 import
+import '../service/User_Service.dart'; // UserService import
 
 class WritePostScreen extends StatefulWidget {
   @override
@@ -13,6 +15,33 @@ class _WritePostScreenState extends State<WritePostScreen> {
   final titleController = TextEditingController();
   final contentController = TextEditingController();
   String? selectedBoard;
+  final UserService userService = UserService();
+
+  // 유저 정보 변수
+  String? userId;
+  String? userName;
+  String? userImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserInfo();
+  }
+
+  // 현재 유저의 정보를 가져오는 함수
+  Future<void> _fetchUserInfo() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      userId = currentUser.uid;
+      final userInfo = await userService.getUserInfo(userId!);
+      if (userInfo != null) {
+        setState(() {
+          userName = userInfo['userName'] ?? 'Unknown';
+          userImage = userInfo['userImage'] ?? '';
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +122,11 @@ class _WritePostScreenState extends State<WritePostScreen> {
   // Firestore에 게시글 저장 함수
   Future<void> _addPostToFirestore(String board, String title, String content) async {
     try {
+      if (userId == null || userName == null || userImage == null) {
+        print("유저 정보가 누락되었습니다.");
+        return;
+      }
+
       // Firestore의 'posts' 컬렉션에 새 문서를 추가
       DocumentReference postRef = await FirebaseFirestore.instance.collection('posts').add({
         'board': board,
@@ -101,9 +135,9 @@ class _WritePostScreenState extends State<WritePostScreen> {
         'timestamp': FieldValue.serverTimestamp(),
         'likes': 0,
         'commentsCount': 0, // 댓글 수 필드 추가
-        'userId': 'your_user_id', // 실제 유저 ID를 여기서 가져와야 함
-        'userName': 'user_name', // 실제 유저 닉네임
-        'userImage': 'user_image_url', // 실제 유저 이미지
+        'userId': userId, // 실제 유저 ID
+        'userName': userName, // 실제 유저 이름
+        'userImage': userImage, // 실제 유저 이미지
       });
 
       print('게시글 Firestore에 성공적으로 저장되었습니다. postId: ${postRef.id}');

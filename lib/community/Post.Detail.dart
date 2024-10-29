@@ -30,7 +30,7 @@ class _PostDetailState extends State<PostDetail> {
   Future<void> _fetchUserDetails() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      userId = currentUser.uid; // 현재 사용자 ID 설정
+      userId = currentUser.uid;
       final userInfo = await userService.getUserInfo(userId);
       if (userInfo != null) {
         setState(() {
@@ -86,6 +86,28 @@ class _PostDetailState extends State<PostDetail> {
       print("댓글 추가 오류: $e");
     } finally {
       setState(() => _isCommentLoading = false);
+    }
+  }
+
+  Future<void> _editPost(String newTitle, String newContent) async {
+    try {
+      await FirebaseFirestore.instance.collection('posts').doc(widget.postId).update({
+        'title': newTitle,
+        'content': newContent,
+      });
+      print("게시글 수정 완료");
+    } catch (e) {
+      print("게시글 수정 오류: $e");
+    }
+  }
+
+  Future<void> _deletePost() async {
+    try {
+      await FirebaseFirestore.instance.collection('posts').doc(widget.postId).delete();
+      Navigator.pop(context);
+      print("게시글 삭제 완료");
+    } catch (e) {
+      print("게시글 삭제 오류: $e");
     }
   }
 
@@ -211,6 +233,7 @@ class _PostDetailState extends State<PostDetail> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // 작성자 정보와 게시 시간 표시
                       StreamBuilder<DocumentSnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('posts')
@@ -220,9 +243,57 @@ class _PostDetailState extends State<PostDetail> {
                           if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
                           final post = (snapshot.data!.data() ?? {}) as Map<String, dynamic>;
 
+                          final isUserPost = post['userId'] == userId; // 작성자가 현재 로그인한 유저인지 확인
+
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundImage: NetworkImage(post['userImage'] ?? ''),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        post['userName'] ?? '알 수 없음',
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        post['timestamp'] != null
+                                            ? _timeAgo(post['timestamp'])
+                                            : '작성 시간 알 수 없음',
+                                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                  Spacer(),
+                                  if (isUserPost) // 현재 사용자가 작성자인 경우에만 메뉴 표시
+                                    PopupMenuButton<String>(
+                                      onSelected: (value) {
+                                        if (value == 'edit') {
+                                          _showEditPostDialog(post['title'], post['content']);
+                                        } else if (value == 'delete') {
+                                          _deletePost();
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        PopupMenuItem(
+                                          value: 'edit',
+                                          child: Text("수정"),
+                                        ),
+                                        PopupMenuItem(
+                                          value: 'delete',
+                                          child: Text("삭제"),
+                                        ),
+                                      ],
+                                      icon: Icon(Icons.more_vert),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
                               Text(
                                 post['title'] ?? '',
                                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -251,6 +322,7 @@ class _PostDetailState extends State<PostDetail> {
                           );
                         },
                       ),
+                      // 댓글 및 답글 UI 유지
                       StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('posts')
@@ -521,6 +593,46 @@ class _PostDetailState extends State<PostDetail> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // 게시글 수정 다이얼로그 표시
+  void _showEditPostDialog(String currentTitle, String currentContent) {
+    final titleController = TextEditingController(text: currentTitle);
+    final contentController = TextEditingController(text: currentContent);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("게시글 수정"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(labelText: "제목"),
+            ),
+            TextField(
+              controller: contentController,
+              decoration: InputDecoration(labelText: "내용"),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text("취소"),
+          ),
+          TextButton(
+            onPressed: () {
+              _editPost(titleController.text, contentController.text);
+              Navigator.of(context).pop();
+            },
+            child: Text("저장"),
+          ),
+        ],
       ),
     );
   }
