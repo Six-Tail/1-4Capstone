@@ -232,7 +232,7 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => RankingPage()),
+                        MaterialPageRoute(builder: (context) => const RankingPage()),
                       );
                     },
                   ),

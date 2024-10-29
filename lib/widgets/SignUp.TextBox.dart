@@ -320,7 +320,7 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
                       );
 
                       if (newUser.user != null) {
-                        Get.to(() => LoginScreen());
+                        Get.to(() => const LoginScreen());
                       }
                     } catch (e) {
                       if (e is FirebaseAuthException &&

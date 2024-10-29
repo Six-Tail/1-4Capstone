@@ -18,7 +18,7 @@ class LoginButton extends StatelessWidget {
         if (kDebugMode) {
           print('Login');
         }
-        Get.to(() => LoginScreen()); // Navigate to LoginScreen
+        Get.to(() => const LoginScreen()); // Navigate to LoginScreen
       },
       child: Container(
         alignment: Alignment.center,

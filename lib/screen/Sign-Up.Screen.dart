@@ -70,7 +70,7 @@ class SignUpScreen extends StatelessWidget {
               SizedBox(width: screenWidth * 0.01),
               GestureDetector(
                 onTap: () {
-                  Get.to(() => LoginScreen()); // Navigate to LoginScreen
+                  Get.to(() => const LoginScreen()); // Navigate to LoginScreen
                 },
                 child: Container(
                   decoration: BoxDecoration(
