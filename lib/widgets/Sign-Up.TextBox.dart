@@ -314,14 +314,17 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
 
                   if (isSignupScreen && _tryValidation()) {
                     try {
-                      final newUser =
-                      await _authentication.createUserWithEmailAndPassword(
+                      final newUser = await _authentication.createUserWithEmailAndPassword(
                         email: userEmail,
                         password: userPassword,
                       );
 
                       if (newUser.user != null) {
-                        Get.to(() => const LoginScreen());
+                        // 회원가입 후 사용자 이름 업데이트
+                        await newUser.user!.updateDisplayName(userName);
+
+                        // 업데이트가 완료되면 로그인 화면으로 이동
+                        Get.to(() => LoginScreen());
                       }
                     } catch (e) {
                       if (e is FirebaseAuthException &&

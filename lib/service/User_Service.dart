@@ -6,21 +6,19 @@ import '../rank/RankingScreen.dart'; // 사용자 정의 User 모델 임포트
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Firestore에 사용자 정보를 저장하는 함수
   Future<void> saveUserIfNew(User firebaseUser) async {
-    // Firebase User
     final userDoc = _firestore.collection('users').doc(firebaseUser.uid);
 
-    // 이미 사용자 정보가 저장되어 있는지 확인
+    // 사용자 정보가 없는 경우에만 저장
     if (!(await userDoc.get()).exists) {
       await userDoc.set({
-        'userName': firebaseUser.displayName ?? 'Unknown',
+        'userName': firebaseUser.displayName ?? 'Unknown', // displayName 사용
         'userImage': firebaseUser.photoURL ?? '',
         'email': firebaseUser.email,
         'createdAt': FieldValue.serverTimestamp(),
-        'level': 1, // 초기 레벨
-        'currentExp': 0, // 초기 경험치
-        'maxExp': 10, // 초기 최대 경험치
+        'level': 1,
+        'currentExp': 0,
+        'maxExp': 10,
       });
     }
   }

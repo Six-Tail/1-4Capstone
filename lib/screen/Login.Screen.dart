@@ -1,15 +1,15 @@
-// Login.Screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/screen/First.Screen.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
 import 'package:todobest_home/widgets/App.Icon.dart';
 import 'package:todobest_home/widgets/Login.TextBox.dart';
-
 import 'package:todobest_home/widgets/Social.Login.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  final TextEditingController _nameController = TextEditingController();
+
+  LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,6 @@ class LoginScreen extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        //포커스 해제
         FocusScopeNode currentFocus = FocusScope.of(context);
         if (!currentFocus.hasPrimaryFocus) {
           currentFocus.unfocus();
@@ -46,7 +45,10 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(height: screenHeight * 0.035),
                   const AppIcon(),
                   SizedBox(height: screenHeight * 0.01),
-                  const LoginTextBox(),
+
+                  // LoginTextBox에 userName 전달
+                  LoginTextBox(userName: _nameController.text),
+
                   Column(
                     children: [
                       Container(

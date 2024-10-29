@@ -1,13 +1,15 @@
-// Login.TextBox.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/Router.dart';
+import 'package:todobest_home/service/User_Service.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
 
 class LoginTextBox extends StatefulWidget {
-  const LoginTextBox({super.key});
+  final String userName;
+
+  const LoginTextBox({super.key, required this.userName});
 
   @override
   _LoginTextBoxState createState() => _LoginTextBoxState();
@@ -15,6 +17,7 @@ class LoginTextBox extends StatefulWidget {
 
 class _LoginTextBoxState extends State<LoginTextBox> {
   final _authentication = FirebaseAuth.instance;
+  final UserService _userService = UserService();
   bool isSignupScreen = true;
   bool _obscureText = true;
   final _formKey = GlobalKey<FormState>();
@@ -57,7 +60,6 @@ class _LoginTextBoxState extends State<LoginTextBox> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 이메일 텍스트 박스
               SizedBox(
                 height: 70,
                 child: TextFormField(
@@ -92,7 +94,6 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                 ),
               ),
               const SizedBox(height: 10.0),
-              // 비밀번호 텍스트 박스
               SizedBox(
                 height: 70,
                 child: TextFormField(
@@ -137,7 +138,6 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                 ),
               ),
               SizedBox(height: screenHeight * 0.02),
-              // Error message display
               if (_errorMessage.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -158,12 +158,17 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                     );
 
                     if (newUser.user != null) {
+                      // displayName 설정 및 Firestore 저장
+                      await newUser.user!.updateDisplayName(widget.userName);
+                      await _userService.saveUserIfNew(newUser.user!);
+
                       if (kDebugMode) {
                         print('이메일로 로그인 성공!');
                         print('사용자 이메일: ${newUser.user!.email}');
-                        print('사용자 이름: ${newUser.user!.displayName ?? "이름 없음"}');
-                        print('사용자 : ${newUser.user!.uid}');
+                        print('사용자 이름: ${newUser.user!.displayName}');
+                        print('사용자 UID: ${newUser.user!.uid}');
                       }
+
                       Get.offAll(() => RouterPage());
                     }
                   } catch (e) {
