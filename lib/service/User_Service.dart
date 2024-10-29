@@ -5,17 +5,17 @@ import '../rank/RankingScreen.dart'; // 사용자 정의 User 모델 임포트
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String defaultProfileImageUrl = 'https://drive.google.com/file/d/18KGbC7T_zNG-k2bWodK5cmUcRQ9b8xDE/'; // 기본 이미지 URL
 
   // Firestore에 사용자 정보를 저장하는 함수
   Future<void> saveUserIfNew(User firebaseUser) async {
-    // Firebase User
     final userDoc = _firestore.collection('users').doc(firebaseUser.uid);
 
     // 이미 사용자 정보가 저장되어 있는지 확인
     if (!(await userDoc.get()).exists) {
       await userDoc.set({
         'userName': firebaseUser.displayName ?? 'Unknown',
-        'userImage': firebaseUser.photoURL ?? '',
+        'userImage': firebaseUser.photoURL ?? defaultProfileImageUrl, // 기본 프로필 사진 사용
         'email': firebaseUser.email,
         'createdAt': FieldValue.serverTimestamp(),
         'level': 1, // 초기 레벨

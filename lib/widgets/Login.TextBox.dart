@@ -1,9 +1,9 @@
-// Login.TextBox.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todobest_home/Router.dart';
+import 'package:todobest_home/service/User_Service.dart'; // UserService 가져오기
 import 'package:todobest_home/utils/Themes.Colors.dart';
 
 class LoginTextBox extends StatefulWidget {
@@ -15,6 +15,7 @@ class LoginTextBox extends StatefulWidget {
 
 class _LoginTextBoxState extends State<LoginTextBox> {
   final _authentication = FirebaseAuth.instance;
+  final UserService _userService = UserService(); // UserService 인스턴스 생성
   bool isSignupScreen = true;
   bool _obscureText = true;
   final _formKey = GlobalKey<FormState>();
@@ -151,13 +152,15 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                   _tryValidation();
 
                   try {
-                    final newUser =
-                    await _authentication.signInWithEmailAndPassword(
+                    final newUser = await _authentication.signInWithEmailAndPassword(
                       email: userEmail,
                       password: userPassword,
                     );
 
                     if (newUser.user != null) {
+                      // Firestore에 사용자 정보 저장
+                      await _userService.saveUserIfNew(newUser.user!);
+
                       if (kDebugMode) {
                         print('이메일로 로그인 성공!');
                         print('사용자 이메일: ${newUser.user!.email}');

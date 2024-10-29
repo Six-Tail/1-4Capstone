@@ -307,6 +307,8 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
               ),
               SizedBox(height: screenHeight * 0.06),
               GestureDetector(
+                // SignUpTextBox.dart
+
                 onTap: () async {
                   setState(() {
                     _showErrors = true;
@@ -314,18 +316,20 @@ class _SignUpTextBoxState extends State<SignUpTextBox> {
 
                   if (isSignupScreen && _tryValidation()) {
                     try {
-                      final newUser =
-                      await _authentication.createUserWithEmailAndPassword(
+                      final newUser = await _authentication.createUserWithEmailAndPassword(
                         email: userEmail,
                         password: userPassword,
                       );
 
                       if (newUser.user != null) {
+                        // 여기서 displayName을 설정
+                        await newUser.user!.updateDisplayName(userName);
+
+                        // 회원가입 성공 시 로그인 화면으로 이동
                         Get.to(() => const LoginScreen());
                       }
                     } catch (e) {
-                      if (e is FirebaseAuthException &&
-                          e.code == 'email-already-in-use') {
+                      if (e is FirebaseAuthException && e.code == 'email-already-in-use') {
                         setState(() {
                           isEmailInUse = true;
                           isEmailValid = false;
