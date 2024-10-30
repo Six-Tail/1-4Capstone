@@ -89,6 +89,7 @@ class _RankMoreState extends State<RankMore> {
   // Firebase에서 사용자 이름을 가져오는 함수
   String _getUserName() {
     final user = FirebaseAuth.instance.currentUser;
+    // 사용자 displayName 값을 가져옵니다.
     return user?.displayName ?? '사용자';
   }
 
@@ -221,7 +222,7 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => RankingPage()),
+                        MaterialPageRoute(builder: (context) => const RankingPage()),
                       );
                     },
                     icon: Icons.leaderboard, // 랭킹 아이콘

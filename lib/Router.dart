@@ -4,6 +4,7 @@ import 'package:todobest_home/Setting.MainPage.dart';
 import 'package:todobest_home/community/Community.MainPage.dart';
 import 'package:todobest_home/rank/RankMore.dart';
 import 'package:todobest_home/screen/Calender.Screen.dart';
+import 'package:todobest_home/screens/manage_screen.dart';
 
 class RouterPage extends StatefulWidget {
   @override
@@ -18,7 +19,7 @@ class _RouterPageState extends State<RouterPage> {
     const CalenderScreen(),
     CommunityMainPage(),
     const RankMore(),
-    SettingMainPage(),
+    ManageScreen(toggleTheme: (bool) {  }, isDarkMode : false,),
   ];
 
   @override
