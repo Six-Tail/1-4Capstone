@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:todobest_home/utils/Themes.Colors.dart';
 
 import 'CalenderUtil/custom_calendar.dart';
@@ -25,7 +24,6 @@ class _CalenderScreenState extends State<CalenderScreen>
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now(); // 현재 날짜로 초기화
   bool _isExpanded = false;
-  CalendarFormat _calendarFormat = CalendarFormat.month;
   final Map<DateTime, List<Event>> _events = {};
   final ScrollController _scrollController = ScrollController();
   double _rotationAngle = 0.0; // 버튼의 회전 각도
@@ -171,7 +169,6 @@ class _CalenderScreenState extends State<CalenderScreen>
     setState(() {
       _selectedDay = startDate;
       _focusedDay = startDate;
-      _calendarFormat = CalendarFormat.month;
     });
 
     if (kDebugMode) print('이벤트 등록 완료: $event from $startDate to ${endDate ?? '반복 종료 없음'}');
@@ -693,44 +690,6 @@ class _CalenderScreenState extends State<CalenderScreen>
           height: screenHeight * 0.75,
           child: Column(
             children: [
-              // 달력 형식 선택 버튼 추가
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _calendarFormat = CalendarFormat.month;
-                        });
-                      },
-                      child: Text(
-                        '월간',
-                        style: TextStyle(
-                            color: _calendarFormat == CalendarFormat.month
-                                ? Colors.blueGrey
-                                : Colors.grey),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _calendarFormat = CalendarFormat.week;
-                        });
-                      },
-                      child: Text(
-                        '주간',
-                        style: TextStyle(
-                          color: _calendarFormat == CalendarFormat.week
-                              ? Colors.blueGrey
-                              : Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               CustomCalendar(
                 focusedDay: _focusedDay,
                 selectedDay: _selectedDay!,

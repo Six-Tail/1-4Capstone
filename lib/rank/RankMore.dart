@@ -18,7 +18,7 @@ class RankMore extends StatefulWidget {
 }
 
 class _RankMoreState extends State<RankMore> {
-  int currentExp = 0; // 현재 경험치
+  int currentExp = 10350; // 현재 경험치
   int level = 1; // 초기 레벨 설정
   int maxExp = 10; // 첫 레벨의 총 경험치 요구량
   final UserService userService = UserService(); // UserService 인스턴스 생성
@@ -145,49 +145,63 @@ class _RankMoreState extends State<RankMore> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _getUserName(),
-                      style: TextStyle(
-                        fontSize: screenHeight * 0.03,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // 레벨과 이름의 순서 변경
+                    Row(
                       children: [
                         Text(
-                          'Lv.$level', // 현재 레벨 표시
+                          'Lv.$level', // 레벨 텍스트를 먼저 표시
                           style: TextStyle(
-                            fontSize: screenHeight * 0.025,
+                            fontSize: screenHeight * 0.03,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: screenHeight * 0.01),
-                        SizedBox(
-                          width: screenWidth * 0.6,
-                          child: LinearProgressIndicator(
-                            value: expRatio,
-                            backgroundColor: Colors.grey[300],
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
-                            minHeight: screenHeight * 0.02,
-                          ),
-                        ),
-                        SizedBox(height: screenHeight * 0.01),
+                        SizedBox(width: screenWidth * 0.02), // 레벨과 이름 사이 여백
                         Text(
-                          '$currentExp/$maxExp', // 현재 경험치와 다음 레벨까지의 총 경험치 표시
+                          _getUserName(),
                           style: TextStyle(
-                            fontSize: screenHeight * 0.02,
-                            color: Colors.grey[600],
+                            fontSize: screenHeight * 0.028,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
+                    ),
+                    SizedBox(height: screenHeight * 0.01),
+                    SizedBox(
+                      width: screenWidth * 0.6,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          LinearProgressIndicator(
+                            value: expRatio,
+                            backgroundColor: Colors.grey[300],
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.greenAccent),
+                            minHeight: screenHeight * 0.02,
+                          ),
+                          Text(
+                            '${(expRatio * 100).toStringAsFixed(1)}%', // 퍼센트를 경험치 바 안에 표시
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.018,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black, // 텍스트 색상 설정
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.01),
+                    Text(
+                      '$currentExp/$maxExp', // 현재 경험치와 다음 레벨까지의 총 경험치 표시
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.02,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: screenHeight * 0.05),
+            SizedBox(height: screenHeight * 0.06),
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
@@ -196,7 +210,7 @@ class _RankMoreState extends State<RankMore> {
                 children: [
                   TaskButton(
                     label: '일일과제',
-                    color: Color(0xff9ad7f8),
+                    color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -207,7 +221,7 @@ class _RankMoreState extends State<RankMore> {
                   ),
                   TaskButton(
                     label: '주간과제',
-                    color: Color(0xff9ad7f8),
+                    color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -218,7 +232,7 @@ class _RankMoreState extends State<RankMore> {
                   ),
                   TaskButton(
                     label: '랭킹',
-                    color: Color(0xff9ad7f8),
+                    color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -229,7 +243,7 @@ class _RankMoreState extends State<RankMore> {
                   ),
                   TaskButton(
                     label: '도전과제',
-                    color: Color(0xff9ad7f8),
+                    color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,

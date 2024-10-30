@@ -15,12 +15,16 @@ class UserService {
     if (!(await userDoc.get()).exists) {
       await userDoc.set({
         'userName': firebaseUser.displayName ?? 'Unknown',
-        'userImage': firebaseUser.photoURL ?? defaultProfileImageUrl, // 기본 프로필 사진 사용
+        'userImage': firebaseUser.photoURL ?? defaultProfileImageUrl,
+        // 기본 프로필 사진 사용
         'email': firebaseUser.email,
         'createdAt': FieldValue.serverTimestamp(),
-        'level': 1, // 초기 레벨
-        'currentExp': 0, // 초기 경험치
-        'maxExp': 10, // 초기 최대 경험치
+        'level': 1,
+        // 초기 레벨
+        'currentExp': 0,
+        // 초기 경험치
+        'maxExp': 10,
+        // 초기 최대 경험치
       });
     }
   }
@@ -65,8 +69,12 @@ class UserService {
         userList.add(AppUser(
           name: data['userName'] ?? 'Unknown',
           level: data['level'] ?? 1,
-          currentExp: data['currentExp'] ?? 0, // 현재 경험치 추가
-          rank: 0, // 초기 rank를 0으로 설정
+          currentExp: data['currentExp'] ?? 0,
+          // 현재 경험치 추가
+          rank: 0,
+          // 초기 rank를 0으로 설정
+          profileImageUrl: data['userImage'] ??
+              defaultProfileImageUrl, // 프로필 이미지 URL 추가
         ));
       }
 
