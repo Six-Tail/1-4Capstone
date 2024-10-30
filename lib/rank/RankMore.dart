@@ -1,4 +1,4 @@
-//RankMore.dart
+// RankMore.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -104,24 +104,14 @@ class _RankMoreState extends State<RankMore> {
       appBar: AppBar(
         title: Text(
           'ToDoBest',
-          style: TextStyle(
-            fontSize: 26,
-            color: Theme1Colors.textColor,
-          ),
+          style: TextStyle(fontSize: 26, color: Theme1Colors.textColor),
         ),
         centerTitle: true,
-        backgroundColor: Theme1Colors.mainColor,
-        leading: BackButton(
-          color: Theme1Colors.textColor,
+        backgroundColor: const Color(0xff73b1e7),
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset('assets/images/icon.png'),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // 알림 기능 추가 가능
-            },
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -178,8 +168,7 @@ class _RankMoreState extends State<RankMore> {
                           child: LinearProgressIndicator(
                             value: expRatio,
                             backgroundColor: Colors.grey[300],
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.greenAccent),
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
                             minHeight: screenHeight * 0.02,
                           ),
                         ),
@@ -206,46 +195,47 @@ class _RankMoreState extends State<RankMore> {
                 children: [
                   TaskButton(
                     label: '일일과제',
-                    color: Colors.green.shade200,
+                    color: Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => DailyTasksPage()),
+                        MaterialPageRoute(builder: (context) => DailyTasksPage()),
                       );
                     },
+                    icon: Icons.assignment, // 일일 과제 아이콘
                   ),
                   TaskButton(
                     label: '주간과제',
-                    color: Colors.green.shade100,
+                    color: Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => WeeklyTasksPage()),
+                        MaterialPageRoute(builder: (context) => WeeklyTasksPage()),
                       );
                     },
+                    icon: Icons.calendar_view_week, // 주간 과제 아이콘
                   ),
                   TaskButton(
                     label: '랭킹',
-                    color: Colors.yellow.shade100,
+                    color: Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => RankingPage()),
                       );
                     },
+                    icon: Icons.leaderboard, // 랭킹 아이콘
                   ),
                   TaskButton(
                     label: '도전과제',
-                    color: Colors.orange.shade100,
+                    color: Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => ChallengePage()),
+                        MaterialPageRoute(builder: (context) => ChallengePage()),
                       );
                     },
+                    icon: Icons.flag, // 도전 과제 아이콘
                   ),
                 ],
               ),
@@ -262,12 +252,15 @@ class TaskButton extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onPressed;
+  final IconData icon; // 아이콘 매개변수 추가
 
-  const TaskButton(
-      {super.key,
-        required this.label,
-        required this.color,
-        required this.onPressed});
+  const TaskButton({
+    super.key,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+    required this.icon, // 아이콘 초기화
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -279,12 +272,19 @@ class TaskButton extends StatelessWidget {
         ),
       ),
       onPressed: onPressed,
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // 내용 중앙 정렬
+        children: [
+          Icon(icon, size: 30), // 아이콘 추가 (크기 설정)
+          const SizedBox(height: 8), // 아이콘과 레이블 사이의 공간
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

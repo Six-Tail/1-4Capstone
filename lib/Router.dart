@@ -31,9 +31,9 @@ class _RouterPageState extends State<RouterPage> {
         , // 네비게이션 바 배경색을 설정
         key: _bottomNavigationKey,
         items: const <Widget>[
-          Icon(Icons.home, size: 30),
-          Icon(Icons.chat, size: 30),
-          Icon(Icons.star_border, size: 30),
+          Icon(Icons.calendar_today, size: 28),
+          Icon(Icons.dashboard, size: 30),
+          Icon(Icons.emoji_events, size: 30),
           Icon(Icons.more_horiz, size: 30),
         ],
         onTap: (index) {
