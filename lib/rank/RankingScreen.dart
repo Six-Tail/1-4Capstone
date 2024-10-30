@@ -7,12 +7,14 @@ class AppUser {
   final int level;
   final int currentExp;
   final int rank; // 랭크 추가
+  final String profileImageUrl; // 프로필 이미지 URL 추가
 
   AppUser({
     required this.name,
     required this.level,
     required this.currentExp,
     required this.rank,
+    required this.profileImageUrl, // 프로필 이미지 URL 초기화
   });
 
   // copyWith 메서드 추가
@@ -21,12 +23,14 @@ class AppUser {
     int? level,
     int? currentExp,
     int? rank,
+    String? profileImageUrl,
   }) {
     return AppUser(
       name: name ?? this.name,
       level: level ?? this.level,
       currentExp: currentExp ?? this.currentExp,
       rank: rank ?? this.rank,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl, // 프로필 이미지 URL 복사
     );
   }
 }
@@ -42,7 +46,9 @@ class RankingPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("랭킹"),
+        backgroundColor: Colors.white, // 원하는 색상으로 설정
       ),
+      backgroundColor: Colors.white,
       body: FutureBuilder<List<AppUser>>(
         future: userService.getAllUsers(), // getAllUsers() 메서드가 AppUser 리스트 반환
         builder: (context, snapshot) {
@@ -63,6 +69,11 @@ class RankingPage extends StatelessWidget {
             return b.currentExp.compareTo(a.currentExp);
           });
 
+          // 상위 3명 선택
+          List<AppUser> topThreeUsers = users.take(3).toList();
+          // 4등부터 100등까지의 사용자
+          List<AppUser> remainingUsers = users.skip(3).take(97).toList();
+
           // 현재 사용자의 정보 찾기
           AppUser? currentUserData;
           for (var user in users) {
@@ -72,38 +83,110 @@ class RankingPage extends StatelessWidget {
             }
           }
 
-          return ListView(
+          return Column(
             children: [
               const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  "TOP 100",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                padding: EdgeInsets.all(4.0),
+                child: Center(
+                  child: Text(
+                    "TOP 3",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(), // 스크롤 비활성화
-                itemCount: users.length > 5 ? 5 : users.length, // 상위 5명만 표시
-                itemBuilder: (context, index) {
-                  final user = users[index];
-                  return Card(
-                    child: ListTile(
-                      leading: Text(
-                        (index + 1).toString(),
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              // 시상대 형태로 상위 3명 표시
+              // 시상대 형태로 상위 3명 표시
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 2등 (왼쪽)
+                  if (topThreeUsers.length > 1) ...[
+                    Expanded(
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 25, // 아이콘 크기 설정
+                            backgroundImage: NetworkImage(topThreeUsers[1].profileImageUrl), // 프로필 이미지 사용
+                          ),
+                          const SizedBox(height: 4), // 아이콘과 이름 사이의 간격 추가
+                          Text(
+                            topThreeUsers[1].name,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFC0C0C0)), // 은색
+                          ),
+                          Text("레벨: ${topThreeUsers[1].level}"),
+                          Text("경험치: ${topThreeUsers[1].currentExp}"), // 경험치 추가
+                        ],
                       ),
-                      title: Text(user.name),
-                      subtitle: Text("레벨: ${user.level}, 경험치: ${user.currentExp}"),
-                      trailing: const Icon(Icons.emoji_events), // 우승 메달 표시
                     ),
-                  );
-                },
+                  ],
+                  // 1등 (가운데)
+                  if (topThreeUsers.isNotEmpty) ...[
+                    Expanded(
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 30, // 아이콘 크기 설정
+                            backgroundImage: NetworkImage(topThreeUsers[0].profileImageUrl), // 프로필 이미지 사용
+                          ),
+                          const SizedBox(height: 4), // 아이콘과 이름 사이의 간격 추가
+                          Text(
+                            topThreeUsers[0].name,
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFFFD700)), // 금색
+                          ),
+                          Text("레벨: ${topThreeUsers[0].level}"),
+                          Text("경험치: ${topThreeUsers[0].currentExp}"), // 경험치 추가
+                        ],
+                      ),
+                    ),
+                  ],
+                  // 3등 (오른쪽)
+                  if (topThreeUsers.length > 2) ...[
+                    Expanded(
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 20, // 아이콘 크기 설정
+                            backgroundImage: NetworkImage(topThreeUsers[2].profileImageUrl), // 프로필 이미지 사용
+                          ),
+                          const SizedBox(height: 4), // 아이콘과 이름 사이의 간격 추가
+                          Text(
+                            topThreeUsers[2].name,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFCD7F32)), // 동색
+                          ),
+                          Text("레벨: ${topThreeUsers[2].level}"),
+                          Text("경험치: ${topThreeUsers[2].currentExp}"), // 경험치 추가
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const Divider(),
+              // 스크롤 영역 줄이기
+              SizedBox(
+                height: 320, // 원하는 높이로 설정
+                child: ListView.builder(
+                  itemCount: remainingUsers.length,
+                  itemBuilder: (context, index) {
+                    final user = remainingUsers[index];
+                    return Card(
+                      child: ListTile(
+                        leading: Text(
+                          (index + 4).toString(), // 4등부터 시작하므로 인덱스에 4를 더함
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        title: Text(user.name),
+                        subtitle: Text("레벨: ${user.level}, 경험치: ${user.currentExp}"),
+                        trailing: const Icon(Icons.emoji_events), // 우승 메달 표시
+                      ),
+                    );
+                  },
+                ),
               ),
               const Divider(),
               // 내 순위 섹션
               const Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(2.0),
                 child: Text(
                   "내 순위",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
