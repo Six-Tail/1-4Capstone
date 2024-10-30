@@ -139,8 +139,10 @@ class _ManageScreenState extends State<ManageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xffffffff),
       appBar: AppBar(
         title: const Text('설정'),
+        backgroundColor: Color(0xffffffff),
       ),
       body: ListView(
         padding: EdgeInsets.all(16.0),
