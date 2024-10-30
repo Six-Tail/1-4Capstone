@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/Themes.Colors.dart';
 import 'Post.Detail.dart';
 
 class WroteBoardScreen extends StatelessWidget {
-  final String userId; // 사용자의 ID를 받아와야 합니다.
+  final String? userId;
 
-  WroteBoardScreen({required this.userId});
+  WroteBoardScreen({Key? key, this.userId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // 현재 로그인된 사용자의 ID를 가져옴
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (currentUserId == null) {
+      return Scaffold(
+        body: Center(
+          child: Text('로그인이 필요합니다.'),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
@@ -40,7 +52,7 @@ class WroteBoardScreen extends StatelessWidget {
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('posts')
-              .where('userId', isEqualTo: userId) // 특정 사용자 ID로 필터링
+              .where('userId', isEqualTo: currentUserId) // 로그인된 사용자 ID로 필터링
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -59,6 +71,7 @@ class WroteBoardScreen extends StatelessWidget {
                 final postId = posts[index].id; // 각 게시글의 postId
 
                 return Card(
+                  color: Theme1Colors.mainColor,
                   child: ListTile(
                     title: Text(
                       post['title'] ?? '',
@@ -67,13 +80,13 @@ class WroteBoardScreen extends StatelessWidget {
                     ),
                     subtitle: Row(
                       children: [
-                        const Icon(Icons.thumb_up, size: 18),
+                        const Icon(Icons.thumb_up, size: 18, color: Colors.grey),
                         const SizedBox(width: 4),
-                        Text(post['likes'].toString()),
+                        Text(post['likes']?.toString() ?? '0'),
                         const SizedBox(width: 16),
-                        const Icon(Icons.comment, size: 18),
+                        const Icon(Icons.comment, size: 18, color: Colors.grey),
                         const SizedBox(width: 4),
-                        Text(post['commentsCount'].toString()), // 댓글 수
+                        Text(post['commentsCount']?.toString() ?? '0'), // 댓글 수
                       ],
                     ),
                     onTap: () {
