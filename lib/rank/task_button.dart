@@ -4,8 +4,15 @@ class TaskButton extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onPressed;
+  final IconData icon; // 아이콘 매개변수 추가
 
-  TaskButton({required this.label, required this.color, required this.onPressed});
+  const TaskButton({
+    super.key,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+    required this.icon, // 아이콘 초기화
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +24,19 @@ class TaskButton extends StatelessWidget {
         ),
       ),
       onPressed: onPressed,
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // 아이콘과 텍스트 중앙 정렬
+        children: [
+          Icon(icon, size: 30), // 아이콘 추가
+          const SizedBox(height: 8), // 아이콘과 텍스트 사이의 간격
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

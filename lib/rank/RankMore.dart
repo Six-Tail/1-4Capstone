@@ -1,8 +1,8 @@
-// RankMore.dart
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:todobest_home/rank/task_button.dart';
 import '../service/User_Service.dart';
 import '../utils/Themes.Colors.dart';
 import 'RankingScreen.dart';
@@ -18,19 +18,23 @@ class RankMore extends StatefulWidget {
 }
 
 class _RankMoreState extends State<RankMore> {
-  int currentExp = 10350; // 현재 경험치
-  int level = 1; // 초기 레벨 설정
-  int maxExp = 10; // 첫 레벨의 총 경험치 요구량
-  final UserService userService = UserService(); // UserService 인스턴스 생성
+  int currentExp = 0;
+  int level = 1;
+  int maxExp = 10;
+  final UserService userService = UserService();
 
   @override
   void initState() {
     super.initState();
-    _updateLevel();
-    _loadUserInfo(); // 사용자 정보를 불러오는 함수 호출
+    _loadUserInfo();
   }
 
-  // 사용자 정보를 Firestore에서 불러오는 함수
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadUserInfo(); // 페이지로 돌아올 때마다 사용자 정보 갱신
+  }
+
   Future<void> _loadUserInfo() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -45,19 +49,15 @@ class _RankMoreState extends State<RankMore> {
     }
   }
 
-  // 레벨과 경험치 업데이트 후 Firestore에 저장하는 함수
   void _updateLevel() {
     while (currentExp >= maxExp) {
-      currentExp -= maxExp; // 현재 경험치에서 maxExp를 빼고 남은 경험치로 업데이트
-      level++; // 레벨 증가
-      maxExp += 10; // 다음 레벨의 총 경험치 요구량을 10씩 증가
+      level += 1;
+      currentExp -= maxExp;
+      maxExp = (maxExp * 1.2).round();
     }
-
-    // 업데이트된 정보를 Firestore에 저장
     _saveUserLevelAndExp();
   }
 
-  // Firestore에 레벨과 경험치 저장
   Future<void> _saveUserLevelAndExp() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -65,16 +65,13 @@ class _RankMoreState extends State<RankMore> {
     }
   }
 
-  // Firebase에서 프로필 이미지 URL 가져오는 함수
   Future<String?> _getProfileImageUrl() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user?.photoURL != null) {
       return user!.photoURL;
     } else if (user != null) {
       try {
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('profile_images/${user.uid}.png');
+        final ref = FirebaseStorage.instance.ref().child('profile_images/${user.uid}.png');
         return await ref.getDownloadURL();
       } catch (e) {
         if (kDebugMode) {
@@ -86,10 +83,8 @@ class _RankMoreState extends State<RankMore> {
     return null;
   }
 
-  // Firebase에서 사용자 이름을 가져오는 함수
   String _getUserName() {
     final user = FirebaseAuth.instance.currentUser;
-    // 사용자 displayName 값을 가져옵니다.
     return user?.displayName ?? '사용자';
   }
 
@@ -145,17 +140,16 @@ class _RankMoreState extends State<RankMore> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 레벨과 이름의 순서 변경
                     Row(
                       children: [
                         Text(
-                          'Lv.$level', // 레벨 텍스트를 먼저 표시
+                          'Lv.$level',
                           style: TextStyle(
                             fontSize: screenHeight * 0.03,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(width: screenWidth * 0.02), // 레벨과 이름 사이 여백
+                        SizedBox(width: screenWidth * 0.02),
                         Text(
                           _getUserName(),
                           style: TextStyle(
@@ -179,11 +173,11 @@ class _RankMoreState extends State<RankMore> {
                             minHeight: screenHeight * 0.02,
                           ),
                           Text(
-                            '${(expRatio * 100).toStringAsFixed(1)}%', // 퍼센트를 경험치 바 안에 표시
+                            '${(expRatio * 100).toStringAsFixed(1)}%',
                             style: TextStyle(
                               fontSize: screenHeight * 0.018,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black, // 텍스트 색상 설정
+                              color: Colors.black,
                             ),
                           ),
                         ],
@@ -191,7 +185,7 @@ class _RankMoreState extends State<RankMore> {
                     ),
                     SizedBox(height: screenHeight * 0.01),
                     Text(
-                      '$currentExp/$maxExp', // 현재 경험치와 다음 레벨까지의 총 경험치 표시
+                      '$currentExp/$maxExp',
                       style: TextStyle(
                         fontSize: screenHeight * 0.02,
                         color: Colors.grey[600],
@@ -215,9 +209,9 @@ class _RankMoreState extends State<RankMore> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => DailyTasksPage()),
-                      );
+                      ).then((_) => _loadUserInfo()); // 돌아오면 정보 갱신
                     },
-                    icon: Icons.assignment, // 일일 과제 아이콘
+                    icon: Icons.assignment,
                   ),
                   TaskButton(
                     label: '주간과제',
@@ -226,9 +220,9 @@ class _RankMoreState extends State<RankMore> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => WeeklyTasksPage()),
-                      );
+                      ).then((_) => _loadUserInfo());
                     },
-                    icon: Icons.calendar_view_week, // 주간 과제 아이콘
+                    icon: Icons.calendar_view_week,
                   ),
                   TaskButton(
                     label: '랭킹',
@@ -237,9 +231,9 @@ class _RankMoreState extends State<RankMore> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const RankingPage()),
-                      );
+                      ).then((_) => _loadUserInfo());
                     },
-                    icon: Icons.leaderboard, // 랭킹 아이콘
+                    icon: Icons.leaderboard,
                   ),
                   TaskButton(
                     label: '도전과제',
@@ -248,58 +242,15 @@ class _RankMoreState extends State<RankMore> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => ChallengePage()),
-                      );
+                      ).then((_) => _loadUserInfo());
                     },
-                    icon: Icons.flag, // 도전 과제 아이콘
+                    icon: Icons.flag,
                   ),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// TaskButton 클래스
-class TaskButton extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onPressed;
-  final IconData icon; // 아이콘 매개변수 추가
-
-  const TaskButton({
-    super.key,
-    required this.label,
-    required this.color,
-    required this.onPressed,
-    required this.icon, // 아이콘 초기화
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-        ),
-      ),
-      onPressed: onPressed,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // 내용 중앙 정렬
-        children: [
-          Icon(icon, size: 30), // 아이콘 추가 (크기 설정)
-          const SizedBox(height: 8), // 아이콘과 레이블 사이의 공간
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
       ),
     );
   }

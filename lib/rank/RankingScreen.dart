@@ -146,7 +146,7 @@ class RankingPage extends StatelessWidget {
                         ),
                       ),
                     ],
-// 2등 (왼쪽, 중간 높이)
+                    // 2등 (왼쪽, 중간 높이)
                     if (topThreeUsers.length > 1) ...[
                       Positioned(
                         bottom: 20,
@@ -174,7 +174,7 @@ class RankingPage extends StatelessWidget {
                         ),
                       ),
                     ],
-// 1등 (가운데, 가장 높은 위치)
+                    // 1등 (가운데, 가장 높은 위치)
                     if (topThreeUsers.isNotEmpty) ...[
                       Positioned(
                         bottom: 40,
