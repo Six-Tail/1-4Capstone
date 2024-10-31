@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import '../service/User_Service.dart';
 import '../utils/Themes.Colors.dart';
 
@@ -25,7 +26,8 @@ class _PostDetailState extends State<PostDetail> {
   final UserService userService = UserService();
   String userName = '';
   String userImage = '';
-  String userId = '';
+  String userId = FirebaseAuth.instance.currentUser!.uid;
+  bool isScraped = false; // 즐겨찾기 상태 변수
 
   Future<void> _fetchUserDetails() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
@@ -45,6 +47,42 @@ class _PostDetailState extends State<PostDetail> {
   void initState() {
     super.initState();
     _fetchUserDetails();
+    _checkIfScraped();
+  }
+
+  Future<void> _checkIfScraped() async {
+    // Firestore에서 현재 사용자가 이 게시글을 즐겨찾기했는지 확인
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('scraps')
+        .doc(userId)
+        .collection('posts')
+        .doc(widget.postId)
+        .get();
+    setState(() {
+      isScraped = snapshot.exists;
+    });
+  }
+
+  Future<void> _toggleScrap() async {
+    final scrapDoc = FirebaseFirestore.instance
+        .collection('scraps')
+        .doc(userId)
+        .collection('posts')
+        .doc(widget.postId);
+
+    if (isScraped) {
+      // 즐겨찾기 해제
+      await scrapDoc.delete();
+    } else {
+      // 즐겨찾기 등록
+      await scrapDoc.set({
+        'postId': widget.postId,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    }
+    setState(() {
+      isScraped = !isScraped;
+    });
   }
 
   Future<void> _togglePostLike(bool isLiked) async {
@@ -88,8 +126,19 @@ class _PostDetailState extends State<PostDetail> {
         'isLiked': false,
       });
 
+      // 댓글 수 업데이트
       await FirebaseFirestore.instance.collection('posts').doc(widget.postId).update({
         'commentsCount': FieldValue.increment(1),
+      });
+
+      // 사용자의 commentedPosts 컬렉션에 게시글 ID 추가
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('commentedPosts')
+          .doc(widget.postId)
+          .set({
+        'timestamp': FieldValue.serverTimestamp(),
       });
 
       _commentController.clear();
@@ -281,6 +330,13 @@ class _PostDetailState extends State<PostDetail> {
                                     ],
                                   ),
                                   Spacer(),
+                                  IconButton(
+                                    icon: Icon(
+                                      isScraped ? Icons.star : Icons.star_border,
+                                      color: isScraped ? Colors.yellow : Colors.grey,
+                                    ),
+                                    onPressed: _toggleScrap, // 즐겨찾기 토글 함수
+                                  ),
                                   if (post['userId'] == userId)
                                     PopupMenuButton<String>(
                                       onSelected: (value) {

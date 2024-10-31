@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/Themes.Colors.dart';
+import 'AllpostScreen.dart';
+import 'CommentScreen.dart';
+import 'ScrapScreen.dart';
 import 'WritePost.Screen.dart';
 import 'FreeBoard.Screen.dart';
 import 'GoalshareBoard.Screen.dart';
@@ -8,7 +11,6 @@ import 'MentoringBoard.Screen.dart';
 import 'PromotionBoard.Screen.dart';
 import 'HotBoard.Screen.dart';
 import 'WroteBoard.Screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CommunityMainPage extends StatefulWidget {
   @override
@@ -49,6 +51,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // 첫 번째 Row: 기존의 두 개의 박스
             Row(
               children: [
                 Expanded(
@@ -74,7 +77,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       ),
                       child: const Column(
                         children: [
-                          Icon(Icons.whatshot, size: 40, color: Colors.brown),
+                          Icon(Icons.local_fire_department, size: 40, color: Colors.deepOrange),
                           SizedBox(height: 30),
                           Text('HOT 게시판', style: TextStyle(fontSize: 16)),
                         ],
@@ -93,7 +96,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => WroteBoardScreen(userId: '',),
+                          builder: (context) => WroteBoardScreen(userId: ''),
                         ),
                       );
                     },
@@ -106,7 +109,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                       ),
                       child: const Column(
                         children: [
-                          Icon(Icons.notes, size: 40, color: Colors.black),
+                          Icon(Icons.edit_note_sharp, size: 40, color: Colors.blueAccent),
                           SizedBox(height: 30),
                           Text('내가 쓴 글', style: TextStyle(fontSize: 16)),
                         ],
@@ -118,6 +121,98 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
             ),
             const SizedBox(height: 16),
 
+            // 두 번째 Row: 세 번째 박스는 AllPostsScreen로 이동, 네 번째 박스는 ScrapPage로 이동
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      // AllPostsScreen 페이지로 이동
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AllPostsScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.paste, size: 40, color: Colors.purple),
+                          SizedBox(height: 30),
+                          Text('전체 글', style: TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ScrapPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.star_border_outlined, size: 40, color: Colors.yellow),
+                          SizedBox(height: 30),
+                          Text('스크랩', style: TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CommentedPostsPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.comment, size: 40, color: Colors.teal),
+                          SizedBox(height: 30),
+                          Text('댓글 단 글', style: TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // 기존의 확장형 게시판 목록
             Theme(
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
@@ -197,7 +292,6 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
             context,
             MaterialPageRoute(builder: (context) => WritePostScreen()),
           );
-          // Firestore에 새 게시글 저장 후 자동으로 업데이트되므로 추가 작업 불필요
         },
         child: const Icon(Icons.add),
       ),
