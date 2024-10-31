@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class DailyTasksPage extends StatefulWidget {
@@ -17,7 +18,9 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
       dailyTasks[index].isCompleted = !dailyTasks[index].isCompleted;
       if (dailyTasks[index].isCompleted) {
         // 경험치 지급 로직 추가
-        print('Experience Points Earned: ${dailyTasks[index].xp}');
+        if (kDebugMode) {
+          print('Experience Points Earned: ${dailyTasks[index].xp}');
+        }
       }
     });
   }
@@ -25,7 +28,7 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Daily Tasks')),
+      appBar: AppBar(title: const Text('Daily Tasks')),
       body: ListView.builder(
         itemCount: dailyTasks.length,
         itemBuilder: (context, index) {
