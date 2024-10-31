@@ -154,11 +154,11 @@ class MentoringBoardScreen extends StatelessWidget {
                           SizedBox(height: 12),
                           Row(
                             children: [
-                              Icon(Icons.thumb_up, size: 18),
+                              Icon(Icons.thumb_up, size: 18, color: Colors.blue), // 좋아요 아이콘 파란색 설정
                               SizedBox(width: 4),
                               Text(post['likes'].toString()),
                               SizedBox(width: 16),
-                              Icon(Icons.comment, size: 18),
+                              Icon(Icons.comment, size: 18, color: Colors.green), // 댓글 아이콘 초록색 설정
                               SizedBox(width: 4),
                               Text(post['commentsCount'].toString()),
                               Spacer(),

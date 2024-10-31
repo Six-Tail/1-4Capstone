@@ -47,12 +47,23 @@ class _PostDetailState extends State<PostDetail> {
     _fetchUserDetails();
   }
 
-  Future<void> _togglePostLike(bool isLiked, int currentLikes) async {
+  Future<void> _togglePostLike(bool isLiked) async {
     try {
-      await FirebaseFirestore.instance.collection('posts').doc(widget.postId).update({
-        'isLiked': !isLiked,
-        'likes': isLiked ? currentLikes - 1 : currentLikes + 1,
-      });
+      final postDoc = FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+
+      if (isLiked) {
+        // 좋아요를 이미 눌렀으면 UID를 제거
+        await postDoc.update({
+          'likedBy': FieldValue.arrayRemove([userId]),
+          'likes': FieldValue.increment(-1),
+        });
+      } else {
+        // 좋아요를 누르지 않았다면 UID를 추가
+        await postDoc.update({
+          'likedBy': FieldValue.arrayUnion([userId]),
+          'likes': FieldValue.increment(1),
+        });
+      }
     } catch (e) {
       print("좋아요 업데이트 오류: $e");
     }
@@ -233,7 +244,6 @@ class _PostDetailState extends State<PostDetail> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 작성자 정보와 게시 시간 표시
                       StreamBuilder<DocumentSnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('posts')
@@ -243,7 +253,8 @@ class _PostDetailState extends State<PostDetail> {
                           if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
                           final post = (snapshot.data!.data() ?? {}) as Map<String, dynamic>;
 
-                          final isUserPost = post['userId'] == userId; // 작성자가 현재 로그인한 유저인지 확인
+                          final likedBy = List<String>.from(post['likedBy'] ?? []);
+                          final isLiked = likedBy.contains(userId); // 현재 사용자가 좋아요를 눌렀는지 확인
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +281,7 @@ class _PostDetailState extends State<PostDetail> {
                                     ],
                                   ),
                                   Spacer(),
-                                  if (isUserPost) // 현재 사용자가 작성자인 경우에만 메뉴 표시
+                                  if (post['userId'] == userId)
                                     PopupMenuButton<String>(
                                       onSelected: (value) {
                                         if (value == 'edit') {
@@ -304,16 +315,14 @@ class _PostDetailState extends State<PostDetail> {
                                 children: [
                                   IconButton(
                                     icon: Icon(
-                                      post['isLiked'] == true
-                                          ? Icons.thumb_up
-                                          : Icons.thumb_up_off_alt,
+                                      isLiked ? Icons.thumb_up : Icons.thumb_up_off_alt,
+                                      color: isLiked ? Colors.blue : Colors.blue,
                                     ),
-                                    onPressed: () => _togglePostLike(
-                                        post['isLiked'] == true, post['likes'] ?? 0),
+                                    onPressed: () => _togglePostLike(isLiked),
                                   ),
                                   Text(post['likes']?.toString() ?? '0'),
                                   const SizedBox(width: 16),
-                                  const Icon(Icons.comment),
+                                  const Icon(Icons.comment, color: Colors.green),
                                   Text(post['commentsCount']?.toString() ?? '0'),
                                 ],
                               ),
@@ -322,7 +331,6 @@ class _PostDetailState extends State<PostDetail> {
                           );
                         },
                       ),
-                      // 댓글 및 답글 UI 유지
                       StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('posts')
