@@ -237,7 +237,7 @@ class _RankMoreState extends State<RankMore> {
                 mainAxisSpacing: screenHeight * 0.03,
                 children: [
                   TaskButton(
-                    label: '일일과제',
+                    label: '일간 미션',
                     color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
@@ -248,7 +248,7 @@ class _RankMoreState extends State<RankMore> {
                     icon: Icons.assignment,
                   ),
                   TaskButton(
-                    label: '주간과제',
+                    label: '주간 미션',
                     color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(

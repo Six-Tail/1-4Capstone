@@ -94,4 +94,19 @@ class UserService {
     }
     return userList;
   }
+
+  Future<void> updateTaskStatus(String uid, String taskName, DateTime lastClaimedTime, {bool isCompleted = false, bool hasClaimedXP = false}) async {
+    await _firestore.collection('users').doc(uid).collection('day tasks').doc(taskName).set({
+      'hasClaimedXP': hasClaimedXP, // 이제 hasClaimedXP 값을 매개변수로 받습니다.
+      'lastClaimedTime': lastClaimedTime,
+      'isCompleted': isCompleted, // 태스크 완료 상태 저장
+    }, SetOptions(merge: true)); // merge: true를 사용하여 기존 문서에 필드 추가
+  }
+
+  // 태스크 상태 불러오기
+  Future<Map<String, dynamic>?> getTaskStatus(String uid, String taskName) async {
+    DocumentSnapshot doc = await _firestore.collection('users').doc(uid).collection('day tasks').doc(taskName).get();
+    return doc.data() as Map<String, dynamic>?;
+  }
 }
+
