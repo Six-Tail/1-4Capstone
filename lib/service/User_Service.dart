@@ -1,37 +1,31 @@
-import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth에서 User 가져오기
+import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import '../rank/RankingScreen.dart'; // 사용자 정의 User 모델 임포트
+import '../rank/RankingScreen.dart';
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String defaultProfileImageUrl = 'https://drive.google.com/file/d/18KGbC7T_zNG-k2bWodK5cmUcRQ9b8xDE/'; // 기본 이미지 URL
+  final String defaultProfileImageUrl = 'https://drive.google.com/file/d/18KGbC7T_zNG-k2bWodK5cmUcRQ9b8xDE/';
 
-  // Firestore에 사용자 정보를 저장하는 함수
+  // 새로운 사용자를 Firestore에 저장하는 함수
   Future<void> saveUserIfNew(User firebaseUser) async {
     final userDoc = _firestore.collection('users').doc(firebaseUser.uid);
-
-    // 이미 사용자 정보가 저장되어 있는지 확인
     if (!(await userDoc.get()).exists) {
       await userDoc.set({
         'userName': firebaseUser.displayName ?? 'Unknown',
         'userImage': firebaseUser.photoURL ?? defaultProfileImageUrl,
-        // 기본 프로필 사진 사용
         'email': firebaseUser.email,
         'createdAt': FieldValue.serverTimestamp(),
         'level': 1,
-        // 초기 레벨
         'currentExp': 0,
-        // 초기 경험치
         'maxExp': 10,
-        // 초기 최대 경험치
       });
     }
   }
 
-  // 사용자 정보를 업데이트하는 함수
-  Future<void> updateUserLevelAndExp(String uid, int level, int currentExp,
-      int maxExp) async {
+  // 사용자 경험치와 레벨을 업데이트하는 함수
+  Future<void> updateUserLevelAndExp(String uid, int level, int currentExp, int maxExp) async {
     final userDoc = _firestore.collection('users').doc(uid);
     await userDoc.update({
       'level': level,
@@ -40,26 +34,34 @@ class UserService {
     });
   }
 
-  // Firestore에서 사용자 정보를 불러오는 함수
+  // 사용자 정보를 불러오는 함수
   Future<Map<String, dynamic>?> getUserInfo(String uid) async {
     try {
-      DocumentSnapshot userDoc = await _firestore.collection('users')
-          .doc(uid)
-          .get();
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
       if (userDoc.exists) {
-        return userDoc.data() as Map<String, dynamic>?; // 사용자 문서가 존재할 경우 데이터 반환
+        return userDoc.data() as Map<String, dynamic>?;
       } else {
-        return null; // 문서가 존재하지 않으면 null 반환
+        return null;
       }
     } catch (e) {
       if (kDebugMode) {
         print("Error fetching user info: $e");
       }
-      return null; // 오류 발생 시 null 반환
+      return null;
     }
   }
 
-  // 사용자 정보를 가져오는 함수
+  // 사용자 레벨을 업데이트하는 유틸리티 함수
+  Map<String, int> updateLevel(int currentExp, int level, int maxExp) {
+    while (currentExp >= maxExp) {
+      level += 1;
+      currentExp -= maxExp;
+      maxExp = (100 * pow(1.05, level - 1)).round(); // 다음 레벨 경험치 증가
+    }
+    return {'level': level, 'currentExp': currentExp, 'maxExp': maxExp};
+  }
+
+  // 모든 사용자 목록을 가져와 정렬 및 랭크 할당
   Future<List<AppUser>> getAllUsers() async {
     List<AppUser> userList = [];
     try {
@@ -70,33 +72,26 @@ class UserService {
           name: data['userName'] ?? 'Unknown',
           level: data['level'] ?? 1,
           currentExp: data['currentExp'] ?? 0,
-          // 현재 경험치 추가
           rank: 0,
-          // 초기 rank를 0으로 설정
-          profileImageUrl: data['userImage'] ??
-              defaultProfileImageUrl, // 프로필 이미지 URL 추가
+          profileImageUrl: data['userImage'] ?? defaultProfileImageUrl,
         ));
       }
 
-      // 사용자 데이터를 레벨과 경험치에 따라 내림차순으로 정렬
+      // 사용자 목록을 레벨과 경험치로 정렬
       userList.sort((a, b) {
-        // 레벨 비교
         int levelComparison = b.level.compareTo(a.level);
-        if (levelComparison != 0) return levelComparison;
-
-        // 레벨이 같으면 경험치 비교
-        return b.currentExp.compareTo(a.currentExp);
+        return levelComparison != 0 ? levelComparison : b.currentExp.compareTo(a.currentExp);
       });
 
       // 랭크 할당
       for (int i = 0; i < userList.length; i++) {
-        userList[i] = userList[i].copyWith(rank: i + 1); // i + 1로 랭크 설정
+        userList[i] = userList[i].copyWith(rank: i + 1);
       }
     } catch (e) {
       if (kDebugMode) {
         print("Error fetching users: $e");
       }
     }
-    return userList; // 사용자 목록 반환
+    return userList;
   }
 }

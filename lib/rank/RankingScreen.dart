@@ -141,12 +141,13 @@ class RankingPage extends StatelessWidget {
                               ),
                             ),
                             Text("레벨: ${topThreeUsers[2].level}"),
-                            Text("경험치: ${topThreeUsers[2].currentExp}"),
+                            Text("경험치: ${_formatExperience(topThreeUsers[2].currentExp)}"), // 수정된 부분
                           ],
                         ),
                       ),
                     ],
-                    // 2등 (왼쪽, 중간 높이)
+
+// 2등 (왼쪽, 중간 높이)
                     if (topThreeUsers.length > 1) ...[
                       Positioned(
                         bottom: 20,
@@ -169,12 +170,13 @@ class RankingPage extends StatelessWidget {
                               ),
                             ),
                             Text("레벨: ${topThreeUsers[1].level}"),
-                            Text("경험치: ${topThreeUsers[1].currentExp}"),
+                            Text("경험치: ${_formatExperience(topThreeUsers[1].currentExp)}"), // 수정된 부분
                           ],
                         ),
                       ),
                     ],
-                    // 1등 (가운데, 가장 높은 위치)
+
+// 1등 (가운데, 가장 높은 위치)
                     if (topThreeUsers.isNotEmpty) ...[
                       Positioned(
                         bottom: 40,
@@ -196,7 +198,7 @@ class RankingPage extends StatelessWidget {
                               ),
                             ),
                             Text("레벨: ${topThreeUsers[0].level}"),
-                            Text("경험치: ${topThreeUsers[0].currentExp}"),
+                            Text("경험치: ${_formatExperience(topThreeUsers[0].currentExp)}"), // 수정된 부분
                           ],
                         ),
                       ),
@@ -262,3 +264,13 @@ class RankingPage extends StatelessWidget {
     );
   }
 }
+
+// 경험치량 포맷팅 함수 추가
+String _formatExperience(int exp) {
+  if (exp < 1000000) return exp.toString(); // 1000 미만은 그대로 출력
+  if (exp < 1000000000) return '${(exp / 10000).toStringAsFixed(1)}만'; // 1,000,000 이상, 1,000,000,000 미만은 '백만'으로 표시
+  if (exp < 1000000000000) return '${(exp / 100000000).toStringAsFixed(1)}억'; // 1,000,000,000 이상, 1,000,000,000,000 미만은 '십억'으로 표시
+  return '${(exp / 1000000000000).toStringAsFixed(1)}조'; // 1,000,000,000,000 이상은 '조'로 표시
+}
+
+

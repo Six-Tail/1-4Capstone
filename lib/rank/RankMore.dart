@@ -20,19 +20,28 @@ class RankMore extends StatefulWidget {
 class _RankMoreState extends State<RankMore> {
   int currentExp = 0;
   int level = 1;
-  int maxExp = 10;
+  int maxExp = 50;
   final UserService userService = UserService();
+  Color levelTextColor = Colors.black; // 초기 색상은 검정색으로 설정
+
+  // 레벨에 따른 색상 배열 (1~9레벨은 연한 파랑, 10레벨부터 다른 색상 사용)
+  final List<Color> levelColors = [
+    Colors.lightBlueAccent,  // 1~9 레벨
+    Colors.deepPurpleAccent,  // 10~19 레벨
+    Colors.amberAccent,       // 20~29 레벨
+    Colors.redAccent,         // 30~39 레벨
+    Colors.pinkAccent,        // 40~49 레벨
+    Colors.cyanAccent,        // 50~59 레벨
+    Colors.yellowAccent,      // 60~69 레벨
+    Colors.lightGreenAccent,  // 70~79 레벨
+    Colors.deepOrange,        // 80~89 레벨
+    Colors.purpleAccent,      // 90~99 레벨
+  ];
 
   @override
   void initState() {
     super.initState();
     _loadUserInfo();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _loadUserInfo(); // 페이지로 돌아올 때마다 사용자 정보 갱신
   }
 
   Future<void> _loadUserInfo() async {
@@ -45,17 +54,32 @@ class _RankMoreState extends State<RankMore> {
           currentExp = userInfo['currentExp'] ?? 0;
           maxExp = userInfo['maxExp'] ?? 10;
         });
+
+        _setLevelTextColor(); // 색상 설정
+        _updateLevel(); // 레벨 업데이트 체크
       }
     }
   }
 
   void _updateLevel() {
-    while (currentExp >= maxExp) {
-      level += 1;
-      currentExp -= maxExp;
-      maxExp = (maxExp * 1.2).round();
-    }
+    final updatedData = userService.updateLevel(currentExp, level, maxExp);
+    setState(() {
+      level = updatedData['level']!;
+      currentExp = updatedData['currentExp']!;
+      maxExp = updatedData['maxExp']!;
+      _setLevelTextColor(); // 레벨 텍스트 색상 설정
+    });
     _saveUserLevelAndExp();
+  }
+
+  void _setLevelTextColor() {
+    if (level < 10) {
+      levelTextColor = Colors.black; // 1~9레벨은 검정색
+    } else {
+      // 색상 배열을 반복해서 사용
+      int colorIndex = (level ~/ 10 - 1) % levelColors.length; // 색상 배열 길이로 나눈 나머지 사용
+      levelTextColor = levelColors[colorIndex]; // 색상 설정
+    }
   }
 
   Future<void> _saveUserLevelAndExp() async {
@@ -87,6 +111,15 @@ class _RankMoreState extends State<RankMore> {
     final user = FirebaseAuth.instance.currentUser;
     return user?.displayName ?? '사용자';
   }
+
+  // 경험치량 포맷팅 함수 추가
+  String _formatExperience(int exp) {
+    if (exp < 1000000) return exp.toString(); // 1000 미만은 그대로 출력
+    if (exp < 1000000000) return '${(exp / 10000).toStringAsFixed(1)}만'; // 1,000,000 이상, 1,000,000,000 미만은 '백만'으로 표시
+    if (exp < 1000000000000) return '${(exp / 100000000).toStringAsFixed(1)}억'; // 1,000,000,000 이상, 1,000,000,000,000 미만은 '십억'으로 표시
+    return '${(exp / 1000000000000).toStringAsFixed(1)}조'; // 1,000,000,000,000 이상은 '조'로 표시
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +180,7 @@ class _RankMoreState extends State<RankMore> {
                           style: TextStyle(
                             fontSize: screenHeight * 0.03,
                             fontWeight: FontWeight.bold,
+                            color: levelTextColor, // 레벨 텍스트 색상 적용
                           ),
                         ),
                         SizedBox(width: screenWidth * 0.02),
@@ -185,7 +219,7 @@ class _RankMoreState extends State<RankMore> {
                     ),
                     SizedBox(height: screenHeight * 0.01),
                     Text(
-                      '$currentExp/$maxExp',
+                      '${_formatExperience(currentExp)}/${_formatExperience(maxExp)}', // 포맷팅된 경험치 표시
                       style: TextStyle(
                         fontSize: screenHeight * 0.02,
                         color: Colors.grey[600],
@@ -208,7 +242,7 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => DailyTasksPage()),
+                        MaterialPageRoute(builder: (context) => const DailyTasksPage()),
                       ).then((_) => _loadUserInfo()); // 돌아오면 정보 갱신
                     },
                     icon: Icons.assignment,

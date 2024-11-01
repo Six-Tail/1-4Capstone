@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../service/User_Service.dart';
 
 class DailyTasksPage extends StatefulWidget {
+  const DailyTasksPage({super.key});
+
   @override
   _DailyTasksPageState createState() => _DailyTasksPageState();
 }
@@ -13,9 +15,10 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
   final User? currentUser = FirebaseAuth.instance.currentUser;
 
   List<Task> dailyTasks = [
-    Task(name: 'Exercise', isCompleted: false, xp: 50),
-    Task(name: 'Read a book', isCompleted: false, xp: 30),
-    Task(name: 'Meditation', isCompleted: false, xp: 20),
+    Task(name: '앱에 로그인하기', isCompleted: false, xp: 10),
+    Task(name: '일정 3개 이상 등록하기', isCompleted: false, xp: 40),
+    Task(name: '일정 3개 이상 완료하기', isCompleted: false, xp: 40),
+    Task(name: '일정 달성률 50% 이상 달성하기', isCompleted: false, xp: 500),
   ];
 
   void completeTask(int index) async {
@@ -40,7 +43,7 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
         if (currentExp >= maxExp) {
           level += 1;
           currentExp -= maxExp; // 초과 경험치는 다음 레벨로 이월
-          maxExp = (maxExp * 1.2).round(); // 다음 레벨업에 필요한 경험치 증가 (20% 증가)
+          maxExp = (maxExp * 1.05).round(); // 다음 레벨업에 필요한 경험치 증가 (20% 증가)
         }
 
         // Firestore에 사용자 정보 업데이트
