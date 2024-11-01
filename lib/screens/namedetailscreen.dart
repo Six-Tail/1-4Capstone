@@ -35,7 +35,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
                     radius: 50,
                     backgroundImage: _profileImage != null
                         ? FileImage(_profileImage!) // 선택한 이미지를 프로필로 설정
-                        : NetworkImage('https://example.com/profile_image.jpg') as ImageProvider, // 기본 프로필 이미지 URL
+                        : const NetworkImage('https://example.com/profile_image.jpg') as ImageProvider, // 기본 프로필 이미지 URL
                   ),
                   Positioned(
                     bottom: 0,
