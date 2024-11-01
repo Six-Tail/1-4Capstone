@@ -1,12 +1,10 @@
+// ProfileDetailScreen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:todobest_home/screens/birthdayselectionscreen.dart';
-import 'package:todobest_home/screens/genderselectionscreen.dart';
-import 'package:todobest_home/screens/namedetailscreen.dart';
-
 import 'editnicknamescreen.dart';
-
+import 'birthdayselectionscreen.dart';
+import 'genderselectionscreen.dart';
 
 class ProfileDetailScreen extends StatefulWidget {
   @override
@@ -14,9 +12,11 @@ class ProfileDetailScreen extends StatefulWidget {
 }
 
 class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
-  File? _profileImage; // 프로필 이미지 파일을 저장할 변수
+  File? _profileImage;
   final ImagePicker _picker = ImagePicker();
-  bool _isHovered = false; // hover 상태를 관리하는 변수
+  String _nickname = '정세운';
+  String _birthday = '2003년 4월 23일';
+  String _gender = '남성';
 
   @override
   Widget build(BuildContext context) {
@@ -28,49 +28,42 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
         padding: EdgeInsets.all(16.0),
         children: [
           Center(
-            child: MouseRegion(
-              onEnter: (_) => setState(() => _isHovered = true),
-              onExit: (_) => setState(() => _isHovered = false),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: _profileImage != null
-                        ? FileImage(_profileImage!) // 선택한 이미지를 프로필로 설정
-                        : NetworkImage('https://example.com/profile_image.jpg') as ImageProvider, // 기본 프로필 이미지 URL
-                  ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: _changeProfileImage, // 프로필 사진 변경 메소드 호출
-                        child: CircleAvatar(
-                          radius: 18,
-                          backgroundColor: Colors.white,
-                          child: Icon(Icons.camera_alt, color: Colors.grey),
-                        ),
-                      ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: _profileImage != null
+                      ? FileImage(_profileImage!)
+                      : NetworkImage('https://example.com/profile_image.jpg') as ImageProvider,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: _changeProfileImage,
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.white,
+                      child: Icon(Icons.camera_alt, color: Colors.grey),
                     ),
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: 16.0),
           Divider(),
           ListTile(
             title: Text('닉네임'),
-            trailing: Text('정세운', style: TextStyle(color: Colors.blue)),
+            trailing: Text(_nickname, style: TextStyle(color: Colors.blue)),
             onTap: () async {
-              // 닉네임 변경 화면으로 이동
               final newNickname = await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => EditNicknameScreen()),
               );
               if (newNickname != null) {
-                // 닉네임이 변경되었으면 업데이트 처리
                 setState(() {
-                  // 예: 닉네임 업데이트 로직
+                  _nickname = newNickname;
                 });
               }
             },
@@ -78,37 +71,39 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
           Divider(),
           ListTile(
             title: Text('생일'),
-            trailing: Text('2003년 4월 23일', style: TextStyle(color: Colors.blue)),
-    onTap: () async {
-      // 닉네임 변경 화면으로 이동
-      final newNickname = await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => BirthdaySelectionScreen()),
-      );
-    },
+            trailing: Text(_birthday, style: TextStyle(color: Colors.blue)),
+            onTap: () async {
+              final selectedBirthday = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => BirthdaySelectionScreen()),
+              );
+              if (selectedBirthday != null) {
+                setState(() {
+                  _birthday = selectedBirthday;
+                });
+              }
+            },
           ),
           Divider(),
           ListTile(
             title: Text('성별'),
-            trailing: Text('남성', style: TextStyle(color: Colors.blue)),
+            trailing: Text(_gender, style: TextStyle(color: Colors.blue)),
             onTap: () async {
-              // 닉네임 변경 화면으로 이동
-              final newNickname = await Navigator.push(
+              final selectedGender = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => GenderSelectionScreen(currentGender: '',)),
+                MaterialPageRoute(builder: (context) => GenderSelectionScreen(currentGender: _gender)),
               );
+              if (selectedGender != null) {
+                setState(() {
+                  _gender = selectedGender;
+                });
+              }
             },
           ),
           Divider(),
           ListTile(
             title: Text('이름'),
-            onTap: () async {
-              // 닉네임 변경 화면으로 이동
-              final newNickname = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NameDetailScreen()),
-              );
-            },
+            subtitle: Text('본인 확인 정보로 사용할 수 있는 이름을 관리합니다. 본인 인증받은 이름이 등록됩니다.'),
           ),
         ],
       ),
@@ -117,13 +112,10 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
 
   Future<void> _changeProfileImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       setState(() {
-        _profileImage = File(pickedFile.path); // 선택한 파일을 프로필 이미지로 설정
+        _profileImage = File(pickedFile.path);
       });
     }
   }
 }
-
-

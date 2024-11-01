@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:todobest_home/screens/account_info_screen.dart';
-import 'account_info_screen.dart';
-import 'account_settings_screen.dart';
+import 'package:todobest_home/screens/manage_screen.dart';
 
 class UserProfileScreen extends StatelessWidget {
+  get toggleTheme => null;
+
+  get isDarkMode => null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +46,7 @@ class UserProfileScreen extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AccountInfoScreen()),
+                MaterialPageRoute(builder: (context) => ManageScreen(toggleTheme: toggleTheme, isDarkMode: isDarkMode)),
               );
             },
           ),

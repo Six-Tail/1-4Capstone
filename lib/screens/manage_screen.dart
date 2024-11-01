@@ -4,15 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:get/get.dart';
-import 'package:todobest_home/screens/account_info_screen.dart';
 import '../screen/First.Screen.dart';
-import 'event_edit_screen.dart';
-import 'image_picker.dart';
 import 'feedback_screen.dart';
+import 'namedetailscreen.dart';
 import 'notification_settings_screen.dart';
 import 'calendar_list_screen.dart';
-import 'login_management_screen.dart';
 
 class ManageScreen extends StatefulWidget {
   final Function(bool) toggleTheme;
@@ -133,92 +129,6 @@ class _ManageScreenState extends State<ManageScreen> {
     );
   }
 
-  // 휴일 선택 모달 창
-  void _showHolidayPicker() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 200,
-          child: Column(
-            children: <Widget>[
-              ListTile(
-                title: Text('한국'),
-                onTap: () {
-                  setState(() {
-                    selectedHoliday = '한국';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('미국'),
-                onTap: () {
-                  setState(() {
-                    selectedHoliday = '미국';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('일본'),
-                onTap: () {
-                  setState(() {
-                    selectedHoliday = '일본';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // 언어 선택 모달 창
-  void _showLanguagePicker() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 200,
-          child: Column(
-            children: <Widget>[
-              ListTile(
-                title: Text('한국'),
-                onTap: () {
-                  setState(() {
-                    selectedLanguage = '한국';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('미국'),
-                onTap: () {
-                  setState(() {
-                    selectedLanguage = '미국';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('일본'),
-                onTap: () {
-                  setState(() {
-                    selectedLanguage = '일본';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -251,13 +161,6 @@ class _ManageScreenState extends State<ManageScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          '+82 10-2730-4759',
-                          style: TextStyle(
-                            fontSize: 14,
-                          ),
-                        ),
                       ],
                     ),
                   ],
@@ -267,7 +170,7 @@ class _ManageScreenState extends State<ManageScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AccountSettingsScreen()),
+                      MaterialPageRoute(builder: (context) => ProfileDetailScreen()),
                     );
                   },
                 ),
@@ -278,74 +181,34 @@ class _ManageScreenState extends State<ManageScreen> {
             leading: Icon(Icons.account_circle),
             title: Text('ToDoBest 계정'),
             subtitle: Text('peterishappy@naver.com'),
+          ),
+          ListTile(
+            leading: Icon(Icons.call),
+            title: Text('전화번호'),
+            subtitle: Text('010-2900-9686'),
+          ),
+          ListTile(
+            title: Text('내 정보 관리'),
+            trailing: Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AccountInfoScreen()),
+                MaterialPageRoute(
+                  builder: (context) => ProfileDetailScreen(),
+                ),
               );
             },
+          ),
+          ListTile(
+            title: Text('계정 비밀번호 변경'),
+            trailing: Icon(Icons.chevron_right),
           ),
 
           const Divider(color: Colors.grey),
           ListTile(
-            leading: Icon(Icons.language),
-            title: Text('언어'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  selectedLanguage,
-                  style: TextStyle(color: Colors.grey),
-                ),
-                Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16.0),
-              ],
-            ),
-            onTap: _showLanguagePicker,
-          ),
-          ListTile(
-            leading: Icon(Icons.event_available),
-            title: Text('휴일'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  selectedHoliday,
-                  style: TextStyle(color: Colors.grey),
-                ),
-                Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16.0),
-              ],
-            ),
-            onTap: _showHolidayPicker,
-          ),
-          ListTile(
             leading: Icon(Icons.access_time),
             title: Text('시간대'),
             trailing: _buildToggleButton(showTimezone),
-          ),
-          ListTile(
-            leading: Icon(Icons.brightness_2),
-            title: Text('음력'),
-            trailing: _buildToggleButton(showLunar),
-          ),
-          ListTile(
-            leading: Icon(Icons.history),
-            title: Text('일정 작성 기록'),
-            trailing: _buildToggleButton(showScheduleHistory),
-          ),
-          ListTile(
-            leading: Icon(Icons.photo_library),
-            title: Text('추천 사진'),
-            trailing: _buildToggleButton(showRecommendedPhotos),
-          ),
-          ListTile(
-            leading: Icon(Icons.event),
-            title: Text('이벤트 편집'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => EventEditScreen()),
-              );
-            },
           ),
           ListTile(
             leading: Icon(Icons.notifications),
