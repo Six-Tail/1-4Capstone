@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todobest_home/screens/profiledetailscreen.dart';
 import 'login_management_screen.dart'; // login_management_screen.dart 파일 임포트
 
 
@@ -20,8 +21,16 @@ class AccountInfoScreen extends StatelessWidget {
             subtitle: Text('+82 10-27**-47**'),
           ),
           ListTile(
-            title: Text('내정보 관리'),
+            title: Text('내 정보 관리'),
             trailing: Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileDetailScreen(),
+                ),
+              );
+              },
           ),
           ListTile(
             title: Text('연락처 관리'),

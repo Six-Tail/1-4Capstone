@@ -1,13 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:get/get.dart';
 import 'package:todobest_home/screens/account_info_screen.dart';
+import '../screen/First.Screen.dart';
 import 'event_edit_screen.dart';
 import 'image_picker.dart';
 import 'feedback_screen.dart';
 import 'notification_settings_screen.dart';
 import 'calendar_list_screen.dart';
-import 'login_management_screen.dart'; // login_management_screen.dart 파일 임포트
-
-
+import 'login_management_screen.dart';
 
 class ManageScreen extends StatefulWidget {
   final Function(bool) toggleTheme;
@@ -26,6 +31,84 @@ class _ManageScreenState extends State<ManageScreen> {
   List<bool> showLunar = [true, false];
   List<bool> showScheduleHistory = [true, false];
   List<bool> showRecommendedPhotos = [true, false];
+
+  // 로그아웃 함수
+  Future<void> _signOut() async {
+    bool logoutSuccessful = true;
+
+    try {
+      await FirebaseAuth.instance.signOut();
+      if (kDebugMode) {
+        print('파이어베이스 로그아웃 성공');
+      }
+    } catch (error) {
+      print('파이어베이스 로그아웃 실패 $error');
+    }
+
+    try {
+      await FlutterNaverLogin.logOutAndDeleteToken();
+      if (kDebugMode) {
+        print('네이버 로그아웃 성공');
+      }
+    } catch (error) {
+      print('네이버 로그아웃 실패 $error');
+    }
+
+    try {
+      await GoogleSignIn().signOut();
+      if (kDebugMode) {
+        print('구글 로그아웃 성공');
+      }
+    } catch (error) {
+      print('구글 로그아웃 실패 $error');
+    }
+
+    try {
+      await UserApi.instance.logout();
+      if (kDebugMode) {
+        print('카카오 로그아웃 성공, SDK에서 토큰 삭제');
+      }
+    } catch (error) {
+      print('카카오 로그아웃 실패 $error');
+    }
+
+    if (logoutSuccessful) {
+      // 로그아웃 완료 후 첫 화면으로 이동
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => FirstScreen()),
+            (route) => false,
+      );
+    }
+  }
+
+  // 로그아웃 확인 다이얼로그
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('로그아웃'),
+          content: Text('로그아웃 하시겠습니까?'),
+          actions: [
+            TextButton(
+              child: Text('예'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+                await _signOut(); // 로그아웃 함수 호출
+              },
+            ),
+            TextButton(
+              child: Text('아니오'),
+              onPressed: () {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   // 토글 버튼 스타일
   Widget _buildToggleButton(List<bool> isSelected) {
@@ -275,16 +358,6 @@ class _ManageScreenState extends State<ManageScreen> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.feedback),
-            title: Text('피드백'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => FeedbackScreen()),
-              );
-            },
-          ),
-          ListTile(
             leading: Icon(Icons.calendar_today),
             title: Text('캘린더 목록'),
             onTap: () {
@@ -295,27 +368,29 @@ class _ManageScreenState extends State<ManageScreen> {
               );
             },
           ),
+          ListTile(
+            leading: Icon(Icons.feedback),
+            title: Text('피드백'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FeedbackScreen()),
+              );
+            },
+          ),
           const ListTile(
             title: Text('ToDoBest pro'),
             subtitle: Text('광고 제거 및 기능 잠금 해제'),
             trailing: Icon(Icons.chevron_right),
             leading: Icon(Icons.stars),
           ),
-          const ListTile(
-            title: Text('로그아웃'),
-            trailing: Icon(Icons.chevron_right),
-            leading: Icon(Icons.logout),
+          ListTile(
+            title: const Text('로그아웃'),
+            trailing: const Icon(Icons.chevron_right),
+            leading: const Icon(Icons.logout),
+            onTap: _showLogoutDialog,
           ),
           Divider(),
-          ListTile(
-            title: Text('화면 테마'),
-            trailing: Switch(
-              value: widget.isDarkMode,
-              onChanged: (bool value) {
-                widget.toggleTheme(value);
-              },
-            ),
-          ),
         ],
       ),
     );

@@ -71,11 +71,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               padding: EdgeInsets.all(16.0),
               child: Text('고급 설정', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
-            const ListTile(
-              leading: Icon(Icons.history),
-              title: Text('내 홈 과거 데이터 보기'),
-              subtitle: Text('현재 지원하지 않는 내 홈의 과거 데이터를 열람할 수 있습니다.'),
-            ),
             SwitchListTile(
               title: const Text('생일 알림'),
               subtitle: const Text(
@@ -83,13 +78,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               value: true,
               onChanged: (bool value) {},
             ),
-            SwitchListTile(
-              title: const Text('Wi-Fi에서만 배경 자동재생'),
-              subtitle: const Text('프로필 배경 동영상을 Wi-Fi 환경에서만 자동 재생합니다.'),
-              value: false,
-              onChanged: (bool value) {},
-            ),
-
           ],
         ),
       ),

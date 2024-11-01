@@ -23,16 +23,16 @@ class FeedbackScreen extends StatelessWidget {
           children: [
             const Text(
               '제출해 주신 피드백은 모두 정성스레 읽지만 하나하나 답변해 드리기 어렵습니다.',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: Colors.black, fontSize: 16),
             ),
             const SizedBox(height: 20),
             TextField(
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: '좋은 점, 나쁜 점, 개선을 위한 제안, 잘못된 번역 등',
-                hintStyle: TextStyle(color: Colors.grey[600]),
+                hintStyle: TextStyle(color: Colors.white),
                 filled: true,
-                fillColor: Colors.grey[850],
+                fillColor: Colors.blueGrey,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -91,7 +91,7 @@ class FeedbackScreen extends StatelessWidget {
           ],
         ),
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
     );
   }
 }
