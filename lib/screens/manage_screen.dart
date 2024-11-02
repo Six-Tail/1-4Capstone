@@ -11,6 +11,7 @@ import 'notification_settings_screen.dart';
 import 'calendar_list_screen.dart';
 import '../screen/First.Screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'PWChange.Screen.dart';
 
 class ManageScreen extends StatefulWidget {
   final Function(bool) toggleTheme;
@@ -295,9 +296,15 @@ class _ManageScreenState extends State<ManageScreen> {
               );
             },
           ),
-          const ListTile(
+          ListTile(
             title: Text('계정 비밀번호 변경'),
             trailing: Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PWChangeScreen()),
+              );
+            },
           ),
           const Divider(color: Colors.grey),
           const ListTile(
