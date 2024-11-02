@@ -20,21 +20,19 @@ class UserService {
         'level': 1,
         'currentExp': 0,
         'maxExp': 10,
+        'phoneNumber': '', // 초기 전화번호 필드 추가
       });
     }
   }
 
-  // 사용자 경험치와 레벨을 업데이트하는 함수
-  Future<void> updateUserLevelAndExp(String uid, int level, int currentExp, int maxExp) async {
-    final userDoc = _firestore.collection('users').doc(uid);
-    await userDoc.update({
-      'level': level,
-      'currentExp': currentExp,
-      'maxExp': maxExp,
+  // 전화번호 업데이트 메서드
+  Future<void> updateUserPhoneNumber(String uid, String phoneNumber) async {
+    await _firestore.collection('users').doc(uid).update({
+      'phoneNumber': phoneNumber,
     });
   }
 
-  // 사용자 정보를 불러오는 함수
+  // 사용자 정보를 불러오는 함수 (전화번호 포함)
   Future<Map<String, dynamic>?> getUserInfo(String uid) async {
     try {
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
@@ -49,6 +47,16 @@ class UserService {
       }
       return null;
     }
+  }
+
+  // 사용자 경험치와 레벨을 업데이트하는 함수
+  Future<void> updateUserLevelAndExp(String uid, int level, int currentExp, int maxExp) async {
+    final userDoc = _firestore.collection('users').doc(uid);
+    await userDoc.update({
+      'level': level,
+      'currentExp': currentExp,
+      'maxExp': maxExp,
+    });
   }
 
   // 사용자 레벨을 업데이트하는 유틸리티 함수
@@ -95,12 +103,13 @@ class UserService {
     return userList;
   }
 
+  // 태스크 상태 업데이트
   Future<void> updateTaskStatus(String uid, String taskName, DateTime? lastClaimedTime, {bool isCompleted = false, bool hasClaimedXP = false}) async {
     await _firestore.collection('users').doc(uid).collection('day tasks').doc(taskName).set({
-      'hasClaimedXP': hasClaimedXP, // 이제 hasClaimedXP 값을 매개변수로 받습니다.
+      'hasClaimedXP': hasClaimedXP,
       'lastClaimedTime': lastClaimedTime,
-      'isCompleted': isCompleted, // 태스크 완료 상태 저장
-    }, SetOptions(merge: true)); // merge: true를 사용하여 기존 문서에 필드 추가
+      'isCompleted': isCompleted,
+    }, SetOptions(merge: true));
   }
 
   // 태스크 상태 불러오기
@@ -109,4 +118,3 @@ class UserService {
     return doc.data() as Map<String, dynamic>?;
   }
 }
-

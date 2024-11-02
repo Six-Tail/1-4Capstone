@@ -28,12 +28,51 @@ class _ManageScreenState extends State<ManageScreen> {
   String userEmail = '';
   String userName = '';
   String userImage = '';
+  String userPhone = ''; // 전화번호 필드 추가
   firebase_auth.User? firebaseUser;
 
   @override
   void initState() {
     super.initState();
     _getCurrentUserInfo();
+  }
+
+  // 전화번호 변경 함수
+  void _changePhoneNumber() async {
+    String? newPhoneNumber = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController phoneController = TextEditingController();
+        return AlertDialog(
+          title: const Text('전화번호 변경'),
+          content: TextField(
+            controller: phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(hintText: '새 전화번호 입력'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null), // 취소
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(phoneController.text); // 입력된 번호 반환
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // 입력된 새 전화번호가 있을 경우 업데이트
+    if (newPhoneNumber != null && newPhoneNumber.isNotEmpty) {
+      setState(() {
+        userPhone = newPhoneNumber;
+      });
+      await _userService.updateUserPhoneNumber(firebaseUser!.uid, newPhoneNumber);
+    }
   }
 
   // 현재 사용자 정보 가져오기
@@ -46,6 +85,12 @@ class _ManageScreenState extends State<ManageScreen> {
         userEmail = firebaseUser!.email ?? '';
         userName = firebaseUser!.displayName ?? 'Unknown';
         userImage = firebaseUser!.photoURL ?? 'https://example.com/default_image.jpg';
+      });
+
+      // 사용자 Firestore 정보 가져오기
+      final userInfo = await _userService.getUserInfo(firebaseUser!.uid);
+      setState(() {
+        userPhone = userInfo?['phoneNumber'] ?? '전화번호를 설정하세요'; // 저장된 전화번호 불러오기
       });
 
       // 계정 종류 확인
@@ -158,14 +203,14 @@ class _ManageScreenState extends State<ManageScreen> {
           content: const Text('로그아웃 하시겠습니까?'),
           actions: [
             TextButton(
-              child: Text('예'),
+              child: const Text('예'),
               onPressed: () async {
                 Navigator.of(context).pop(); // 다이얼로그 닫기
                 await _signOut(); // 로그아웃 함수 호출
               },
             ),
             TextButton(
-              child: Text('아니오'),
+              child: const Text('아니오'),
               onPressed: () {
                 Navigator.of(context).pop(); // 다이얼로그 닫기
               },
@@ -179,13 +224,13 @@ class _ManageScreenState extends State<ManageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffffffff),
+      backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
         title: const Text('설정'),
-        backgroundColor: Color(0xffffffff),
+        backgroundColor: const Color(0xffffffff),
       ),
       body: ListView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         children: [
           Container(
             child: Row(
@@ -225,18 +270,22 @@ class _ManageScreenState extends State<ManageScreen> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.account_circle),
+            leading: const Icon(Icons.account_circle),
             title: Text(accountType), // 계정 종류 (Google, Kakao, Naver, ToDoBest)
             subtitle: Text(userEmail), // 이메일 주소
           ),
-          const ListTile(
-            leading: Icon(Icons.call),
-            title: Text('전화번호'),
-            subtitle: Text('010-2900-9686'),
+          ListTile(
+            leading: const Icon(Icons.call),
+            title: const Text('전화번호'),
+            subtitle: Text(userPhone),
+            trailing: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: _changePhoneNumber,
+            ),
           ),
           ListTile(
-            title: Text('내 정보 관리'),
-            trailing: Icon(Icons.chevron_right),
+            title: const Text('내 정보 관리'),
+            trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
                 context,
@@ -266,8 +315,8 @@ class _ManageScreenState extends State<ManageScreen> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.calendar_today),
-            title: Text('캘린더 목록'),
+            leading: const Icon(Icons.calendar_today),
+            title: const Text('캘린더 목록'),
             onTap: () {
               Navigator.push(
                 context,
@@ -278,8 +327,8 @@ class _ManageScreenState extends State<ManageScreen> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.feedback),
-            title: Text('피드백'),
+            leading: const Icon(Icons.feedback),
+            title: const Text('피드백'),
             onTap: () {
               Navigator.push(
                 context,
@@ -299,7 +348,7 @@ class _ManageScreenState extends State<ManageScreen> {
             leading: const Icon(Icons.logout),
             onTap: _showLogoutDialog,
           ),
-          Divider(),
+          const Divider(),
         ],
       ),
     );
