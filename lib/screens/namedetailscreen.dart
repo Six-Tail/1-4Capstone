@@ -34,7 +34,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
       final userInfo = await _userService.getUserInfo(_firebaseUser!.uid);
       if (userInfo != null) {
         setState(() {
-          userName = userInfo['nickname'] ?? 'Unknown';
+          userName = userInfo['userName'] ?? 'Unknown'; // userName 사용
           gender = userInfo['gender'] ?? '선택안함';
           birthday = userInfo['birthday'] ?? '미설정';
           profileImageUrl = userInfo['userImage'] ?? profileImageUrl;
@@ -60,9 +60,9 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
     }
   }
 
-  Future<void> _updateNickname(String newNickname) async {
+  Future<void> _updateUserName(String newUserName) async { // userName 업데이트 메서드
     if (_firebaseUser != null) {
-      await _userService.updateUserInfo(_firebaseUser!.uid, nickname: newNickname);
+      await _userService.updateUserInfo(_firebaseUser!.uid, userName: newUserName); // userName 사용
     }
   }
 
@@ -115,18 +115,18 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
           SizedBox(height: 16.0),
           Divider(),
           ListTile(
-            title: Text('닉네임'),
+            title: Text('사용자 이름'),
             trailing: Text(userName, style: TextStyle(color: Colors.blue)),
             onTap: () async {
-              final newNickname = await Navigator.push(
+              final newUserName = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EditNicknameScreen()),
+                MaterialPageRoute(builder: (context) => EditNicknameScreen()), // 사용자 이름 변경 화면으로 이동
               );
-              if (newNickname != null) {
+              if (newUserName != null) {
                 setState(() {
-                  userName = newNickname;
+                  userName = newUserName;
                 });
-                await _updateNickname(newNickname); // Firebase에 업데이트
+                await _updateUserName(newUserName); // Firebase에 사용자 이름 업데이트
               }
             },
           ),

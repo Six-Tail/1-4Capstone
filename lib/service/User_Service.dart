@@ -24,7 +24,6 @@ class UserService {
         'currentExp': 0,
         'maxExp': 10,
         'phoneNumber': '', // 초기 전화번호 필드
-        'nickname': firebaseUser.displayName ?? 'Unknown', // 초기 닉네임 필드
         'birthday': '', // 초기 생일 필드
         'gender': '', // 초기 성별 필드
       });
@@ -52,17 +51,17 @@ class UserService {
     }
   }
 
-  // 사용자 정보 업데이트 메서드 (닉네임, 생일, 성별, 프로필 이미지 URL 포함)
-  Future<void> updateUserInfo(String uid, {String? nickname, String? birthday, String? gender, String? profileImageUrl}) async {
+  // 사용자 정보 업데이트 메서드 (userName, 생일, 성별, 프로필 이미지 URL 포함)
+  Future<void> updateUserInfo(String uid, {String? userName, String? birthday, String? gender, String? profileImageUrl}) async {
     Map<String, dynamic> updates = {};
-    if (nickname != null) updates['nickname'] = nickname;
+    if (userName != null) updates['userName'] = userName; // userName 필드 추가
     if (birthday != null) updates['birthday'] = birthday;
     if (gender != null) updates['gender'] = gender;
     if (profileImageUrl != null) updates['userImage'] = profileImageUrl; // 프로필 이미지 URL 업데이트 추가
     await _firestore.collection('users').doc(uid).update(updates);
   }
 
-  // 사용자 정보를 불러오는 함수 (전화번호, 닉네임, 생일, 성별, 프로필 이미지 포함)
+  // 사용자 정보를 불러오는 함수 (전화번호, userName, 생일, 성별, 프로필 이미지 포함)
   Future<Map<String, dynamic>?> getUserInfo(String uid) async {
     try {
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();

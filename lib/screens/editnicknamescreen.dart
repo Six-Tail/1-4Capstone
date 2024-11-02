@@ -1,4 +1,3 @@
-// EditNicknameScreen.dart
 import 'package:flutter/material.dart';
 import '../service/User_Service.dart'; // UserService import
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,17 +15,17 @@ class _EditNicknameScreenState extends State<EditNicknameScreen> {
   @override
   void initState() {
     super.initState();
-    _nicknameController.text = ''; // 초기 닉네임 값 설정 (예: 기존 닉네임)
+    _nicknameController.text = ''; // 초기 사용자 이름 값 설정 (예: 기존 사용자 이름)
   }
 
-  // 닉네임 업데이트 함수
-  Future<void> _updateNickname() async {
+  // 사용자 이름 업데이트 함수
+  Future<void> _updateUserName() async {
     if (_firebaseUser != null) {
-      String newNickname = _nicknameController.text.trim();
-      if (newNickname.isNotEmpty) {
-        // Firebase에 닉네임 업데이트
-        await _userService.updateUserInfo(_firebaseUser!.uid, nickname: newNickname);
-        Navigator.pop(context, newNickname); // 새로운 닉네임을 전달하며 화면 닫기
+      String newUserName = _nicknameController.text.trim();
+      if (newUserName.isNotEmpty) {
+        // Firebase에 사용자 이름 업데이트
+        await _userService.updateUserInfo(_firebaseUser!.uid, userName: newUserName);
+        Navigator.pop(context, newUserName); // 새로운 사용자 이름을 전달하며 화면 닫기
       }
     }
   }
@@ -35,7 +34,7 @@ class _EditNicknameScreenState extends State<EditNicknameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('닉네임 설정'),
+        title: Text('사용자 이름 설정'),
         centerTitle: true,
       ),
       body: Padding(
@@ -43,15 +42,15 @@ class _EditNicknameScreenState extends State<EditNicknameScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('닉네임을 입력해 주세요.', style: TextStyle(fontSize: 16)),
+            Text('사용자 이름을 입력해 주세요.', style: TextStyle(fontSize: 16)),
             TextField(
               controller: _nicknameController,
               maxLength: 20,
-              decoration: InputDecoration(hintText: '닉네임 입력'),
+              decoration: InputDecoration(hintText: '사용자 이름 입력'),
             ),
             Center(
               child: ElevatedButton(
-                onPressed: _updateNickname, // 버튼 클릭 시 닉네임 업데이트 함수 호출
+                onPressed: _updateUserName, // 버튼 클릭 시 사용자 이름 업데이트 함수 호출
                 child: Text('저장'),
               ),
             ),
