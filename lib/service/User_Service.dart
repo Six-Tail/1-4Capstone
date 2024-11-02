@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage 추가
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../rank/RankingScreen.dart';
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance; // Firebase Storage 인스턴스 추가
   final String defaultProfileImageUrl = 'https://drive.google.com/file/d/18KGbC7T_zNG-k2bWodK5cmUcRQ9b8xDE/';
 
   // 새로운 사용자를 Firestore에 저장하는 함수
@@ -20,7 +23,10 @@ class UserService {
         'level': 1,
         'currentExp': 0,
         'maxExp': 10,
-        'phoneNumber': '', // 초기 전화번호 필드 추가
+        'phoneNumber': '', // 초기 전화번호 필드
+        'nickname': firebaseUser.displayName ?? 'Unknown', // 초기 닉네임 필드
+        'birthday': '', // 초기 생일 필드
+        'gender': '', // 초기 성별 필드
       });
     }
   }
@@ -32,7 +38,31 @@ class UserService {
     });
   }
 
-  // 사용자 정보를 불러오는 함수 (전화번호 포함)
+  // 프로필 이미지 업로드 및 URL 반환 함수
+  Future<String?> uploadProfileImage(String uid, File imageFile) async {
+    try {
+      final storageRef = _storage.ref().child('user_images/$uid.jpg'); // 파일 경로 설정
+      await storageRef.putFile(imageFile); // 파일 업로드
+      return await storageRef.getDownloadURL(); // 다운로드 URL 반환
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error uploading profile image: $e");
+      }
+      return null; // 업로드 실패 시 null 반환
+    }
+  }
+
+  // 사용자 정보 업데이트 메서드 (닉네임, 생일, 성별, 프로필 이미지 URL 포함)
+  Future<void> updateUserInfo(String uid, {String? nickname, String? birthday, String? gender, String? profileImageUrl}) async {
+    Map<String, dynamic> updates = {};
+    if (nickname != null) updates['nickname'] = nickname;
+    if (birthday != null) updates['birthday'] = birthday;
+    if (gender != null) updates['gender'] = gender;
+    if (profileImageUrl != null) updates['userImage'] = profileImageUrl; // 프로필 이미지 URL 업데이트 추가
+    await _firestore.collection('users').doc(uid).update(updates);
+  }
+
+  // 사용자 정보를 불러오는 함수 (전화번호, 닉네임, 생일, 성별, 프로필 이미지 포함)
   Future<Map<String, dynamic>?> getUserInfo(String uid) async {
     try {
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();

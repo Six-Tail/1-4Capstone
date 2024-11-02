@@ -1,5 +1,7 @@
 // EditNicknameScreen.dart
 import 'package:flutter/material.dart';
+import '../service/User_Service.dart'; // UserService import
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditNicknameScreen extends StatefulWidget {
   @override
@@ -8,11 +10,25 @@ class EditNicknameScreen extends StatefulWidget {
 
 class _EditNicknameScreenState extends State<EditNicknameScreen> {
   TextEditingController _nicknameController = TextEditingController();
+  final UserService _userService = UserService();
+  final User? _firebaseUser = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
-    _nicknameController.text = '정세운';
+    _nicknameController.text = ''; // 초기 닉네임 값 설정 (예: 기존 닉네임)
+  }
+
+  // 닉네임 업데이트 함수
+  Future<void> _updateNickname() async {
+    if (_firebaseUser != null) {
+      String newNickname = _nicknameController.text.trim();
+      if (newNickname.isNotEmpty) {
+        // Firebase에 닉네임 업데이트
+        await _userService.updateUserInfo(_firebaseUser!.uid, nickname: newNickname);
+        Navigator.pop(context, newNickname); // 새로운 닉네임을 전달하며 화면 닫기
+      }
+    }
   }
 
   @override
@@ -35,9 +51,7 @@ class _EditNicknameScreenState extends State<EditNicknameScreen> {
             ),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context, _nicknameController.text);
-                },
+                onPressed: _updateNickname, // 버튼 클릭 시 닉네임 업데이트 함수 호출
                 child: Text('저장'),
               ),
             ),

@@ -1,5 +1,7 @@
 // BirthdaySelectionScreen.dart
 import 'package:flutter/material.dart';
+import '../service/User_Service.dart'; // UserService import
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BirthdaySelectionScreen extends StatefulWidget {
   @override
@@ -10,6 +12,19 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
   int _selectedYear = 2003;
   int _selectedMonth = 4;
   int _selectedDay = 23;
+
+  final UserService _userService = UserService();
+  final User? _firebaseUser = FirebaseAuth.instance.currentUser;
+
+  // 생일 업데이트 함수
+  Future<void> _updateBirthday() async {
+    if (_firebaseUser != null) {
+      String birthday = '$_selectedYear년 $_selectedMonth월 $_selectedDay일';
+      // Firebase에 생일 업데이트
+      await _userService.updateUserInfo(_firebaseUser!.uid, birthday: birthday);
+      Navigator.pop(context, birthday); // 새로운 생일 정보 전달하며 화면 닫기
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +88,7 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context, '$_selectedYear년 $_selectedMonth월 $_selectedDay일');
-                },
+                onPressed: _updateBirthday, // 버튼 클릭 시 생일 업데이트 함수 호출
                 child: Text('확인'),
               ),
             ),
