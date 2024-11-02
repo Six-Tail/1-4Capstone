@@ -95,7 +95,7 @@ class UserService {
     return userList;
   }
 
-  Future<void> updateTaskStatus(String uid, String taskName, DateTime lastClaimedTime, {bool isCompleted = false, bool hasClaimedXP = false}) async {
+  Future<void> updateTaskStatus(String uid, String taskName, DateTime? lastClaimedTime, {bool isCompleted = false, bool hasClaimedXP = false}) async {
     await _firestore.collection('users').doc(uid).collection('day tasks').doc(taskName).set({
       'hasClaimedXP': hasClaimedXP, // 이제 hasClaimedXP 값을 매개변수로 받습니다.
       'lastClaimedTime': lastClaimedTime,

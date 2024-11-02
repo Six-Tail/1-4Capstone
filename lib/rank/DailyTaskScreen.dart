@@ -77,8 +77,7 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              '남은 시간: ${timeUntilReset.inHours}시간 ${timeUntilReset.inMinutes
-                  .remainder(60)}분 ${timeUntilReset.inSeconds.remainder(60)}초',
+              '남은 시간: ${timeUntilReset.inHours}시간 ${timeUntilReset.inMinutes.remainder(60)}분 ${timeUntilReset.inSeconds.remainder(60)}초',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
@@ -87,7 +86,8 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
               itemCount: dailyTasks.length,
               itemBuilder: (context, index) {
                 return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: dailyTasks[index].isCompleted
@@ -128,7 +128,9 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: LinearProgressIndicator(
-                                    value: dailyTasks[index].isCompleted ? 1.0 : 0.0,
+                                    value: dailyTasks[index].isCompleted
+                                        ? 1.0
+                                        : 0.0,
                                     backgroundColor: Colors.grey,
                                     color: Colors.amber,
                                   ),
@@ -141,38 +143,40 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
                       const SizedBox(width: 12),
                       dailyTasks[index].isCompleted
                           ? ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: dailyTasks[index].hasClaimedXP
-                              ? Colors.grey // 해당 미션이 이미 획득된 경우 회색 버튼
-                              : Colors.amber,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8, horizontal: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4), // 사각형으로 설정
-                          ),
-                        ),
-                        onPressed: dailyTasks[index].hasClaimedXP
-                            ? null // 해당 미션이 이미 획득된 경우 비활성화
-                            : () => claimXP(index),
-                        child: const Text(
-                          '획득',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      )
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: dailyTasks[index].hasClaimedXP
+                                    ? Colors.grey // 해당 미션이 이미 획득된 경우 회색 버튼
+                                    : Colors.amber,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(4), // 사각형으로 설정
+                                ),
+                              ),
+                              onPressed: dailyTasks[index].hasClaimedXP
+                                  ? null // 해당 미션이 이미 획득된 경우 비활성화
+                                  : () => claimXP(index),
+                              child: const Text(
+                                '획득',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            )
                           : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8, horizontal: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4), // 사각형으로 설정
-                          ),
-                        ),
-                        onPressed: () {
-                          completeTask(index);
-                        },
-                        child: const Text('미션 완료'),
-                      ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.lightBlueAccent,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(4), // 사각형으로 설정
+                                ),
+                              ),
+                              onPressed: () {
+                                completeTask(index);
+                              },
+                              child: const Text('미션 완료'),
+                            ),
                     ],
                   ),
                 );
@@ -189,7 +193,8 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
 
     // 각 태스크에 대한 XP 청구 상태를 Firestore에서 가져옴
     for (int i = 0; i < dailyTasks.length; i++) {
-      var taskStatus = await userService.getTaskStatus(currentUser!.uid, dailyTasks[i].name);
+      var taskStatus =
+          await userService.getTaskStatus(currentUser!.uid, dailyTasks[i].name);
       if (taskStatus != null) {
         dailyTasks[i].hasClaimedXP = taskStatus['hasClaimedXP'] ?? false;
         dailyTasks[i].lastClaimedTime = taskStatus['lastClaimedTime']?.toDate();
@@ -209,7 +214,6 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
     setState(() {}); // 상태 업데이트
   }
 
-
   void completeTask(int index) async {
     setState(() {
       // UI에서 태스크 완료 상태 업데이트
@@ -221,12 +225,14 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
       await userService.updateTaskStatus(
         currentUser!.uid,
         dailyTasks[index].name,
-        DateTime.now(),
+        null,
         isCompleted: true, // isCompleted를 true로 설정
+        hasClaimedXP: false, // 획득 여부는 초기화하여 획득 가능 상태로 유지
       );
 
-      // Firestore에 저장 후, 로컬 리스트에서도 상태 업데이트
+      // 로컬 리스트에서도 상태 업데이트
       dailyTasks[index].isCompleted = true; // 로컬 리스트에서도 isCompleted 업데이트
+      dailyTasks[index].hasClaimedXP = false; // 획득 상태 초기화
     }
   }
 
@@ -273,7 +279,7 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
         maxExp,
       );
 
-      // 태스크 상태 업데이트 (hasClaimedXP를 true로 업데이트)
+      // Firestore에서 태스크의 획득 상태와 시간을 업데이트
       await userService.updateTaskStatus(
         currentUser!.uid,
         dailyTasks[index].name,
@@ -287,6 +293,9 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
         print('사용자 ID: ${currentUser!.uid}');
         print('미션 이름: ${dailyTasks[index].name}');
         print('획득한 경험치: ${dailyTasks[index].xp}');
+        print('현재 레벨: $level');
+        print('현재 경험치: $currentExp');
+        print('다음 레벨까지 필요한 경험치: $maxExp');
         print('타임스탬프: $currentTime');
       }
 
@@ -298,7 +307,7 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
   }
 }
 
-  class Task {
+class Task {
   String name;
   bool isCompleted;
   int xp;
