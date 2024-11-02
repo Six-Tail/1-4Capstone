@@ -1,53 +1,116 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import '../screen/First.Screen.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
+import '../service/User_Service.dart';
 import 'feedback_screen.dart';
 import 'namedetailscreen.dart';
 import 'notification_settings_screen.dart';
 import 'calendar_list_screen.dart';
+import '../screen/First.Screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ManageScreen extends StatefulWidget {
   final Function(bool) toggleTheme;
   final bool isDarkMode;
 
-  ManageScreen({required this.toggleTheme, required this.isDarkMode});
+  ManageScreen({super.key, required this.toggleTheme, required this.isDarkMode});
 
   @override
   _ManageScreenState createState() => _ManageScreenState();
 }
 
 class _ManageScreenState extends State<ManageScreen> {
-  String selectedHoliday = '한국';
-  String selectedLanguage = '한국';
-  List<bool> showTimezone = [true, false];
-  List<bool> showLunar = [true, false];
-  List<bool> showScheduleHistory = [true, false];
-  List<bool> showRecommendedPhotos = [true, false];
+  final UserService _userService = UserService();
+  String accountType = 'ToDoBest 계정';
+  String userEmail = '';
+  String userName = '';
+  String userImage = '';
+  firebase_auth.User? firebaseUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentUserInfo();
+  }
+
+  // 현재 사용자 정보 가져오기
+  void _getCurrentUserInfo() async {
+    firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
+
+    if (firebaseUser != null) {
+      // Firebase User 정보 설정
+      setState(() {
+        userEmail = firebaseUser!.email ?? '';
+        userName = firebaseUser!.displayName ?? 'Unknown';
+        userImage = firebaseUser!.photoURL ?? 'https://example.com/default_image.jpg';
+      });
+
+      // 계정 종류 확인
+      if (await _isGoogleUser()) {
+        setState(() => accountType = 'Google 계정');
+      } else if (await _isKakaoUser()) {
+        setState(() => accountType = 'Kakao 계정');
+      } else if (await _isNaverUser()) {
+        setState(() => accountType = 'Naver 계정');
+      } else {
+        setState(() => accountType = 'ToDoBest 계정');
+      }
+    }
+  }
+
+  Future<bool> _isGoogleUser() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    return await googleSignIn.isSignedIn();
+  }
+
+  Future<bool> _isKakaoUser() async {
+    try {
+      final kakao.User user = await kakao.UserApi.instance.me();
+      return user != null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> _isNaverUser() async {
+    try {
+      final currentToken = await FlutterNaverLogin.currentAccessToken;
+      return currentToken != null && currentToken.accessToken.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
 
   // 로그아웃 함수
   Future<void> _signOut() async {
     bool logoutSuccessful = true;
 
+    // Firebase 로그아웃 시도
     try {
-      await FirebaseAuth.instance.signOut();
+      await firebase_auth.FirebaseAuth.instance.signOut();
       if (kDebugMode) {
         print('파이어베이스 로그아웃 성공');
       }
     } catch (error) {
-      print('파이어베이스 로그아웃 실패 $error');
+      if (kDebugMode) {
+        print('파이어베이스 로그아웃 실패 $error');
+      }
+      logoutSuccessful = false;
     }
 
+    // 소셜 로그아웃 개별 시도
     try {
       await FlutterNaverLogin.logOutAndDeleteToken();
       if (kDebugMode) {
         print('네이버 로그아웃 성공');
       }
-    } catch (error) {
-      print('네이버 로그아웃 실패 $error');
+    } catch (e) {
+      if (kDebugMode) {
+        print("네이버 로그아웃 실패: $e");
+      }
     }
 
     try {
@@ -55,25 +118,32 @@ class _ManageScreenState extends State<ManageScreen> {
       if (kDebugMode) {
         print('구글 로그아웃 성공');
       }
-    } catch (error) {
-      print('구글 로그아웃 실패 $error');
+    } catch (e) {
+      if (kDebugMode) {
+        print("구글 로그아웃 실패: $e");
+      }
     }
 
     try {
-      await UserApi.instance.logout();
+      await kakao.UserApi.instance.logout();
       if (kDebugMode) {
-        print('카카오 로그아웃 성공, SDK에서 토큰 삭제');
+        print('카카오 로그아웃 성공');
       }
-    } catch (error) {
-      print('카카오 로그아웃 실패 $error');
+    } catch (e) {
+      if (kDebugMode) {
+        print("카카오 로그아웃 실패: $e");
+      }
     }
 
+    // SharedPreferences 초기화로 자동 로그인 상태 해제
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+
+    // 로그아웃이 성공한 경우 FirstScreen으로 이동하고 모든 화면 제거
     if (logoutSuccessful) {
-      // 로그아웃 완료 후 첫 화면으로 이동
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => FirstScreen()),
-            (route) => false,
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const FirstScreen()),
+            (Route<dynamic> route) => false,
       );
     }
   }
@@ -84,8 +154,8 @@ class _ManageScreenState extends State<ManageScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('로그아웃'),
-          content: Text('로그아웃 하시겠습니까?'),
+          title: const Text('로그아웃'),
+          content: const Text('로그아웃 하시겠습니까?'),
           actions: [
             TextButton(
               child: Text('예'),
@@ -106,29 +176,6 @@ class _ManageScreenState extends State<ManageScreen> {
     );
   }
 
-  // 토글 버튼 스타일
-  Widget _buildToggleButton(List<bool> isSelected) {
-    return ToggleButtons(
-      isSelected: isSelected,
-      onPressed: (int index) {
-        setState(() {
-          for (int i = 0; i < isSelected.length; i++) {
-            isSelected[i] = i == index;
-          }
-        });
-      },
-      borderRadius: BorderRadius.circular(8),
-      selectedColor: Colors.white,
-      fillColor: Colors.grey[700],
-      color: Colors.grey,
-      constraints: BoxConstraints(minWidth: 60.0, minHeight: 40.0),
-      children: const [
-        Text('표시'),
-        Text('비표시'),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,17 +193,17 @@ class _ManageScreenState extends State<ManageScreen> {
               children: [
                 Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 30,
-                      backgroundImage: NetworkImage('https://example.com/profile_image.jpg'),
+                      backgroundImage: NetworkImage(userImage),
                     ),
                     const SizedBox(width: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          '정세운',
-                          style: TextStyle(
+                          userName,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -166,7 +213,7 @@ class _ManageScreenState extends State<ManageScreen> {
                   ],
                 ),
                 IconButton(
-                  icon: Icon(Icons.settings),
+                  icon: const Icon(Icons.settings),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -179,10 +226,10 @@ class _ManageScreenState extends State<ManageScreen> {
           ),
           ListTile(
             leading: Icon(Icons.account_circle),
-            title: Text('ToDoBest 계정'),
-            subtitle: Text('peterishappy@naver.com'),
+            title: Text(accountType), // 계정 종류 (Google, Kakao, Naver, ToDoBest)
+            subtitle: Text(userEmail), // 이메일 주소
           ),
-          ListTile(
+          const ListTile(
             leading: Icon(Icons.call),
             title: Text('전화번호'),
             subtitle: Text('010-2900-9686'),
@@ -199,20 +246,18 @@ class _ManageScreenState extends State<ManageScreen> {
               );
             },
           ),
-          ListTile(
+          const ListTile(
             title: Text('계정 비밀번호 변경'),
             trailing: Icon(Icons.chevron_right),
           ),
-
           const Divider(color: Colors.grey),
-          ListTile(
+          const ListTile(
             leading: Icon(Icons.access_time),
             title: Text('시간대'),
-            trailing: _buildToggleButton(showTimezone),
           ),
           ListTile(
-            leading: Icon(Icons.notifications),
-            title: Text('알림 및 배지'),
+            leading: const Icon(Icons.notifications),
+            title: const Text('알림 및 배지'),
             onTap: () {
               Navigator.push(
                 context,
@@ -226,7 +271,8 @@ class _ManageScreenState extends State<ManageScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CalendarListScreen(isDarkMode: widget.isDarkMode),
+                MaterialPageRoute(
+                  builder: (context) => CalendarListScreen(isDarkMode: widget.isDarkMode),
                 ),
               );
             },
