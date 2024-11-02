@@ -92,6 +92,7 @@ class _ManageScreenState extends State<ManageScreen> {
       final userInfo = await _userService.getUserInfo(firebaseUser!.uid);
       setState(() {
         userPhone = userInfo?['phoneNumber'] ?? '전화번호를 설정하세요'; // 저장된 전화번호 불러오기
+        userName = userInfo?['userName'] ?? userName; // 저장된 사용자 이름 불러오기
       });
 
       // 계정 종류 확인
@@ -260,11 +261,18 @@ class _ManageScreenState extends State<ManageScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.settings),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final updatedUserName = await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => ProfileDetailScreen()),
                     );
+
+                    // ProfileDetailScreen에서 변경된 userName을 가져와서 업데이트
+                    if (updatedUserName != null) {
+                      setState(() {
+                        userName = updatedUserName;
+                      });
+                    }
                   },
                 ),
               ],
@@ -287,13 +295,20 @@ class _ManageScreenState extends State<ManageScreen> {
           ListTile(
             title: const Text('내 정보 관리'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              final updatedUserName = await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ProfileDetailScreen(),
                 ),
               );
+
+              // ProfileDetailScreen에서 변경된 userName을 가져와서 업데이트
+              if (updatedUserName != null) {
+                setState(() {
+                  userName = updatedUserName;
+                });
+              }
             },
           ),
           ListTile(
