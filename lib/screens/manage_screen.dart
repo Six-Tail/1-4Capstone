@@ -151,14 +151,18 @@ class _ManageScreenState extends State<ManageScreen> {
     // 소셜 로그아웃 개별 시도
     try {
       await FlutterNaverLogin.logOutAndDeleteToken();
+      // 로그아웃 후 SharedPreferences에 저장된 네이버 로그인 상태 초기화
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('isLoggedIn');
       if (kDebugMode) {
-        print('네이버 로그아웃 성공');
+        print('네이버 로그아웃 및 SharedPreferences 초기화 성공');
       }
     } catch (e) {
       if (kDebugMode) {
         print("네이버 로그아웃 실패: $e");
       }
     }
+
 
     try {
       await GoogleSignIn().signOut();
