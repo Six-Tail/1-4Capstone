@@ -17,7 +17,7 @@ class ManageScreen extends StatefulWidget {
   final Function(bool) toggleTheme;
   final bool isDarkMode;
 
-  ManageScreen({super.key, required this.toggleTheme, required this.isDarkMode});
+  const ManageScreen({super.key, required this.toggleTheme, required this.isDarkMode});
 
   @override
   _ManageScreenState createState() => _ManageScreenState();
@@ -49,7 +49,7 @@ class _ManageScreenState extends State<ManageScreen> {
           content: TextField(
             controller: phoneController,
             keyboardType: TextInputType.phone,
-            decoration: InputDecoration(hintText: '새 전화번호 입력'),
+            decoration: const InputDecoration(hintText: '새 전화번호 입력'),
           ),
           actions: [
             TextButton(
@@ -316,8 +316,8 @@ class _ManageScreenState extends State<ManageScreen> {
             },
           ),
           ListTile(
-            title: Text('계정 비밀번호 변경'),
-            trailing: Icon(Icons.chevron_right),
+            title: const Text('계정 비밀번호 변경'),
+            trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
                 context,
