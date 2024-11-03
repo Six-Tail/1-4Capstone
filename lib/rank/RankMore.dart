@@ -20,9 +20,10 @@ class RankMore extends StatefulWidget {
 class _RankMoreState extends State<RankMore> {
   int currentExp = 0;
   int level = 1;
-  int maxExp = 50;
+  int maxExp = 100;
   final UserService userService = UserService();
   Color levelTextColor = Colors.black; // 초기 색상은 검정색으로 설정
+  String userName = '사용자'; // 최신 사용자 이름을 저장할 변수
 
   // 레벨에 따른 색상 배열 (1~9레벨은 연한 파랑, 10레벨부터 다른 색상 사용)
   final List<Color> levelColors = [
@@ -47,12 +48,14 @@ class _RankMoreState extends State<RankMore> {
   Future<void> _loadUserInfo() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      // Firestore에서 사용자 정보 가져오기
       final userInfo = await userService.getUserInfo(user.uid);
       if (userInfo != null) {
         setState(() {
           level = userInfo['level'] ?? 1;
           currentExp = userInfo['currentExp'] ?? 0;
           maxExp = userInfo['maxExp'] ?? 10;
+          userName = userInfo['userName'] ?? '사용자'; // 최신 사용자 이름 설정
         });
 
         _setLevelTextColor(); // 색상 설정
@@ -107,14 +110,9 @@ class _RankMoreState extends State<RankMore> {
     return null;
   }
 
-  String _getUserName() {
-    final user = FirebaseAuth.instance.currentUser;
-    return user?.displayName ?? '사용자';
-  }
-
   // 경험치량 포맷팅 함수 추가
   String _formatExperience(int exp) {
-    if (exp < 1000000) return exp.toString(); // 1000 미만은 그대로 출력
+    if (exp < 1000000) return exp.toString(); // 1,000,000 미만은 그대로 출력
     if (exp < 1000000000) return '${(exp / 10000).toStringAsFixed(1)}만'; // 1,000,000 이상, 1,000,000,000 미만은 '백만'으로 표시
     if (exp < 1000000000000) return '${(exp / 100000000).toStringAsFixed(1)}억'; // 1,000,000,000 이상, 1,000,000,000,000 미만은 '십억'으로 표시
     return '${(exp / 1000000000000).toStringAsFixed(1)}조'; // 1,000,000,000,000 이상은 '조'로 표시
@@ -185,7 +183,7 @@ class _RankMoreState extends State<RankMore> {
                         ),
                         SizedBox(width: screenWidth * 0.02),
                         Text(
-                          _getUserName(),
+                          userName,
                           style: TextStyle(
                             fontSize: screenHeight * 0.028,
                             fontWeight: FontWeight.bold,

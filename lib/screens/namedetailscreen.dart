@@ -102,7 +102,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
                   right: 0,
                   child: GestureDetector(
                     onTap: _changeProfileImage,
-                    child: CircleAvatar(
+                    child: const CircleAvatar(
                       radius: 18,
                       backgroundColor: Colors.white,
                       child: Icon(Icons.camera_alt, color: Colors.grey),

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import 'DailyTaskScreen.dart';
+import 'model/task_model.dart';
 
 class WeeklyTasksPage extends StatefulWidget {
   @override
@@ -9,10 +8,10 @@ class WeeklyTasksPage extends StatefulWidget {
 }
 
 class _WeeklyTasksPageState extends State<WeeklyTasksPage> {
-  List<Task> weeklyTasks = [
-    Task(name: 'Complete 5 workouts', isCompleted: false, xp: 150, hasClaimedXP: false),
-    Task(name: 'Finish a book', isCompleted: false, xp: 100, hasClaimedXP: false),
-    Task(name: 'Cook 3 new recipes', isCompleted: false, xp: 80, hasClaimedXP: false),
+  List<DailyTask> weeklyTasks = [
+    DailyTask(name: 'Complete 5 workouts', isCompleted: false, xp: 150, hasClaimedXP: false),
+    DailyTask(name: 'Finish a book', isCompleted: false, xp: 100, hasClaimedXP: false),
+    DailyTask(name: 'Cook 3 new recipes', isCompleted: false, xp: 80, hasClaimedXP: false),
   ];
 
   void completeTask(int index) {
