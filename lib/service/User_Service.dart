@@ -129,7 +129,7 @@ class UserService {
   }
 
   // 태스크 상태 업데이트
-  Future<void> updateTaskStatus(String uid, String taskName, DateTime? lastClaimedTime, {bool isCompleted = false, bool hasClaimedXP = false}) async {
+  Future<void> updateDailyTaskStatus(String uid, String taskName, DateTime? lastClaimedTime, {bool isCompleted = false, bool hasClaimedXP = false}) async {
     await _firestore.collection('users').doc(uid).collection('daily tasks').doc(taskName).set({
       'hasClaimedXP': hasClaimedXP,
       'lastClaimedTime': lastClaimedTime,
@@ -138,8 +138,38 @@ class UserService {
   }
 
   // 태스크 상태 가져오기
-  Future<Map<String, dynamic>?> getTaskStatus(String uid, String taskName) async {
+  Future<Map<String, dynamic>?> getDailyTaskStatus(String uid, String taskName) async {
     DocumentSnapshot doc = await _firestore.collection('users').doc(uid).collection('daily tasks').doc(taskName).get();
+    return doc.data() as Map<String, dynamic>?;
+  }
+
+  // 태스크 상태 업데이트
+  Future<void> updateWeeklyTaskStatus(String uid, String taskName, DateTime? lastClaimedTime, {bool isCompleted = false, bool hasClaimedXP = false, required int currentAttendance}) async {
+    await _firestore.collection('users').doc(uid).collection('weekly tasks').doc(taskName).set({
+      'hasClaimedXP': hasClaimedXP,
+      'lastClaimedTime': lastClaimedTime,
+      'isCompleted': isCompleted,
+    }, SetOptions(merge: true));
+  }
+
+  // 태스크 상태 가져오기
+  Future<Map<String, dynamic>?> getWeeklyTaskStatus(String uid, String taskName) async {
+    DocumentSnapshot doc = await _firestore.collection('users').doc(uid).collection('weekly tasks').doc(taskName).get();
+    return doc.data() as Map<String, dynamic>?;
+  }
+
+  // 태스크 상태 업데이트
+  Future<void> updateChallengeTaskStatus(String uid, String taskName, DateTime? lastClaimedTime, {bool isCompleted = false, bool hasClaimedXP = false, required int currentAttendance}) async {
+    await _firestore.collection('users').doc(uid).collection('challenge tasks').doc(taskName).set({
+      'hasClaimedXP': hasClaimedXP,
+      'lastClaimedTime': lastClaimedTime,
+      'isCompleted': isCompleted,
+    }, SetOptions(merge: true));
+  }
+
+  // 태스크 상태 가져오기
+  Future<Map<String, dynamic>?> getChallengeTaskStatus(String uid, String taskName) async {
+    DocumentSnapshot doc = await _firestore.collection('users').doc(uid).collection('challenge tasks').doc(taskName).get();
     return doc.data() as Map<String, dynamic>?;
   }
 }

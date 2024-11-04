@@ -54,7 +54,7 @@ class _RankMoreState extends State<RankMore> {
         setState(() {
           level = userInfo['level'] ?? 1;
           currentExp = userInfo['currentExp'] ?? 0;
-          maxExp = userInfo['maxExp'] ?? 10;
+          maxExp = userInfo['maxExp'] ?? 100;
           userName = userInfo['userName'] ?? '사용자'; // 최신 사용자 이름 설정
         });
 
@@ -110,12 +110,12 @@ class _RankMoreState extends State<RankMore> {
     return null;
   }
 
-  // 경험치량 포맷팅 함수 추가
+  // 경험치 포맷팅 함수
   String _formatExperience(int exp) {
-    if (exp < 1000000) return exp.toString(); // 1,000,000 미만은 그대로 출력
-    if (exp < 1000000000) return '${(exp / 10000).toStringAsFixed(1)}만'; // 1,000,000 이상, 1,000,000,000 미만은 '백만'으로 표시
-    if (exp < 1000000000000) return '${(exp / 100000000).toStringAsFixed(1)}억'; // 1,000,000,000 이상, 1,000,000,000,000 미만은 '십억'으로 표시
-    return '${(exp / 1000000000000).toStringAsFixed(1)}조'; // 1,000,000,000,000 이상은 '조'로 표시
+    if (exp < 10000) return exp.toString();
+    if (exp < 100000000) return '${(exp / 10000).toStringAsFixed(1)}만';
+    if (exp < 1000000000000) return '${(exp / 100000000).toStringAsFixed(1)}억';
+    return '${(exp / 1000000000000).toStringAsFixed(1)}조';
   }
 
 
@@ -251,7 +251,7 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => WeeklyTasksPage()),
+                        MaterialPageRoute(builder: (context) => const WeeklyTasksPage()),
                       ).then((_) => _loadUserInfo());
                     },
                     icon: Icons.calendar_view_week,

@@ -253,6 +253,7 @@ class _CalenderScreenState extends State<CalenderScreen>
 
     try {
       DocumentReference value = await FirebaseFirestore.instance.collection('events').add({
+        'createdAt': FieldValue.serverTimestamp(), // 서버 시간으로 기록
         'uid': userId,
         'name': event,
         'time': time,
