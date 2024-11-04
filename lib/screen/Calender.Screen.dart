@@ -434,7 +434,7 @@ class _CalenderScreenState extends State<CalenderScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('월 통계'),
+                title: const Text('이달의 통계'),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showMonthlyStats(); // 월 통계 표시
@@ -479,26 +479,88 @@ class _CalenderScreenState extends State<CalenderScreen>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(child: Text('$currentYear년 $currentMonth월 통계')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('완료한 일정: $completedEvents / $totalEvents'),
-              const SizedBox(height: 10),
-              Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text('확인'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+          backgroundColor: Colors.transparent,
+          contentPadding: EdgeInsets.zero,
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.6,
+              minHeight: MediaQuery.of(context).size.height * 0.5,
             ),
-          ],
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff73b1e7),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Stack(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$currentYear년 $currentMonth월 통계',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // 원형 게이지 바 크기 조정
+                        SizedBox(
+                          width: 100, // 너비
+                          height: 100, // 높이
+                          child: CircularProgressIndicator(
+                            value: completionRate / 100,
+                            strokeWidth: 10, // 두께
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                            backgroundColor: Colors.grey[200],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text('완료한 일정: $completedEvents / $totalEvents'),
+                        const SizedBox(height: 20),
+                        Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    right: 10,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        '확인',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
+
+
+
+
+
   }
 
   void _showTotalStatsDialog() {
@@ -636,7 +698,7 @@ class _CalenderScreenState extends State<CalenderScreen>
         return AlertDialog(
           title: Center(
               child: Text(
-                  '${startDate.year}년 ${startDate.month}월 ${startDate.day}일 ~ ${endDate.year}년 ${endDate.month}월 ${endDate.day}일 통계')),
+                  '${startDate.year}/${startDate.month}/${startDate.day} ~ ${endDate.year}/${endDate.month}/${endDate.day} 통계')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
