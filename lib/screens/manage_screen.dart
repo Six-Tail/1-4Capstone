@@ -1,136 +1,227 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:todobest_home/screens/account_info_screen.dart';
-import 'event_edit_screen.dart';
-import 'image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter_naver_login/flutter_naver_login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
+import '../service/User_Service.dart';
 import 'feedback_screen.dart';
+import 'namedetailscreen.dart';
 import 'notification_settings_screen.dart';
 import 'calendar_list_screen.dart';
-import 'login_management_screen.dart'; // login_management_screen.dart 파일 임포트
-
-
+import '../screen/First.Screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'PWChange.Screen.dart';
 
 class ManageScreen extends StatefulWidget {
   final Function(bool) toggleTheme;
   final bool isDarkMode;
 
-  ManageScreen({required this.toggleTheme, required this.isDarkMode});
+  const ManageScreen({super.key, required this.toggleTheme, required this.isDarkMode});
 
   @override
   _ManageScreenState createState() => _ManageScreenState();
 }
 
 class _ManageScreenState extends State<ManageScreen> {
-  String selectedHoliday = '한국';
-  String selectedLanguage = '한국';
-  List<bool> showTimezone = [true, false];
-  List<bool> showLunar = [true, false];
-  List<bool> showScheduleHistory = [true, false];
-  List<bool> showRecommendedPhotos = [true, false];
+  final UserService _userService = UserService();
+  String accountType = 'ToDoBest 계정';
+  String userEmail = '';
+  String userName = '';
+  String userImage = '';
+  String userPhone = ''; // 전화번호 필드 추가
+  firebase_auth.User? firebaseUser;
 
-  // 토글 버튼 스타일
-  Widget _buildToggleButton(List<bool> isSelected) {
-    return ToggleButtons(
-      isSelected: isSelected,
-      onPressed: (int index) {
-        setState(() {
-          for (int i = 0; i < isSelected.length; i++) {
-            isSelected[i] = i == index;
-          }
-        });
-      },
-      borderRadius: BorderRadius.circular(8),
-      selectedColor: Colors.white,
-      fillColor: Colors.grey[700],
-      color: Colors.grey,
-      constraints: BoxConstraints(minWidth: 60.0, minHeight: 40.0),
-      children: const [
-        Text('표시'),
-        Text('비표시'),
-      ],
-    );
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentUserInfo();
   }
 
-  // 휴일 선택 모달 창
-  void _showHolidayPicker() {
-    showModalBottomSheet(
+  // 전화번호 변경 함수
+  void _changePhoneNumber() async {
+    String? newPhoneNumber = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          height: 200,
-          child: Column(
-            children: <Widget>[
-              ListTile(
-                title: Text('한국'),
-                onTap: () {
-                  setState(() {
-                    selectedHoliday = '한국';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('미국'),
-                onTap: () {
-                  setState(() {
-                    selectedHoliday = '미국';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('일본'),
-                onTap: () {
-                  setState(() {
-                    selectedHoliday = '일본';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+        TextEditingController phoneController = TextEditingController();
+        return AlertDialog(
+          title: const Text('전화번호 변경'),
+          content: TextField(
+            controller: phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(hintText: '새 전화번호 입력'),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null), // 취소
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(phoneController.text); // 입력된 번호 반환
+              },
+              child: const Text('확인'),
+            ),
+          ],
         );
       },
     );
+
+    // 입력된 새 전화번호가 있을 경우 업데이트
+    if (newPhoneNumber != null && newPhoneNumber.isNotEmpty) {
+      setState(() {
+        userPhone = newPhoneNumber;
+      });
+      await _userService.updateUserPhoneNumber(firebaseUser!.uid, newPhoneNumber);
+    }
   }
 
-  // 언어 선택 모달 창
-  void _showLanguagePicker() {
-    showModalBottomSheet(
+  // 현재 사용자 정보 가져오기
+  void _getCurrentUserInfo() async {
+    firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
+
+    if (firebaseUser != null) {
+      // Firebase User 정보 설정
+      setState(() {
+        userEmail = firebaseUser!.email ?? '';
+        userName = firebaseUser!.displayName ?? 'Unknown';
+        userImage = firebaseUser!.photoURL ?? 'https://example.com/default_image.jpg';
+      });
+
+      // 사용자 Firestore 정보 가져오기
+      final userInfo = await _userService.getUserInfo(firebaseUser!.uid);
+      setState(() {
+        userPhone = userInfo?['phoneNumber'] ?? '전화번호를 설정하세요'; // 저장된 전화번호 불러오기
+        userName = userInfo?['userName'] ?? userName; // 저장된 사용자 이름 불러오기
+      });
+
+      // 계정 종류 확인
+      if (await _isGoogleUser()) {
+        setState(() => accountType = 'Google 계정');
+      } else if (await _isKakaoUser()) {
+        setState(() => accountType = 'Kakao 계정');
+      } else if (await _isNaverUser()) {
+        setState(() => accountType = 'Naver 계정');
+      } else {
+        setState(() => accountType = 'ToDoBest 계정');
+      }
+    }
+  }
+
+  Future<bool> _isGoogleUser() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    return await googleSignIn.isSignedIn();
+  }
+
+  Future<bool> _isKakaoUser() async {
+    try {
+      final kakao.User user = await kakao.UserApi.instance.me();
+      return user != null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> _isNaverUser() async {
+    try {
+      final currentToken = await FlutterNaverLogin.currentAccessToken;
+      return currentToken != null && currentToken.accessToken.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 로그아웃 함수
+  Future<void> _signOut() async {
+    bool logoutSuccessful = true;
+
+    // Firebase 로그아웃 시도
+    try {
+      await firebase_auth.FirebaseAuth.instance.signOut();
+      if (kDebugMode) {
+        print('파이어베이스 로그아웃 성공');
+      }
+    } catch (error) {
+      if (kDebugMode) {
+        print('파이어베이스 로그아웃 실패 $error');
+      }
+      logoutSuccessful = false;
+    }
+
+    // 소셜 로그아웃 개별 시도
+    try {
+      await FlutterNaverLogin.logOutAndDeleteToken();
+      // 로그아웃 후 SharedPreferences에 저장된 네이버 로그인 상태 초기화
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('isLoggedIn');
+      if (kDebugMode) {
+        print('네이버 로그아웃 및 SharedPreferences 초기화 성공');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("네이버 로그아웃 실패: $e");
+      }
+    }
+
+
+    try {
+      await GoogleSignIn().signOut();
+      if (kDebugMode) {
+        print('구글 로그아웃 성공');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("구글 로그아웃 실패: $e");
+      }
+    }
+
+    try {
+      await kakao.UserApi.instance.logout();
+      if (kDebugMode) {
+        print('카카오 로그아웃 성공');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("카카오 로그아웃 실패: $e");
+      }
+    }
+
+    // SharedPreferences 초기화로 자동 로그인 상태 해제
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+
+    // 로그아웃이 성공한 경우 FirstScreen으로 이동하고 모든 화면 제거
+    if (logoutSuccessful) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const FirstScreen()),
+            (Route<dynamic> route) => false,
+      );
+    }
+  }
+
+  // 로그아웃 확인 다이얼로그
+  void _showLogoutDialog() {
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          height: 200,
-          child: Column(
-            children: <Widget>[
-              ListTile(
-                title: Text('한국'),
-                onTap: () {
-                  setState(() {
-                    selectedLanguage = '한국';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('미국'),
-                onTap: () {
-                  setState(() {
-                    selectedLanguage = '미국';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('일본'),
-                onTap: () {
-                  setState(() {
-                    selectedLanguage = '일본';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
+        return AlertDialog(
+          title: const Text('로그아웃'),
+          content: const Text('로그아웃 하시겠습니까?'),
+          actions: [
+            TextButton(
+              child: const Text('예'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+                await _signOut(); // 로그아웃 함수 호출
+              },
+            ),
+            TextButton(
+              child: const Text('아니오'),
+              onPressed: () {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+              },
+            ),
+          ],
         );
       },
     );
@@ -139,13 +230,13 @@ class _ManageScreenState extends State<ManageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffffffff),
+      backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
         title: const Text('설정'),
-        backgroundColor: Color(0xffffffff),
+        backgroundColor: const Color(0xffffffff),
       ),
       body: ListView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         children: [
           Container(
             child: Row(
@@ -153,26 +244,19 @@ class _ManageScreenState extends State<ManageScreen> {
               children: [
                 Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 30,
-                      backgroundImage: NetworkImage('https://example.com/profile_image.jpg'),
+                      backgroundImage: NetworkImage(userImage),
                     ),
                     const SizedBox(width: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          '정세운',
-                          style: TextStyle(
+                          userName,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '+82 10-2730-4759',
-                          style: TextStyle(
-                            fontSize: 14,
                           ),
                         ),
                       ],
@@ -180,93 +264,75 @@ class _ManageScreenState extends State<ManageScreen> {
                   ],
                 ),
                 IconButton(
-                  icon: Icon(Icons.settings),
-                  onPressed: () {
-                    Navigator.push(
+                  icon: const Icon(Icons.settings),
+                  onPressed: () async {
+                    final updatedUserName = await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AccountSettingsScreen()),
+                      MaterialPageRoute(builder: (context) => ProfileDetailScreen()),
                     );
+
+                    // ProfileDetailScreen에서 변경된 userName을 가져와서 업데이트
+                    if (updatedUserName != null) {
+                      setState(() {
+                        userName = updatedUserName;
+                      });
+                    }
                   },
                 ),
               ],
             ),
           ),
           ListTile(
-            leading: Icon(Icons.account_circle),
-            title: Text('ToDoBest 계정'),
-            subtitle: Text('peterishappy@naver.com'),
+            leading: const Icon(Icons.account_circle),
+            title: Text(accountType), // 계정 종류 (Google, Kakao, Naver, ToDoBest)
+            subtitle: Text(userEmail), // 이메일 주소
+          ),
+          ListTile(
+            leading: const Icon(Icons.call),
+            title: const Text('전화번호'),
+            subtitle: Text(userPhone),
+            trailing: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: _changePhoneNumber,
+            ),
+          ),
+          ListTile(
+            title: const Text('내 정보 관리'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
+              final updatedUserName = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileDetailScreen(),
+                ),
+              );
+
+              // ProfileDetailScreen에서 변경된 userName을 가져와서 업데이트
+              if (updatedUserName != null) {
+                setState(() {
+                  userName = updatedUserName;
+                });
+              }
+            },
+          ),
+          ListTile(
+            title: const Text('계정 비밀번호 변경'),
+            trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AccountInfoScreen()),
+                MaterialPageRoute(builder: (context) => PWChangeScreen()),
               );
             },
           ),
-
           const Divider(color: Colors.grey),
-          ListTile(
-            leading: Icon(Icons.language),
-            title: Text('언어'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  selectedLanguage,
-                  style: TextStyle(color: Colors.grey),
-                ),
-                Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16.0),
-              ],
-            ),
-            onTap: _showLanguagePicker,
-          ),
-          ListTile(
-            leading: Icon(Icons.event_available),
-            title: Text('휴일'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  selectedHoliday,
-                  style: TextStyle(color: Colors.grey),
-                ),
-                Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16.0),
-              ],
-            ),
-            onTap: _showHolidayPicker,
-          ),
-          ListTile(
+          const ListTile(
             leading: Icon(Icons.access_time),
             title: Text('시간대'),
-            trailing: _buildToggleButton(showTimezone),
           ),
           ListTile(
-            leading: Icon(Icons.brightness_2),
-            title: Text('음력'),
-            trailing: _buildToggleButton(showLunar),
-          ),
-          ListTile(
-            leading: Icon(Icons.history),
-            title: Text('일정 작성 기록'),
-            trailing: _buildToggleButton(showScheduleHistory),
-          ),
-          ListTile(
-            leading: Icon(Icons.photo_library),
-            title: Text('추천 사진'),
-            trailing: _buildToggleButton(showRecommendedPhotos),
-          ),
-          ListTile(
-            leading: Icon(Icons.event),
-            title: Text('이벤트 편집'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => EventEditScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.notifications),
-            title: Text('알림 및 배지'),
+            leading: const Icon(Icons.notifications),
+            title: const Text('알림 및 배지'),
             onTap: () {
               Navigator.push(
                 context,
@@ -275,23 +341,24 @@ class _ManageScreenState extends State<ManageScreen> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.feedback),
-            title: Text('피드백'),
+            leading: const Icon(Icons.calendar_today),
+            title: const Text('캘린더 목록'),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => FeedbackScreen()),
+                MaterialPageRoute(
+                  builder: (context) => CalendarListScreen(isDarkMode: widget.isDarkMode),
+                ),
               );
             },
           ),
           ListTile(
-            leading: Icon(Icons.calendar_today),
-            title: Text('캘린더 목록'),
+            leading: const Icon(Icons.feedback),
+            title: const Text('피드백'),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CalendarListScreen(isDarkMode: widget.isDarkMode),
-                ),
+                MaterialPageRoute(builder: (context) => FeedbackScreen()),
               );
             },
           ),
@@ -301,21 +368,13 @@ class _ManageScreenState extends State<ManageScreen> {
             trailing: Icon(Icons.chevron_right),
             leading: Icon(Icons.stars),
           ),
-          const ListTile(
-            title: Text('로그아웃'),
-            trailing: Icon(Icons.chevron_right),
-            leading: Icon(Icons.logout),
-          ),
-          Divider(),
           ListTile(
-            title: Text('화면 테마'),
-            trailing: Switch(
-              value: widget.isDarkMode,
-              onChanged: (bool value) {
-                widget.toggleTheme(value);
-              },
-            ),
+            title: const Text('로그아웃'),
+            trailing: const Icon(Icons.chevron_right),
+            leading: const Icon(Icons.logout),
+            onTap: _showLogoutDialog,
           ),
+          const Divider(),
         ],
       ),
     );

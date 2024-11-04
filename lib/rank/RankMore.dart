@@ -1,8 +1,8 @@
-// RankMore.dart
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:todobest_home/rank/task_button.dart';
 import '../service/User_Service.dart';
 import '../utils/Themes.Colors.dart';
 import 'RankingScreen.dart';
@@ -18,46 +18,73 @@ class RankMore extends StatefulWidget {
 }
 
 class _RankMoreState extends State<RankMore> {
-  int currentExp = 0; // 현재 경험치
-  int level = 1; // 초기 레벨 설정
-  int maxExp = 10; // 첫 레벨의 총 경험치 요구량
-  final UserService userService = UserService(); // UserService 인스턴스 생성
+  int currentExp = 0;
+  int level = 1;
+  int maxExp = 100;
+  final UserService userService = UserService();
+  Color levelTextColor = Colors.black; // 초기 색상은 검정색으로 설정
+  String userName = '사용자'; // 최신 사용자 이름을 저장할 변수
+
+  // 레벨에 따른 색상 배열 (1~9레벨은 연한 파랑, 10레벨부터 다른 색상 사용)
+  final List<Color> levelColors = [
+    Colors.lightBlueAccent,  // 1~9 레벨
+    Colors.deepPurpleAccent,  // 10~19 레벨
+    Colors.amberAccent,       // 20~29 레벨
+    Colors.redAccent,         // 30~39 레벨
+    Colors.pinkAccent,        // 40~49 레벨
+    Colors.cyanAccent,        // 50~59 레벨
+    Colors.yellowAccent,      // 60~69 레벨
+    Colors.lightGreenAccent,  // 70~79 레벨
+    Colors.deepOrange,        // 80~89 레벨
+    Colors.purpleAccent,      // 90~99 레벨
+  ];
 
   @override
   void initState() {
     super.initState();
-    _updateLevel();
-    _loadUserInfo(); // 사용자 정보를 불러오는 함수 호출
+    _loadUserInfo();
   }
 
-  // 사용자 정보를 Firestore에서 불러오는 함수
   Future<void> _loadUserInfo() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      // Firestore에서 사용자 정보 가져오기
       final userInfo = await userService.getUserInfo(user.uid);
       if (userInfo != null) {
         setState(() {
           level = userInfo['level'] ?? 1;
           currentExp = userInfo['currentExp'] ?? 0;
           maxExp = userInfo['maxExp'] ?? 10;
+          userName = userInfo['userName'] ?? '사용자'; // 최신 사용자 이름 설정
         });
+
+        _setLevelTextColor(); // 색상 설정
+        _updateLevel(); // 레벨 업데이트 체크
       }
     }
   }
 
-  // 레벨과 경험치 업데이트 후 Firestore에 저장하는 함수
   void _updateLevel() {
-    while (currentExp >= maxExp) {
-      currentExp -= maxExp; // 현재 경험치에서 maxExp를 빼고 남은 경험치로 업데이트
-      level++; // 레벨 증가
-      maxExp += 10; // 다음 레벨의 총 경험치 요구량을 10씩 증가
-    }
-
-    // 업데이트된 정보를 Firestore에 저장
+    final updatedData = userService.updateLevel(currentExp, level, maxExp);
+    setState(() {
+      level = updatedData['level']!;
+      currentExp = updatedData['currentExp']!;
+      maxExp = updatedData['maxExp']!;
+      _setLevelTextColor(); // 레벨 텍스트 색상 설정
+    });
     _saveUserLevelAndExp();
   }
 
-  // Firestore에 레벨과 경험치 저장
+  void _setLevelTextColor() {
+    if (level < 10) {
+      levelTextColor = Colors.black; // 1~9레벨은 검정색
+    } else {
+      // 색상 배열을 반복해서 사용
+      int colorIndex = (level ~/ 10 - 1) % levelColors.length; // 색상 배열 길이로 나눈 나머지 사용
+      levelTextColor = levelColors[colorIndex]; // 색상 설정
+    }
+  }
+
   Future<void> _saveUserLevelAndExp() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -65,16 +92,13 @@ class _RankMoreState extends State<RankMore> {
     }
   }
 
-  // Firebase에서 프로필 이미지 URL 가져오는 함수
   Future<String?> _getProfileImageUrl() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user?.photoURL != null) {
       return user!.photoURL;
     } else if (user != null) {
       try {
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('profile_images/${user.uid}.png');
+        final ref = FirebaseStorage.instance.ref().child('profile_images/${user.uid}.png');
         return await ref.getDownloadURL();
       } catch (e) {
         if (kDebugMode) {
@@ -86,12 +110,14 @@ class _RankMoreState extends State<RankMore> {
     return null;
   }
 
-  // Firebase에서 사용자 이름을 가져오는 함수
-  String _getUserName() {
-    final user = FirebaseAuth.instance.currentUser;
-    // 사용자 displayName 값을 가져옵니다.
-    return user?.displayName ?? '사용자';
+  // 경험치량 포맷팅 함수 추가
+  String _formatExperience(int exp) {
+    if (exp < 1000000) return exp.toString(); // 1,000,000 미만은 그대로 출력
+    if (exp < 1000000000) return '${(exp / 10000).toStringAsFixed(1)}만'; // 1,000,000 이상, 1,000,000,000 미만은 '백만'으로 표시
+    if (exp < 1000000000000) return '${(exp / 100000000).toStringAsFixed(1)}억'; // 1,000,000,000 이상, 1,000,000,000,000 미만은 '십억'으로 표시
+    return '${(exp / 1000000000000).toStringAsFixed(1)}조'; // 1,000,000,000,000 이상은 '조'로 표시
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -145,49 +171,63 @@ class _RankMoreState extends State<RankMore> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _getUserName(),
-                      style: TextStyle(
-                        fontSize: screenHeight * 0.03,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
                         Text(
-                          'Lv.$level', // 현재 레벨 표시
+                          'Lv.$level',
                           style: TextStyle(
-                            fontSize: screenHeight * 0.025,
+                            fontSize: screenHeight * 0.03,
+                            fontWeight: FontWeight.bold,
+                            color: levelTextColor, // 레벨 텍스트 색상 적용
+                          ),
+                        ),
+                        SizedBox(width: screenWidth * 0.02),
+                        Text(
+                          userName,
+                          style: TextStyle(
+                            fontSize: screenHeight * 0.028,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: screenHeight * 0.01),
-                        SizedBox(
-                          width: screenWidth * 0.6,
-                          child: LinearProgressIndicator(
+                      ],
+                    ),
+                    SizedBox(height: screenHeight * 0.01),
+                    SizedBox(
+                      width: screenWidth * 0.6,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          LinearProgressIndicator(
                             value: expRatio,
                             backgroundColor: Colors.grey[300],
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.greenAccent),
                             minHeight: screenHeight * 0.02,
                           ),
-                        ),
-                        SizedBox(height: screenHeight * 0.01),
-                        Text(
-                          '$currentExp/$maxExp', // 현재 경험치와 다음 레벨까지의 총 경험치 표시
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.02,
-                            color: Colors.grey[600],
+                          Text(
+                            '${(expRatio * 100).toStringAsFixed(1)}%',
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.018,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.01),
+                    Text(
+                      '${_formatExperience(currentExp)}/${_formatExperience(maxExp)}', // 포맷팅된 경험치 표시
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.02,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: screenHeight * 0.05),
+            SizedBox(height: screenHeight * 0.06),
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
@@ -195,97 +235,54 @@ class _RankMoreState extends State<RankMore> {
                 mainAxisSpacing: screenHeight * 0.03,
                 children: [
                   TaskButton(
-                    label: '일일과제',
-                    color: Color(0xff9ad7f8),
+                    label: '일간 미션',
+                    color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => DailyTasksPage()),
-                      );
+                        MaterialPageRoute(builder: (context) => const DailyTasksPage()),
+                      ).then((_) => _loadUserInfo()); // 돌아오면 정보 갱신
                     },
-                    icon: Icons.assignment, // 일일 과제 아이콘
+                    icon: Icons.assignment,
                   ),
                   TaskButton(
-                    label: '주간과제',
-                    color: Color(0xff9ad7f8),
+                    label: '주간 미션',
+                    color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => WeeklyTasksPage()),
-                      );
+                      ).then((_) => _loadUserInfo());
                     },
-                    icon: Icons.calendar_view_week, // 주간 과제 아이콘
+                    icon: Icons.calendar_view_week,
                   ),
                   TaskButton(
                     label: '랭킹',
-                    color: Color(0xff9ad7f8),
+                    color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const RankingPage()),
-                      );
+                      ).then((_) => _loadUserInfo());
                     },
-                    icon: Icons.leaderboard, // 랭킹 아이콘
+                    icon: Icons.leaderboard,
                   ),
                   TaskButton(
                     label: '도전과제',
-                    color: Color(0xff9ad7f8),
+                    color: const Color(0xff9ad7f8),
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => ChallengePage()),
-                      );
+                      ).then((_) => _loadUserInfo());
                     },
-                    icon: Icons.flag, // 도전 과제 아이콘
+                    icon: Icons.flag,
                   ),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// TaskButton 클래스
-class TaskButton extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onPressed;
-  final IconData icon; // 아이콘 매개변수 추가
-
-  const TaskButton({
-    super.key,
-    required this.label,
-    required this.color,
-    required this.onPressed,
-    required this.icon, // 아이콘 초기화
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-        ),
-      ),
-      onPressed: onPressed,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // 내용 중앙 정렬
-        children: [
-          Icon(icon, size: 30), // 아이콘 추가 (크기 설정)
-          const SizedBox(height: 8), // 아이콘과 레이블 사이의 공간
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
       ),
     );
   }

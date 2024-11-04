@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ChallengePage extends StatefulWidget {
@@ -17,7 +18,9 @@ class _ChallengePageState extends State<ChallengePage> {
       challenges[index].isCompleted = !challenges[index].isCompleted;
       if (challenges[index].isCompleted) {
         // 경험치 지급 로직 추가
-        print('Experience Points Earned: ${challenges[index].xp}');
+        if (kDebugMode) {
+          print('Experience Points Earned: ${challenges[index].xp}');
+        }
       }
     });
   }
@@ -25,7 +28,7 @@ class _ChallengePageState extends State<ChallengePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Challenges')),
+      appBar: AppBar(title: const Text('Challenges')),
       body: ListView.builder(
         itemCount: challenges.length,
         itemBuilder: (context, index) {

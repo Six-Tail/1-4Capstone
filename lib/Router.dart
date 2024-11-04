@@ -1,6 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:todobest_home/Setting.MainPage.dart';
 import 'package:todobest_home/community/Community.MainPage.dart';
 import 'package:todobest_home/rank/RankMore.dart';
 import 'package:todobest_home/screen/Calender.Screen.dart';

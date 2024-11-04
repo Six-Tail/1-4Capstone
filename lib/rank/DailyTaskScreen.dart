@@ -1,53 +1,587 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:todobest_home/rank/model/task_model.dart';
+
+import '../Router.dart';
+import '../service/User_Service.dart';
 
 class DailyTasksPage extends StatefulWidget {
+  const DailyTasksPage({super.key});
+
   @override
   _DailyTasksPageState createState() => _DailyTasksPageState();
 }
 
 class _DailyTasksPageState extends State<DailyTasksPage> {
-  List<Task> dailyTasks = [
-    Task(name: 'Exercise', isCompleted: false, xp: 50),
-    Task(name: 'Read a book', isCompleted: false, xp: 30),
-    Task(name: 'Meditation', isCompleted: false, xp: 20),
+  final UserService userService = UserService();
+  final User? currentUser = FirebaseAuth.instance.currentUser;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  Future<double>? _achievementProgressFuture;
+  Future<int>? _totalEventsCountFuture; // 새로운 Future 변수 선언
+  Future<int>? _completedEventsCountFuture;
+  int totalRegisteredEvents = 0;
+  int totalCompletedEvents = 0;
+
+  List<DailyTask> dailyTasks = [
+    DailyTask(name: '일일 출석하기', isCompleted: false, xp: 10, hasClaimedXP: false),
+    DailyTask(name: '일정 3개 등록하기', isCompleted: false, xp: 30, hasClaimedXP: false),
+    DailyTask(name: '일정 3개 완료하기', isCompleted: false, xp: 60, hasClaimedXP: false),
+    DailyTask(name: '달성률 80% 이상 달성하기', isCompleted: false, xp: 80, hasClaimedXP: false),
   ];
 
-  void completeTask(int index) {
-    setState(() {
-      dailyTasks[index].isCompleted = !dailyTasks[index].isCompleted;
-      if (dailyTasks[index].isCompleted) {
-        // 경험치 지급 로직 추가
-        print('Experience Points Earned: ${dailyTasks[index].xp}');
-      }
-    });
+  DateTime? lastClaimedTime;
+  late Timer timer;
+  Duration timeUntilReset = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateTimeUntilReset();
+    _startTimer();
+    completeDailyAttendanceTask(); // 페이지가 열릴 때 일일 출석하기 미션 자동 완료
+    loadTasks(); // 페이지가 열릴 때 태스크 정보를 불러옴
+    _achievementProgressFuture = _calculateAchievementProgress(); // 초기에 진행률 계산
+    _totalEventsCountFuture = _getTotalEventsCount(); // 일정 수를 미리 불러옴
+    _completedEventsCountFuture = _getCompletedEventsCount(); // 완료된 일정 개수 초기화
   }
 
   @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _calculateTimeUntilReset();
+        if (timeUntilReset.isNegative) {
+          lastClaimedTime = null; // 자정이 지나면 lastClaimedTime 초기화
+          for (var task in dailyTasks) {
+            task.hasClaimedXP = false; // 각 미션의 획득 상태도 초기화
+            task.isCompleted = false;
+          }
+        }
+      });
+    });
+  }
+
+  void _calculateTimeUntilReset() {
+    final now = DateTime.now();
+    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    timeUntilReset = nextMidnight.difference(now);
+  }
+
+  Future<double> _calculateAchievementProgress() async {
+    // 사용자 이벤트 수를 가져와서 진행률 계산
+    final userEventsSnapshot = await firestore.collection('events').where('uid', isEqualTo: currentUser!.uid).get();
+
+    int totalEvents = userEventsSnapshot.docs.length;
+    int completedEvents = userEventsSnapshot.docs.where((doc) => doc.data()['isCompleted'] == true).length;
+
+    // 완료 비율을 계산
+    if (totalEvents > 0) {
+      double achievementRate = completedEvents / totalEvents;
+
+      // 80% 이상이면 1.0을 반환하고, 그 이하의 비율을 0.8로 나누어 조정
+      if (achievementRate >= 0.8) {
+        return 1.0; // 80% 이상인 경우
+      } else {
+        return achievementRate / 0.8; // 80% 이하인 경우 비율 조정
+      }
+    } else {
+      return 0.0; // 이벤트가 없으면 0으로 설정
+    }
+  }
+
+  Future<int> _getTotalEventsCount() async {
+    final userEventsSnapshot = await firestore.collection('events').where('uid', isEqualTo: currentUser!.uid).get();
+    return userEventsSnapshot.docs.length;
+  }
+
+  Future<int> _getCompletedEventsCount() async {
+    final userEventsSnapshot = await firestore.collection('events').where('uid', isEqualTo: currentUser!.uid).where('isCompleted', isEqualTo: true).get();
+    return userEventsSnapshot.docs.length;
+  }
+
+  // build 메소드에서 수정
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Daily Tasks')),
-      body: ListView.builder(
-        itemCount: dailyTasks.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(dailyTasks[index].name),
-            trailing: Checkbox(
-              value: dailyTasks[index].isCompleted,
-              onChanged: (bool? value) {
-                completeTask(index);
+      appBar: AppBar(title: const Text('일간 미션')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '남은 시간: ${timeUntilReset.inHours}시간 ${timeUntilReset.inMinutes.remainder(60)}분 ${timeUntilReset.inSeconds.remainder(60)}초',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: dailyTasks.length,
+              itemBuilder: (context, index) {
+                double progressValue;
+
+                if (dailyTasks[index].name == '달성률 80% 이상 달성하기') {
+                  return FutureBuilder<double>(
+                    future: _achievementProgressFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return const Center(child: Text('오류 발생'));
+                      } else {
+                        progressValue = snapshot.data ?? 0.0;
+                        return _buildTaskItem(
+                            dailyTasks[index], progressValue, index);
+                      }
+                    },
+                  );
+                } else {
+                  progressValue = dailyTasks[index].isCompleted ? 1.0 : 0.0;
+                }
+
+                if (dailyTasks[index].name == '일정 3개 등록하기') {
+                  return FutureBuilder<int>(
+                    future: _totalEventsCountFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return const Center(child: Text('오류 발생'));
+                      } else {
+                        int totalEvents = snapshot.data ?? 0;
+                        return _buildTaskItem(dailyTasks[index], progressValue,
+                            index, totalEvents);
+                      }
+                    },
+                  );
+                }
+
+                if (dailyTasks[index].name == '일정 3개 완료하기') {
+                  return FutureBuilder<int>(
+                    future: _completedEventsCountFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return const Center(child: Text('오류 발생'));
+                      } else {
+                        int totalCompletedEvents =
+                            snapshot.data ?? 0; // 완료된 이벤트 수
+                        return _buildTaskItem(dailyTasks[index], progressValue,
+                            index, null, totalCompletedEvents);
+                      }
+                    },
+                  );
+                }
+                return _buildTaskItem(dailyTasks[index], progressValue, index);
               },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
-}
 
-class Task {
-  String name;
-  bool isCompleted;
-  int xp;
+  // 태스크 항목을 빌드하는 메소드 (수정된 부분)
+  Widget _buildTaskItem(DailyTask task, double progressValue, int index,
+      [int? totalEvents, int? totalCompletedEvents]) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: task.isCompleted ? Colors.grey[300] : Colors.grey[800],
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(2, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      task.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (task.name == '달성률 80% 이상 달성하기') // 달성률 표시
+                      FutureBuilder<double>(
+                        future: _achievementProgressFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return const Text(
+                              '오류 발생',
+                              style: TextStyle(color: Colors.white),
+                            );
+                          } else {
+                            double achievementRate = snapshot.data ?? 0.0;
+                            return Text(
+                              '(${(achievementRate * 80).toStringAsFixed(0)}%/80%)',
+                              style: const TextStyle(
+                                color: Colors.amberAccent,
+                                fontSize: 10,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    if (task.name == '일정 3개 등록하기' && totalEvents != null)
+                      Text(
+                        '($totalEvents/3)',
+                        style: const TextStyle(
+                          color: Colors.amberAccent,
+                          fontSize: 10,
+                        ),
+                      ),
+                    if (task.name == '일정 3개 완료하기' &&
+                        totalCompletedEvents != null) // 추가된 부분
+                      Text(
+                        '($totalCompletedEvents/3)',
+                        style: const TextStyle(
+                          color: Colors.amberAccent,
+                          fontSize: 10,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      '${task.xp} EXP',
+                      style: const TextStyle(
+                        color: Colors.amberAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: LinearProgressIndicator(
+                        value: progressValue,
+                        backgroundColor: Colors.grey,
+                        color: Colors.amber,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          task.isCompleted
+              ? ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        task.hasClaimedXP ? Colors.grey : Colors.amber,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  onPressed: task.hasClaimedXP ? null : () => claimXP(index),
+                  child: const Text(
+                    'EXP 획득',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                )
+              : ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        task.isCompleted ? Colors.grey : Colors.lightBlueAccent,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  onPressed: () {
+                    Get.to(() => RouterPage());
+                  },
+                  child: const Text('이동 하기'),
+                ),
+        ],
+      ),
+    );
+  }
 
-  Task({required this.name, required this.isCompleted, required this.xp});
+  Future<void> loadTasks() async {
+    if (currentUser == null) return;
+    totalRegisteredEvents = await _getTotalEventsCount(); // 일정 수를 미리 불러옴
+    for (int i = 0; i < dailyTasks.length; i++) {
+      var taskStatus = await userService.getTaskStatus(currentUser!.uid, dailyTasks[i].name);
+      if (taskStatus != null) {
+        dailyTasks[i].hasClaimedXP = taskStatus['hasClaimedXP'] ?? false;
+        dailyTasks[i].lastClaimedTime = taskStatus['lastClaimedTime']?.toDate();
+        dailyTasks[i].isCompleted = taskStatus['isCompleted'] ?? false;
+      } else {
+        dailyTasks[i].hasClaimedXP = false;
+        dailyTasks[i].isCompleted = false;
+        dailyTasks[i].lastClaimedTime = null;
+      }
+    }
+    await addDailyTasksToFirestore();
+    await Future.wait([checkTaskForThreeEvents(), checkTaskForThreeCompletedEvents(), checkTaskAchievement(),
+    ]);
+    setState(() {}); // 모든 작업이 완료된 후 UI 업데이트
+  }
+
+  // Firebase에 일정 수를 저장하는 메소드 추가
+  Future<void> _updateTotalEventsCountInFirestore(int totalEvents) async {
+    if (currentUser == null) return;
+    try {
+      await firestore.collection('users').doc(currentUser!.uid).update({
+        'totalEventsCount': totalEvents, // 등록된 일정의 수를 'totalEventsCount' 필드에 저장
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating total events count: $e');
+      }
+    }
+  }
+
+  Future<void> checkTaskForThreeEvents() async {
+    final userEventsSnapshot = await firestore.collection('events').where('uid', isEqualTo: currentUser!.uid).get();
+    int totalEvents = userEventsSnapshot.docs.length;
+    totalRegisteredEvents = totalEvents; // 등록된 일정 개수 상태 설정
+    // Firebase에 일정 수를 저장하는 메소드 호출
+    await _updateTotalEventsCountInFirestore(totalEvents);
+    var taskIndex = dailyTasks.indexWhere((task) => task.name == '일정 3개 등록하기');
+    // "일정 3개 등록하기" 미션 확인 및 업데이트
+    if (totalEvents >= 3) {
+      if (!dailyTasks[taskIndex].isCompleted) {
+        dailyTasks[taskIndex].isCompleted = true; // 미션 완료로 설정
+        await userService.updateTaskStatus(
+          currentUser!.uid,
+          dailyTasks[taskIndex].name,
+          null,
+          isCompleted: true,
+          hasClaimedXP: false,
+        );
+      }
+    } else {
+      if (dailyTasks[taskIndex].isCompleted) {
+        dailyTasks[taskIndex].isCompleted = false; // 미션 미완료로 설정
+        await userService.updateTaskStatus(
+          currentUser!.uid,
+          dailyTasks[taskIndex].name,
+          null,
+          isCompleted: false,
+          hasClaimedXP: false,
+        );
+      }
+    }
+  }
+
+// "일정 3개 완료하기" 미션 확인 및 업데이트 메소드
+  Future<void> checkTaskForThreeCompletedEvents() async {
+    final userEventsSnapshot = await firestore.collection('events').where('uid', isEqualTo: currentUser!.uid).where('isCompleted', isEqualTo: true).get();
+    int completedEvents = userEventsSnapshot.docs.length;
+    totalCompletedEvents = completedEvents;
+    var taskIndex = dailyTasks.indexWhere((task) => task.name == '일정 3개 완료하기');
+    // "일정 3개 완료하기" 미션 확인 및 업데이트
+    if (completedEvents >= 3) {
+      if (!dailyTasks[taskIndex].isCompleted) {
+        dailyTasks[taskIndex].isCompleted = true; // 미션 완료로 설정
+        await userService.updateTaskStatus(
+          currentUser!.uid,
+          dailyTasks[taskIndex].name,
+          null,
+          isCompleted: true,
+          hasClaimedXP: false,
+        );
+      }
+    } else {
+      if (dailyTasks[taskIndex].isCompleted) {
+        dailyTasks[taskIndex].isCompleted = false; // 미션 미완료로 설정
+        await userService.updateTaskStatus(
+          currentUser!.uid,
+          dailyTasks[taskIndex].name,
+          null,
+          isCompleted: false,
+          hasClaimedXP: false,
+        );
+      }
+    }
+  }
+
+  Future<void> checkTaskAchievement() async {
+    final userEventsSnapshot = await firestore.collection('events').where('uid', isEqualTo: currentUser!.uid).get();
+    int totalEvents = userEventsSnapshot.docs.length;
+    int completedEvents = 0;
+    // 완료된 이벤트 수 계산
+    for (var eventDoc in userEventsSnapshot.docs) {
+      if (eventDoc.data()['isCompleted'] == true) {
+        completedEvents++;
+      }
+    }
+    if (totalEvents > 0) {
+      double completionRate = completedEvents / totalEvents;
+      // "일정 달성률 80% 이상 달성하기" 태스크 확인 및 업데이트
+      var taskIndex = dailyTasks.indexWhere((task) => task.name == '달성률 80% 이상 달성하기');
+      if (completionRate >= 0.8) {
+        if (!dailyTasks[taskIndex].isCompleted) {
+          dailyTasks[taskIndex].isCompleted = true; // 미션을 완료로 설정
+          // Firestore에 업데이트하여 데이터를 동기화
+          await userService.updateTaskStatus(
+            currentUser!.uid,
+            dailyTasks[taskIndex].name,
+            null,
+            isCompleted: true,
+            hasClaimedXP: false,
+          );
+        }
+      } else {
+        if (dailyTasks[taskIndex].isCompleted) {
+          dailyTasks[taskIndex].isCompleted = false; // 미션을 미완료로 설정
+          // Firestore에 업데이트하여 데이터를 동기화
+          await userService.updateTaskStatus(
+            currentUser!.uid,
+            dailyTasks[taskIndex].name,
+            null,
+            isCompleted: false,
+            hasClaimedXP: false,
+          );
+        }
+      }
+    }
+  }
+
+  void completeTask(int index) async {
+    setState(() {
+      // UI에서 태스크 완료 상태 업데이트
+      dailyTasks[index].isCompleted = true;
+    });
+    // Firestore에 태스크 완료 상태 저장
+    if (currentUser != null) {
+      await userService.updateTaskStatus(
+        currentUser!.uid,
+        dailyTasks[index].name,
+        null,
+        isCompleted: true, // isCompleted를 true로 설정
+        hasClaimedXP: false, // 획득 여부는 초기화하여 획득 가능 상태로 유지
+      );
+      // 로컬 리스트에서도 상태 업데이트
+      dailyTasks[index].isCompleted = true; // 로컬 리스트에서도 isCompleted 업데이트
+      dailyTasks[index].hasClaimedXP = false; // 획득 상태 초기화
+    }
+  }
+
+  void claimXP(int index) async {
+    final currentTime = DateTime.now();
+    // 해당 태스크가 이미 완료되었는지 확인
+    if (!dailyTasks[index].isCompleted) {
+      return; // 태스크가 완료되지 않았다면 경험치 청구를 중단
+    }
+    // 하루에 한 번만 경험치를 받을 수 있도록 하는 조건 체크
+    if (dailyTasks[index].lastClaimedTime != null &&
+        dailyTasks[index].lastClaimedTime!.day == currentTime.day &&
+        dailyTasks[index].lastClaimedTime!.year == currentTime.year &&
+        dailyTasks[index].lastClaimedTime!.month == currentTime.month) {
+      return; // 이미 오늘 해당 미션에 대한 경험치를 받았음
+    }
+    if (currentUser == null) return;
+    // 유저 정보 가져오기
+    var userInfo = await userService.getUserInfo(currentUser!.uid);
+    if (userInfo != null) {
+      int currentExp = userInfo['currentExp'];
+      int level = userInfo['level'];
+      int maxExp = userInfo['maxExp'];
+      // 경험치 추가
+      currentExp += dailyTasks[index].xp;
+      // 경험치가 maxExp를 초과하면 레벨 업
+      if (currentExp >= maxExp) {
+        level += 1;
+        currentExp -= maxExp; // 초과 경험치는 다음 레벨로 이월
+        maxExp = (maxExp * 1.05).round(); // 다음 레벨업에 필요한 경험치 증가 (5% 증가)
+      }
+      // Firestore에 사용자 정보 업데이트
+      await userService.updateUserLevelAndExp(
+        currentUser!.uid,
+        level,
+        currentExp,
+        maxExp,
+      );
+      // Firestore에서 태스크의 획득 상태와 시간을 업데이트
+      await userService.updateTaskStatus(
+        currentUser!.uid,
+        dailyTasks[index].name,
+        currentTime,
+        isCompleted: true, // 태스크는 이미 완료된 상태이므로 true로 유지
+        hasClaimedXP: true, // 경험치를 청구했으므로 hasClaimedXP를 true로 설정
+      );
+      // 콘솔에 경험치 획득 로그 출력
+      if (kDebugMode) {
+        print('사용자 ID: ${currentUser!.uid}');
+        print('미션 이름: ${dailyTasks[index].name}');
+        print('획득한 경험치: ${dailyTasks[index].xp}');
+        print('현재 레벨: $level');
+        print('현재 경험치: $currentExp');
+        print('다음 레벨까지 필요한 경험치: $maxExp');
+        print('타임스탬프: $currentTime');
+      }
+      setState(() {
+        dailyTasks[index].lastClaimedTime = currentTime; // 경험치 획득 시간 업데이트
+        dailyTasks[index].hasClaimedXP = true; // 해당 미션의 획득 상태 업데이트
+      });
+    }
+  }
+
+  Future<void> addDailyTasksToFirestore() async {
+    for (var task in dailyTasks) {
+      // Firestore에 태스크가 없는 경우에만 추가
+      var taskStatus =
+          await userService.getTaskStatus(currentUser!.uid, task.name);
+      if (taskStatus == null) {
+        await userService.updateTaskStatus(
+          currentUser!.uid,
+          task.name,
+          null, // lastClaimedTime 초기화
+          isCompleted: false, // 초기 상태는 완료되지 않음
+          hasClaimedXP: false, // 초기 상태는 XP 청구 안 함
+        );
+      }
+    }
+  }
+
+  // 일일 출석하기 미션 자동 완료 함수
+  Future<void> completeDailyAttendanceTask() async {
+    if (currentUser != null) {
+      // '일일 출석하기' 미션을 자동으로 완료로 설정
+      dailyTasks[0].isCompleted = true; // '일일 출석하기' 미션을 완료로 설정
+      dailyTasks[0].hasClaimedXP = false; // XP 획득 상태는 초기화
+
+      // Firestore에 상태 업데이트
+      await userService.updateTaskStatus(
+        currentUser!.uid,
+        dailyTasks[0].name,
+        null, // lastClaimedTime은 초기화
+        isCompleted: true, // 완료 상태를 true로 설정
+        hasClaimedXP: false, // XP 획득 여부는 초기화
+      );
+    }
+  }
 }
