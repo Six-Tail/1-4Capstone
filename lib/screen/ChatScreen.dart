@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../service/User_Service.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -11,6 +12,10 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final User? _currentUser = FirebaseAuth.instance.currentUser;
+  final UserService _userService = UserService();
+
+  // 사용자 정보를 캐싱하기 위한 맵
+  Map<String, Map<String, dynamic>> userCache = {};
 
   // 메시지 전송 메서드
   Future<void> _sendMessage() async {
@@ -22,6 +27,19 @@ class _ChatScreenState extends State<ChatScreen> {
       'sentAt': FieldValue.serverTimestamp(),
     });
     _controller.clear();
+  }
+
+  // Firestore에서 사용자 정보를 가져오고 캐시합니다.
+  Future<Map<String, dynamic>?> _getUserInfo(String uid) async {
+    if (userCache.containsKey(uid)) {
+      return userCache[uid];
+    } else {
+      final userInfo = await _userService.getUserInfo(uid);
+      if (userInfo != null) {
+        userCache[uid] = userInfo; // 사용자 정보를 캐시에 저장
+      }
+      return userInfo;
+    }
   }
 
   @override
@@ -53,25 +71,61 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
-                    final isMe = message['senderId'] == _currentUser?.uid;
+                    final senderId = message['senderId'];
+                    final isMe = senderId == _currentUser?.uid;
 
-                    return ListTile(
-                      title: Align(
-                        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: isMe ? Colors.blueAccent : Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
+                    return FutureBuilder<Map<String, dynamic>?>(
+                      future: _getUserInfo(senderId),
+                      builder: (context, userSnapshot) {
+                        if (!userSnapshot.hasData) {
+                          return const SizedBox.shrink();
+                        }
+
+                        final user = userSnapshot.data!;
+                        final userName = user['userName'] ?? 'Unknown';
+                        final userImage = user['userImage'] ?? 'https://default-image-url.com/default.png';
+
+                        return ListTile(
+                          leading: isMe
+                              ? null
+                              : CircleAvatar(
+                            backgroundImage: NetworkImage(userImage),
+                            radius: 20,
                           ),
-                          child: Text(
-                            message['messageText'] ?? '',
-                            style: TextStyle(
-                              color: isMe ? Colors.white : Colors.black,
+                          title: Align(
+                            alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                            child: Column(
+                              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isMe ? '나' : userName,
+                                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  margin: const EdgeInsets.only(top: 5),
+                                  decoration: BoxDecoration(
+                                    color: isMe ? Colors.blueAccent : Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    message['messageText'] ?? '',
+                                    style: TextStyle(
+                                      color: isMe ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ),
+                          trailing: isMe
+                              ? CircleAvatar(
+                            backgroundImage: NetworkImage(userImage),
+                            radius: 20,
+                          )
+                              : null,
+                        );
+                      },
                     );
                   },
                 );
