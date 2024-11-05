@@ -116,9 +116,13 @@ class _WritePostScreenState extends State<WritePostScreen> {
               Center(
                 child: ElevatedButton(
                   onPressed: handleComplete,
-                  child: Text('완료'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // 여기서 배경색을 설정합니다.
+                  ),
+                  child: Text('완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ),
+
             ],
           ),
         ),

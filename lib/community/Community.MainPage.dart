@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import '../utils/Themes.Colors.dart';
 import 'AllpostScreen.dart';
 import 'CommentScreen.dart';
@@ -295,10 +297,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xff73b1e7),
         onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => WritePostScreen()),
-          );
+          Get.to(() => WritePostScreen());
         },
         child: const Icon(Icons.add),
       ),
