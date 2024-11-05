@@ -207,7 +207,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         child: const Column(
                           children: [
                             SizedBox(height: 10),
-                            Icon(Icons.comment, size: 35, color: Colors.blueGrey),
+                            Icon(Icons.comment, size: 35, color: Colors.blueAccent),
                             SizedBox(height: 15),
                             Text('댓글 단 글', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],

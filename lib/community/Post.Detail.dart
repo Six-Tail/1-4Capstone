@@ -332,7 +332,7 @@ class _PostDetailState extends State<PostDetail> {
                                   Spacer(),
                                   IconButton(
                                     icon: Icon(
-                                      isScraped ? Icons.star : Icons.star_border,
+                                      isScraped ? Icons.bookmark_border : Icons.bookmark_border_outlined,
                                       color: isScraped ? Colors.yellow : Colors.grey,
                                     ),
                                     onPressed: _toggleScrap, // 즐겨찾기 토글 함수
