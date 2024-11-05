@@ -30,10 +30,10 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
   int totalCompletedEvents = 0;
 
   List<DailyTask> dailyTasks = [
-    DailyTask(name: '일일 출석하기', isCompleted: false, xp: 10, hasClaimedXP: false),
-    DailyTask(name: '일정 3개 등록하기', isCompleted: false, xp: 30, hasClaimedXP: false),
-    DailyTask(name: '일정 3개 완료하기', isCompleted: false, xp: 60, hasClaimedXP: false),
-    DailyTask(name: '달성률 80% 이상 달성하기', isCompleted: false, xp: 80, hasClaimedXP: false),
+    DailyTask(name: '일일 출석하기', isCompleted: false, xp: 30, hasClaimedXP: false),
+    DailyTask(name: '일정 3개 등록하기', isCompleted: false, xp: 50, hasClaimedXP: false),
+    DailyTask(name: '일정 3개 완료하기', isCompleted: false, xp: 80, hasClaimedXP: false),
+    DailyTask(name: '달성률 80% 이상 달성하기', isCompleted: false, xp: 100, hasClaimedXP: false),
   ];
 
   // 전역변수로 weeklyTasks를 정의
