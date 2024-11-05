@@ -4,6 +4,7 @@ class DailyTask {
   int xp;
   bool hasClaimedXP;
   DateTime? lastClaimedTime; // 각 미션의 마지막 경험치 획득 시간 추가
+  int currentAttendance;
 
   DailyTask({
     required this.name,
@@ -11,5 +12,6 @@ class DailyTask {
     required this.xp,
     required this.hasClaimedXP,
     this.lastClaimedTime,
+    this.currentAttendance = 0,
   });
 }
