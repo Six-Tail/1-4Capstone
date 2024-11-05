@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import '../screen/ChatScreen.dart';
 import '../utils/Themes.Colors.dart';
 import 'AllpostScreen.dart';
 import 'CommentScreen.dart';
@@ -45,10 +46,29 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
               color: Colors.greenAccent,
               size: 20,
             ),
-            onPressed: () {},
+            onPressed: () {
+              // 알림 버튼의 동작 정의 (필요하다면 추가)
+            },
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.chat_bubble_outline, // 채팅 아이콘 추가
+              color: Colors.white,
+              size: 24,
+            ),
+            onPressed: () {
+              // 채팅 화면으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(), // 채팅 화면으로 연결
+                ),
+              );
+            },
           ),
         ],
       ),
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

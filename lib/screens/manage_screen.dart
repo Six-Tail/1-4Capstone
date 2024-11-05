@@ -375,9 +375,12 @@ class _ManageScreenState extends State<ManageScreen> {
             leading: const Icon(Icons.logout),
             onTap: _showLogoutDialog,
           ),
+          const Divider(),
+
           ListTile(
             leading: const Icon(Icons.delete_forever),
             title: const Text('회원탈퇴'),
+            trailing: Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
                 context,
@@ -385,7 +388,6 @@ class _ManageScreenState extends State<ManageScreen> {
               );
             },
           ),
-          const Divider(),
         ],
       ),
     );
