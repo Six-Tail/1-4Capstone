@@ -5,6 +5,7 @@ import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import '../service/User_Service.dart';
+import 'authsecession_screen.dart';
 import 'feedback_screen.dart';
 import 'namedetailscreen.dart';
 import 'notification_settings_screen.dart';
@@ -373,6 +374,16 @@ class _ManageScreenState extends State<ManageScreen> {
             trailing: const Icon(Icons.chevron_right),
             leading: const Icon(Icons.logout),
             onTap: _showLogoutDialog,
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete_forever),
+            title: const Text('회원탈퇴'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AuthSeccessionScreen()),
+              );
+            },
           ),
           const Divider(),
         ],

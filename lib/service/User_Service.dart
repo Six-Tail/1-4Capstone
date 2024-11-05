@@ -35,6 +35,7 @@ class UserService {
     }
   }
 
+
   // 사용자 전화번호 업데이트
   Future<void> updateUserPhoneNumber(String uid, String phoneNumber) async {
     await _firestore.collection('users').doc(uid).update({
@@ -172,4 +173,37 @@ class UserService {
     DocumentSnapshot doc = await _firestore.collection('users').doc(uid).collection('challenge tasks').doc(taskName).get();
     return doc.data() as Map<String, dynamic>?;
   }
+
+  // Firestore에서 사용자 데이터 삭제
+  Future<void> deleteUserData(String uid) async {
+    try {
+      // 사용자의 하위 컬렉션 삭제
+      await _deleteSubcollections(uid, 'daily tasks');
+      await _deleteSubcollections(uid, 'weekly tasks');
+      await _deleteSubcollections(uid, 'challenge tasks');
+      await _deleteSubcollections(uid, 'daily_reset'); // daily_reset 하위 컬렉션 추가
+
+      // 사용자 메인 문서 삭제
+      await _firestore.collection('users').doc(uid).delete();
+
+      if (kDebugMode) {
+        print("사용자 데이터 삭제 성공: $uid");
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("사용자 데이터 삭제 중 오류 발생: $e");
+      }
+    }
+  }
+
+  // 하위 컬렉션 삭제 메서드
+  Future<void> _deleteSubcollections(String uid, String subcollection) async {
+    final subcollectionRef = _firestore.collection('users').doc(uid).collection(subcollection);
+    final snapshots = await subcollectionRef.get();
+
+    for (var doc in snapshots.docs) {
+      await doc.reference.delete();
+    }
+  }
 }
+
