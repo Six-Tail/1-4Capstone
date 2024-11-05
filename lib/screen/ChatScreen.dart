@@ -141,7 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: TextField(
                     controller: _controller,
                     decoration: const InputDecoration(
-                      hintText: 'Enter a message...',
+                      hintText: '메세지 입력',
                       border: OutlineInputBorder(),
                     ),
                   ),
