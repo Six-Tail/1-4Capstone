@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../service/User_Service.dart';
+import '../utils/UserInfoDialog.dart';
+import 'package:intl/intl.dart'; // 시간 형식을 위해 추가
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -42,6 +44,26 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  // 시간 형식을 변환하는 메서드
+  String _formatTimestamp(Timestamp timestamp) {
+    final DateTime date = timestamp.toDate();
+    return DateFormat('hh:mm a').format(date); // 시간을 오전/오후 hh:mm 형식으로 변환
+  }
+
+  // 사용자 정보 팝업을 보여주는 메서드
+  void _showUserInfoDialog(BuildContext context, Map<String, dynamic> userInfo) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return UserInfoDialog(
+          userName: userInfo['userName'] ?? 'Unknown',
+          userImage: userInfo['userImage'] ?? 'https://default-image-url.com/default.png',
+          userLevel: userInfo['level'] ?? 1,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,6 +95,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     final message = messages[index];
                     final senderId = message['senderId'];
                     final isMe = senderId == _currentUser?.uid;
+                    final sentAt = message['sentAt'] as Timestamp?;
 
                     return FutureBuilder<Map<String, dynamic>?>(
                       future: _getUserInfo(senderId),
@@ -84,26 +107,33 @@ class _ChatScreenState extends State<ChatScreen> {
                         final user = userSnapshot.data!;
                         final userName = user['userName'] ?? 'Unknown';
                         final userImage = user['userImage'] ?? 'https://default-image-url.com/default.png';
+                        final formattedTime = sentAt != null ? _formatTimestamp(sentAt) : '';
 
-                        return ListTile(
-                          leading: isMe
-                              ? null
-                              : CircleAvatar(
-                            backgroundImage: NetworkImage(userImage),
-                            radius: 20,
-                          ),
-                          title: Align(
-                            alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                            child: Column(
-                              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        return Row(
+                          mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (!isMe) ...[
+                              GestureDetector(
+                                onTap: () => _showUserInfoDialog(context, user),
+                                child: CircleAvatar(
+                                  backgroundImage: NetworkImage(userImage),
+                                  radius: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            Column(
+                              crossAxisAlignment:
+                              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   isMe ? '나' : userName,
                                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                                 ),
+                                const SizedBox(height: 4),
                                 Container(
                                   padding: const EdgeInsets.all(10),
-                                  margin: const EdgeInsets.only(top: 5),
                                   decoration: BoxDecoration(
                                     color: isMe ? Colors.blueAccent : Colors.grey[300],
                                     borderRadius: BorderRadius.circular(8),
@@ -115,15 +145,24 @@ class _ChatScreenState extends State<ChatScreen> {
                                     ),
                                   ),
                                 ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  formattedTime,
+                                  style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                                ),
                               ],
                             ),
-                          ),
-                          trailing: isMe
-                              ? CircleAvatar(
-                            backgroundImage: NetworkImage(userImage),
-                            radius: 20,
-                          )
-                              : null,
+                            if (isMe) ...[
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => _showUserInfoDialog(context, user),
+                                child: CircleAvatar(
+                                  backgroundImage: NetworkImage(userImage),
+                                  radius: 20,
+                                ),
+                              ),
+                            ],
+                          ],
                         );
                       },
                     );
