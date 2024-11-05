@@ -68,7 +68,11 @@ class _CalendarListScreenState extends State<CalendarListScreen> {
       data: _currentTheme,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('캘린더 목록'),
+          title: Text(
+            '캘린더 목록',
+            style: TextStyle(color: Colors.black), // 텍스트 색상 적용
+          ),
+          backgroundColor: Color(0xffffffff), // AppBar 배경색 적용
         ),
         body: ListView(
           padding: const EdgeInsets.all(16.0),
@@ -208,7 +212,7 @@ class _CalendarListScreenState extends State<CalendarListScreen> {
                 });
               },
             ),
-           ],
+          ],
         ),
       ),
     );

@@ -34,7 +34,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
       final userInfo = await _userService.getUserInfo(_firebaseUser!.uid);
       if (userInfo != null) {
         setState(() {
-          userName = userInfo['userName'] ?? 'Unknown'; // userName 사용
+          userName = userInfo['userName'] ?? 'Unknown';
           gender = userInfo['gender'] ?? '선택안함';
           birthday = userInfo['birthday'] ?? '미설정';
           profileImageUrl = userInfo['userImage'] ?? profileImageUrl;
@@ -49,7 +49,6 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
       setState(() {
         _profileImage = File(pickedFile.path);
       });
-      // Firebase에 프로필 이미지 업로드 및 URL 업데이트
       final downloadUrl = await _userService.uploadProfileImage(_firebaseUser!.uid, _profileImage!);
       if (downloadUrl != null) {
         await _userService.updateUserInfo(_firebaseUser!.uid, profileImageUrl: downloadUrl);
@@ -60,9 +59,9 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
     }
   }
 
-  Future<void> _updateUserName(String newUserName) async { // userName 업데이트 메서드
+  Future<void> _updateUserName(String newUserName) async {
     if (_firebaseUser != null) {
-      await _userService.updateUserInfo(_firebaseUser!.uid, userName: newUserName); // userName 사용
+      await _userService.updateUserInfo(_firebaseUser!.uid, userName: newUserName);
     }
   }
 
@@ -81,8 +80,11 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
-        title: Text('내 정보 관리'),
+        title: Text('내 정보 관리', style: TextStyle(color: Colors.black)), // 텍스트를 검정색으로 설정
+        backgroundColor: Color(0xffffffff),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: ListView(
         padding: EdgeInsets.all(16.0),
@@ -115,25 +117,25 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
           SizedBox(height: 16.0),
           Divider(),
           ListTile(
-            title: Text('사용자 이름'),
-            trailing: Text(userName, style: TextStyle(color: Colors.blue)),
+            title: Text('사용자 이름', style: TextStyle(color: Colors.black)), // 검정색으로 변경
+            trailing: Text(userName, style: TextStyle(color: Colors.black)),
             onTap: () async {
               final newUserName = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EditNicknameScreen()), // 사용자 이름 변경 화면으로 이동
+                MaterialPageRoute(builder: (context) => EditNicknameScreen()),
               );
               if (newUserName != null) {
                 setState(() {
                   userName = newUserName;
                 });
-                await _updateUserName(newUserName); // Firebase에 사용자 이름 업데이트
+                await _updateUserName(newUserName);
               }
             },
           ),
           Divider(),
           ListTile(
-            title: Text('생일'),
-            trailing: Text(birthday, style: TextStyle(color: Colors.blue)),
+            title: Text('생일', style: TextStyle(color: Colors.black)), // 검정색으로 변경
+            trailing: Text(birthday, style: TextStyle(color: Colors.black)),
             onTap: () async {
               final newBirthday = await Navigator.push(
                 context,
@@ -143,14 +145,14 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
                 setState(() {
                   birthday = newBirthday;
                 });
-                await _updateBirthday(newBirthday); // Firebase에 업데이트
+                await _updateBirthday(newBirthday);
               }
             },
           ),
           Divider(),
           ListTile(
-            title: Text('성별'),
-            trailing: Text(gender, style: TextStyle(color: Colors.blue)),
+            title: Text('성별', style: TextStyle(color: Colors.black)), // 검정색으로 변경
+            trailing: Text(gender, style: TextStyle(color: Colors.black)),
             onTap: () async {
               final newGender = await Navigator.push(
                 context,
@@ -160,7 +162,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
                 setState(() {
                   gender = newGender;
                 });
-                await _updateGender(newGender); // Firebase에 업데이트
+                await _updateGender(newGender);
               }
             },
           ),

@@ -57,8 +57,10 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffffffff), // 배경색 흰색으로 설정
       appBar: AppBar(
         title: Text('비밀번호 변경'),
+        backgroundColor: Color(0xff73b1e7), // AppBar 배경색 설정
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -69,7 +71,10 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
               TextFormField(
                 controller: _currentPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: '현재 비밀번호'),
+                decoration: InputDecoration(
+                  labelText: '현재 비밀번호',
+                  labelStyle: TextStyle(color: Colors.black), // 라벨 색상 검정으로
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return '현재 비밀번호를 입력하세요';
@@ -81,7 +86,10 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
               TextFormField(
                 controller: _newPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: '새 비밀번호'),
+                decoration: InputDecoration(
+                  labelText: '새 비밀번호',
+                  labelStyle: TextStyle(color: Colors.black),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return '새 비밀번호를 입력하세요';
@@ -95,7 +103,10 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
               TextFormField(
                 controller: _confirmNewPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: '새 비밀번호 확인'),
+                decoration: InputDecoration(
+                  labelText: '새 비밀번호 확인',
+                  labelStyle: TextStyle(color: Colors.black),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return '새 비밀번호를 다시 입력하세요';
@@ -108,6 +119,9 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
               SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _changePassword,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xff73b1e7), // 버튼 색상 설정
+                ),
                 child: Text('비밀번호 변경'),
               ),
             ],
