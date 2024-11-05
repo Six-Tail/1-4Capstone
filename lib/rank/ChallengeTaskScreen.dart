@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:todobest_home/rank/model/task_model.dart';
+import 'package:todobest_home/rank/model/daily_task_model.dart';
 
 import '../Router.dart';
 import '../service/User_Service.dart';

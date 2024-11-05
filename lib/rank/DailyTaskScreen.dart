@@ -5,10 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:todobest_home/rank/model/task_model.dart';
+
 
 import '../Router.dart';
 import '../service/User_Service.dart';
+import 'model/daily_task_model.dart';
+import 'model/weekly_task_model.dart';
 
 class DailyTasksPage extends StatefulWidget {
   const DailyTasksPage({super.key});
@@ -33,6 +35,52 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
     DailyTask(name: '일정 3개 완료하기', isCompleted: false, xp: 60, hasClaimedXP: false),
     DailyTask(name: '달성률 80% 이상 달성하기', isCompleted: false, xp: 80, hasClaimedXP: false),
   ];
+
+  // 전역변수로 weeklyTasks를 정의
+  List<WeeklyTask> weeklyTasks = [
+    WeeklyTask(name: '5일 출석하기', isCompleted: false, xp: 150, hasClaimedXP: false, currentAttendance: 0),
+    WeeklyTask(name: '일정 15개 등록하기', isCompleted: false, xp: 300, hasClaimedXP: false),
+    WeeklyTask(name: '일정 15개 완료하기', isCompleted: false, xp: 600, hasClaimedXP: false),
+    WeeklyTask(name: '달성률 100% 달성하기', isCompleted: false, xp: 800, hasClaimedXP: false),
+  ];
+
+// completeDailyAttendanceTask 함수 내에서 사용
+  Future<void> completeDailyAttendanceTask() async {
+    if (currentUser != null) {
+      var taskStatus = await userService.getDailyTaskStatus(currentUser!.uid, dailyTasks[0].name);
+
+      if (taskStatus == null || !(taskStatus['hasClaimedXP'] ?? false)) {
+        dailyTasks[0].isCompleted = true;
+        dailyTasks[0].hasClaimedXP = false;
+
+        // 주간 미션의 currentAttendance 값을 증가
+        var weeklyTask = weeklyTasks.firstWhere((task) => task.name == '5일 출석하기');
+        weeklyTask.currentAttendance++;
+
+        await userService.updateDailyTaskStatus(
+          currentUser!.uid,
+          dailyTasks[0].name,
+          null,
+          isCompleted: true,
+          hasClaimedXP: false,
+        );
+
+        await userService.updateWeeklyTaskStatus(
+          currentUser!.uid,
+          weeklyTask.name,
+          null,
+          isCompleted: false,
+          hasClaimedXP: false,
+          currentAttendance: weeklyTask.currentAttendance, // 이 값을 Firebase에 저장해야 합니다.
+        );
+
+        if (kDebugMode) {
+          print('currentAttendance: ${weeklyTask.currentAttendance}');
+        }
+      }
+    }
+  }
+
 
   DateTime? lastClaimedTime;
   late Timer timer;
@@ -406,7 +454,7 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
   Future<void> _updateAchievementRateInUsersDailyReset(double achievementRate) async {
     if (currentUser == null) return;
     try {
-      await firestore.collection('users').doc(currentUser!.uid).collection('daily_reset').doc('achievement_rate')
+      await firestore.collection('users').doc(currentUser!.uid).collection('daily_reset').doc('event_count')
           .set({
         'achievementRate': achievementRate, // 달성률을 'achievementRate' 필드에 저장
       }, SetOptions(merge: true)); // merge: true 옵션 추가
@@ -629,28 +677,6 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
           null, // lastClaimedTime 초기화
           isCompleted: false, // 초기 상태는 완료되지 않음
           hasClaimedXP: false, // 초기 상태는 XP 청구 안 함
-        );
-      }
-    }
-  }
-
-  Future<void> completeDailyAttendanceTask() async {
-    if (currentUser != null) {
-      // '일일 출석하기' 미션의 상태를 가져옴
-      var taskStatus = await userService.getDailyTaskStatus(currentUser!.uid, dailyTasks[0].name);
-
-      // 경험치를 이미 수령하지 않은 경우에만 상태를 업데이트
-      if (taskStatus == null || !(taskStatus['hasClaimedXP'] ?? false)) {
-        dailyTasks[0].isCompleted = true; // '일일 출석하기' 미션을 완료로 설정
-        dailyTasks[0].hasClaimedXP = false; // XP 획득 상태는 초기화
-
-        // Firestore에 상태 업데이트
-        await userService.updateDailyTaskStatus(
-          currentUser!.uid,
-          dailyTasks[0].name,
-          null, // lastClaimedTime은 초기화
-          isCompleted: true, // 완료 상태를 true로 설정
-          hasClaimedXP: false, // XP 획득 여부는 초기화
         );
       }
     }

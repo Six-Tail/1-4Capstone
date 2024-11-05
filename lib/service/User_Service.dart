@@ -9,7 +9,25 @@ import '../rank/RankingScreen.dart';
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  final String defaultProfileImageUrl = 'https://yourfirebaseapp.appspot.com/default_profile.jpg'; // Firebase Storage의 URL로 설정
+
+  String? defaultProfileImageUrl;
+
+  UserService() {
+    _initializeDefaultProfileImage();
+  }
+
+  Future<void> _initializeDefaultProfileImage() async {
+    try {
+      defaultProfileImageUrl = await _storage.ref('images/pngwing.com.png').getDownloadURL();
+    } catch (e) {
+      if (kDebugMode) {
+        print("Failed to load default profile image URL: $e");
+      }
+      // 기본 이미지 URL을 설정
+      defaultProfileImageUrl = 'https://default-image-url.com/default.png';
+    }
+  }
+
 
   // Firestore에 사용자 기본 정보를 설정하는 공통 메서드
   Map<String, dynamic> _defaultUserData(User firebaseUser) {
@@ -20,7 +38,7 @@ class UserService {
       'createdAt': FieldValue.serverTimestamp(),
       'level': 1,
       'currentExp': 0,
-      'maxExp': 10,
+      'maxExp': 100,
       'phoneNumber': '',
       'birthday': '',
       'gender': '',
@@ -57,13 +75,16 @@ class UserService {
     }
   }
 
-  // 사용자 정보 업데이트
+  // 사용자 정보 업데이트 (프로필 이미지 포함)
   Future<void> updateUserInfo(String uid, {String? userName, String? birthday, String? gender, String? profileImageUrl}) async {
     Map<String, dynamic> updates = {};
     if (userName != null) updates['userName'] = userName;
     if (birthday != null) updates['birthday'] = birthday;
     if (gender != null) updates['gender'] = gender;
-    if (profileImageUrl != null) updates['userImage'] = profileImageUrl;
+
+    // 프로필 이미지 URL이 제공되면 업데이트, 아니면 기본 이미지 URL을 사용
+    updates['userImage'] = profileImageUrl ?? defaultProfileImageUrl;
+
     await _firestore.collection('users').doc(uid).update(updates);
   }
 
@@ -150,6 +171,7 @@ class UserService {
       'hasClaimedXP': hasClaimedXP,
       'lastClaimedTime': lastClaimedTime,
       'isCompleted': isCompleted,
+      'currentAttendance': currentAttendance,
     }, SetOptions(merge: true));
   }
 
@@ -165,6 +187,7 @@ class UserService {
       'hasClaimedXP': hasClaimedXP,
       'lastClaimedTime': lastClaimedTime,
       'isCompleted': isCompleted,
+      'currentAttendance': currentAttendance,
     }, SetOptions(merge: true));
   }
 

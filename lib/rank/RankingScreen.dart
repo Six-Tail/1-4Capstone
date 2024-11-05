@@ -78,17 +78,16 @@ class RankingPage extends StatelessWidget {
 
           // 현재 사용자 데이터를 UID를 통해 찾기
           AppUser? currentUserData = users.firstWhere(
-                (user) => user.uid == currentUser?.uid,  // user.uid를 사용하여 현재 사용자 UID와 비교
+                (user) => user.uid == currentUser?.uid,
             orElse: () => AppUser(
               uid: 'Unknown',
               name: currentUser?.displayName ?? 'Unknown',
               level: 1,
               currentExp: 0,
               rank: 0,
-              profileImageUrl: userService.defaultProfileImageUrl,
+              profileImageUrl: userService.defaultProfileImageUrl ?? 'https://default-image-url.com/default.png',
             ),
           );
-
           return Column(
             children: [
               const Padding(
