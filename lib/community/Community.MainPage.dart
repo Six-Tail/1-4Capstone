@@ -47,12 +47,11 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView( // 스크롤 가능하게 만듭니다.
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // 첫 번째 Row: 기존의 두 개의 박스
               Row(
                 children: [
                   Expanded(
@@ -78,10 +77,10 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         ),
                         child: const Column(
                           children: [
+                            SizedBox(height: 8), // 아이콘 위치 조정
                             Icon(Icons.local_fire_department, size: 40, color: Colors.deepOrange),
-                            SizedBox(height: 30),
-                            Text('HOT 게시판', style: TextStyle(fontSize: 16,
-                              fontWeight: FontWeight.bold,)),
+                            SizedBox(height: 10),
+                            Text('HOT 게시판', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -111,11 +110,15 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         ),
                         child: const Column(
                           children: [
-                            Icon(Icons.edit_note_sharp, size: 40, color: Colors.blueAccent),
-                            SizedBox(height: 30),
-                            Text('내가 쓴 글', style: TextStyle(fontSize: 16,
-                              fontWeight: FontWeight.bold,)),
+                            SizedBox(height: 6),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 6), // 아이콘을 약간 오른쪽으로 이동
+                              child: Icon(Icons.edit_note_sharp, size: 42, color: Colors.blueAccent),
+                            ),
+                            SizedBox(height: 10),
+                            Text('내가 쓴 글', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
+
                         ),
                       ),
                     ),
@@ -124,13 +127,11 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
               ),
               const SizedBox(height: 16),
 
-              // 두 번째 Row: 세 번째 박스는 AllPostsScreen로 이동, 네 번째 박스는 ScrapPage로 이동
               Row(
                 children: [
                   Expanded(
                     child: InkWell(
                       onTap: () {
-                        // AllPostsScreen 페이지로 이동
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -147,12 +148,10 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         ),
                         child: const Column(
                           children: [
-                            Icon(Icons.paste, size: 40, color: Colors.purple),
-                            SizedBox(height: 30),
-                            Text('전체 글',
-                                style: TextStyle(fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                )),
+                            SizedBox(height: 8),
+                            Icon(Icons.paste, size: 40, color: Colors.blueAccent),
+                            SizedBox(height: 15),
+                            Text('전체 글', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -178,10 +177,10 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         ),
                         child: const Column(
                           children: [
-                            Icon(Icons.star_border_outlined, size: 40, color: Colors.yellow),
-                            SizedBox(height: 30),
-                            Text('스크랩', style: TextStyle(fontSize: 16,
-                              fontWeight: FontWeight.bold,)),
+                            SizedBox(height: 8),
+                            Icon(Icons.bookmark_border_outlined, size: 40, color: Color(0xffefe684)),
+                            SizedBox(height: 15),
+                            Text('스크랩', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -207,10 +206,10 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         ),
                         child: const Column(
                           children: [
-                            Icon(Icons.comment, size: 40, color: Colors.teal),
-                            SizedBox(height: 30),
-                            Text('댓글 단 글', style: TextStyle(fontSize: 16,
-                              fontWeight: FontWeight.bold,)),
+                            SizedBox(height: 10),
+                            Icon(Icons.comment, size: 35, color: Colors.blueGrey),
+                            SizedBox(height: 15),
+                            Text('댓글 단 글', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -220,7 +219,6 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
               ),
               const SizedBox(height: 16),
 
-              // 기존의 확장형 게시판 목록
               Theme(
                 data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                 child: ExpansionTile(
