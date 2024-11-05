@@ -77,7 +77,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         ),
                         child: const Column(
                           children: [
-                            SizedBox(height: 8), // 아이콘 위치 조정
+                            SizedBox(height: 9), // 아이콘 위치 조정
                             Icon(Icons.local_fire_department, size: 40, color: Colors.deepOrange),
                             SizedBox(height: 10),
                             Text('HOT 게시판', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
