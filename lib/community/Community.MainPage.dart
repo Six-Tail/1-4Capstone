@@ -42,16 +42,6 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
         actions: [
           IconButton(
             icon: const Icon(
-              Icons.notification_add,
-              color: Colors.greenAccent,
-              size: 20,
-            ),
-            onPressed: () {
-              // 알림 버튼의 동작 정의 (필요하다면 추가)
-            },
-          ),
-          IconButton(
-            icon: const Icon(
               Icons.chat_bubble_outline, // 채팅 아이콘 추가
               color: Colors.white,
               size: 24,
