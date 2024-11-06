@@ -95,6 +95,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
               children: [
                 CircleAvatar(
                   radius: 50,
+                  backgroundColor: Color(0xff73b1e7), // 프로필 배경 색상을 하얀색으로 설정
                   backgroundImage: _profileImage != null
                       ? FileImage(_profileImage!)
                       : NetworkImage(profileImageUrl) as ImageProvider,

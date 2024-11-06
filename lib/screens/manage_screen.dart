@@ -210,14 +210,14 @@ class _ManageScreenState extends State<ManageScreen> {
           content: const Text('로그아웃 하시겠습니까?'),
           actions: [
             TextButton(
-              child: const Text('예'),
+              child: const Text('예', style: TextStyle(color: Colors.black)),
               onPressed: () async {
                 Navigator.of(context).pop(); // 다이얼로그 닫기
                 await _signOut(); // 로그아웃 함수 호출
               },
             ),
             TextButton(
-              child: const Text('아니오'),
+              child: const Text('아니오',style: TextStyle(color: Colors.black)),
               onPressed: () {
                 Navigator.of(context).pop(); // 다이얼로그 닫기
               },
@@ -247,6 +247,7 @@ class _ManageScreenState extends State<ManageScreen> {
                   children: [
                     CircleAvatar(
                       radius: 30,
+                      backgroundColor: Color(0xff73b1e7), // 프로필 배경 색상을 하얀색으로 설정
                       backgroundImage: NetworkImage(userImage),
                     ),
                     const SizedBox(width: 16),
