@@ -166,6 +166,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                         print('사용자 이메일: ${newUser.user!.email}');
                         print('사용자 이름: ${newUser.user!.displayName ?? "이름 없음"}');
                         print('사용자 : ${newUser.user!.uid}');
+                        print('사용자 프로필 Url : ${newUser.user!.photoURL}');
                       }
                       Get.offAll(() => RouterPage());
                     }

@@ -10,36 +10,8 @@ class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  String? defaultProfileImageUrl;
-
-  UserService() {
-    _initializeDefaultProfileImage();
-  }
-
-  Future<void> _initializeDefaultProfileImage() async {
-    try {
-      // Firebase Storage의 'images/default_profile.png' 경로에서 다운로드 URL을 가져옴
-      defaultProfileImageUrl =
-          await _storage.ref('images/default_profile.png').getDownloadURL();
-
-      // 다운로드한 URL을 콘솔에 출력
-      if (kDebugMode) {
-        print("Downloaded profile image URL: $defaultProfileImageUrl");
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print("Failed to load default profile image URL: $e");
-      }
-      // 오류 발생 시 기본 이미지 URL을 수동으로 설정
-      defaultProfileImageUrl =
-          'https://firebasestorage.googleapis.com/v0/b/to-do-best-72308.appspot.com/o/images%2Fdefault_profile.png?alt=media';
-
-      // 설정된 기본 이미지 URL을 콘솔에 출력
-      if (kDebugMode) {
-        print("Using default profile image URL: $defaultProfileImageUrl");
-      }
-    }
-  }
+  // 기본 프로필 이미지 경로 (assets 폴더에 있는 이미지)
+  String? defaultProfileImageUrl = 'assets/default_profile.png';
 
   // Firestore에 사용자 기본 정보를 설정하는 공통 메서드
   Map<String, dynamic> _defaultUserData(User firebaseUser) {
