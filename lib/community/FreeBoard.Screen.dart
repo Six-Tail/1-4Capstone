@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../service/User_Service.dart';
 import '../utils/Themes.Colors.dart';
 import 'Post.Detail.dart';
@@ -106,7 +105,7 @@ class FreeBoardScreen extends StatelessWidget {
                               return Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundImage: NetworkImage(userImage),
+                                    backgroundImage: NetworkImage(post['userImage'] ?? ''),
                                     radius: 20,
                                   ),
                                   SizedBox(width: 8),

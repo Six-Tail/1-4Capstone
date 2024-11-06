@@ -105,7 +105,7 @@ class SdTipBoardScreen extends StatelessWidget {
                               return Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundImage: NetworkImage(userImage),
+                                    backgroundImage: NetworkImage(post['userImage'] ?? ''),
                                     radius: 20,
                                   ),
                                   SizedBox(width: 8),

@@ -252,7 +252,6 @@ class _SocialLoginState extends State<SocialLogin> {
       }
     }
 
-    initUniLinks();
   }
 
   Future<void> _handleSuccessfulLogin(kakao.OAuthToken token) async {
