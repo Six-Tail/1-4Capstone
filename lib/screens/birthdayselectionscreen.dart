@@ -29,8 +29,10 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
         title: Text('생일 선택'),
+        backgroundColor: const Color(0xffffffff),
         centerTitle: true,
         actions: [
           IconButton(
@@ -89,7 +91,7 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: _updateBirthday, // 버튼 클릭 시 생일 업데이트 함수 호출
-                child: Text('확인'),
+                child: Text('확인',style: TextStyle(color: Colors.black)),
               ),
             ),
           ],

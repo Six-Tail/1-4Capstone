@@ -33,8 +33,10 @@ class _EditNicknameScreenState extends State<EditNicknameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
         title: Text('사용자 이름 설정'),
+          backgroundColor: const Color(0xffffffff),
         centerTitle: true,
       ),
       body: Padding(
@@ -51,7 +53,7 @@ class _EditNicknameScreenState extends State<EditNicknameScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: _updateUserName, // 버튼 클릭 시 사용자 이름 업데이트 함수 호출
-                child: Text('저장'),
+                child: Text('저장',style: TextStyle(color: Colors.black)),
               ),
             ),
           ],

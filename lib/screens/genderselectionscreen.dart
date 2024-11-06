@@ -34,8 +34,10 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
         title: Text('ToDoBest계정'),
+        backgroundColor: const Color(0xffffffff),
         centerTitle: true,
         actions: [
           IconButton(

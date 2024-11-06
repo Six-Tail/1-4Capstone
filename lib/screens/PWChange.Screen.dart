@@ -122,7 +122,7 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xff73b1e7), // 버튼 색상 설정
                 ),
-                child: Text('비밀번호 변경'),
+                child: Text('비밀번호 변경',style: TextStyle(color: Colors.black)),
               ),
             ],
           ),
