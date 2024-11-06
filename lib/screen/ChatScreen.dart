@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../service/User_Service.dart';
+import '../utils/Themes.Colors.dart';
 import '../utils/UserInfoDialog.dart';
 import 'package:intl/intl.dart';
 
@@ -103,6 +104,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
         title: const Text('실시간 채팅방'),
         backgroundColor: const Color(0xff73b1e7),
