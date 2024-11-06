@@ -487,10 +487,6 @@ class _CalenderScreenState extends State<CalenderScreen>
               minHeight: MediaQuery.of(context).size.height * 0.5,
             ),
             child: Container(
-              decoration: BoxDecoration(
-                color: Color(0xff73b1e7),
-                borderRadius: BorderRadius.circular(12),
-              ),
               child: Stack(
                 children: [
                   Container(
@@ -530,8 +526,8 @@ class _CalenderScreenState extends State<CalenderScreen>
                     ),
                   ),
                   Positioned(
-                    bottom: 10,
-                    right: 10,
+                    bottom: 20,
+                    right: 20,
                     child: TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
@@ -739,9 +735,9 @@ class _CalenderScreenState extends State<CalenderScreen>
         actions: [
           IconButton(
             icon: const Icon(
-              Icons.check_circle,
-              color: Colors.greenAccent,
-              size: 20,
+              Icons.bar_chart,
+              color: Colors.white60,
+              size: 30,
             ),
             onPressed: _showCompletionStats, // 아이콘 클릭 시 팝업창 띄우는 함수 호출
           ),

@@ -251,7 +251,7 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const WeeklyTasksPage()),
+                        MaterialPageRoute(builder: (context) => WeeklyTasksPage()),
                       ).then((_) => _loadUserInfo());
                     },
                     icon: Icons.calendar_view_week,
