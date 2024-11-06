@@ -11,7 +11,7 @@ class CommentedPostsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme1Colors.mainColor,
+      backgroundColor: Color(0xFFF1F3F5), // 배경 색상 설정
       appBar: AppBar(
         title: Text(
           '댓글 단 글',
