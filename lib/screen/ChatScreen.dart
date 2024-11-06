@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../service/User_Service.dart';
 import '../utils/UserInfoDialog.dart';
-import 'package:intl/intl.dart'; // 시간 형식을 위해 추가
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -15,9 +16,44 @@ class _ChatScreenState extends State<ChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final User? _currentUser = FirebaseAuth.instance.currentUser;
   final UserService _userService = UserService();
+  late Timer _timer;
 
   // 사용자 정보를 캐싱하기 위한 맵
   Map<String, Map<String, dynamic>> userCache = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoDeleteOldMessages();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel(); // 타이머 해제
+    super.dispose();
+  }
+
+  // 1시간마다 오래된 메시지 삭제
+  void _startAutoDeleteOldMessages() {
+    _timer = Timer.periodic(Duration(hours: 1), (timer) {
+      _deleteOldMessages();
+    });
+  }
+
+  // Firestore에서 1시간 이상 된 메시지 삭제
+  Future<void> _deleteOldMessages() async {
+    final cutoff = DateTime.now().subtract(Duration(hours: 1));
+    final oldMessages = await _firestore
+        .collection('chatRooms')
+        .doc('global_chat')
+        .collection('messages')
+        .where('sentAt', isLessThan: Timestamp.fromDate(cutoff))
+        .get();
+
+    for (var doc in oldMessages.docs) {
+      await doc.reference.delete();
+    }
+  }
 
   // 메시지 전송 메서드
   Future<void> _sendMessage() async {
@@ -38,7 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
     } else {
       final userInfo = await _userService.getUserInfo(uid);
       if (userInfo != null) {
-        userCache[uid] = userInfo; // 사용자 정보를 캐시에 저장
+        userCache[uid] = userInfo;
       }
       return userInfo;
     }
@@ -47,7 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
   // 시간 형식을 변환하는 메서드
   String _formatTimestamp(Timestamp timestamp) {
     final DateTime date = timestamp.toDate();
-    return DateFormat('hh:mm a').format(date); // 시간을 오전/오후 hh:mm 형식으로 변환
+    return DateFormat('hh:mm a').format(date);
   }
 
   // 사용자 정보 팝업을 보여주는 메서드
@@ -68,7 +104,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat Room'),
+        title: const Text('실시간 채팅방'),
         backgroundColor: const Color(0xff73b1e7),
       ),
       body: Column(
@@ -78,7 +114,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
                   .collection('chatRooms')
-                  .doc('global_chat') // 글로벌 채팅방 ID
+                  .doc('global_chat')
                   .collection('messages')
                   .orderBy('sentAt', descending: true)
                   .snapshots(),

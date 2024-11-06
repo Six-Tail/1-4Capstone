@@ -132,12 +132,12 @@ class _AuthSeccessionScreenState extends State<AuthSeccessionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('회원 탈퇴'),
+        title: const Text('회원 탈퇴',style: TextStyle(color: Colors.black)),
       ),
       body: Center(
         child: ElevatedButton(
           onPressed: _showDeleteAccountDialog,
-          child: const Text('회원 탈퇴'),
+          child: const Text('회원 탈퇴',style: TextStyle(color: Colors.black)),
         ),
       ),
     );
