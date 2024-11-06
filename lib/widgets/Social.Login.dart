@@ -251,8 +251,7 @@ class _SocialLoginState extends State<SocialLogin> {
         print('사용자 정보 요청 또는 Firebase 프로필 업데이트 실패: $error');
       }
     }
-
-    initUniLinks();
+    
   }
 
   Future<void> _handleSuccessfulLogin(kakao.OAuthToken token) async {
