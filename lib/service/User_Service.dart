@@ -266,7 +266,10 @@ class UserService {
       await _deleteSubcollections(uid, 'daily tasks');
       await _deleteSubcollections(uid, 'weekly tasks');
       await _deleteSubcollections(uid, 'challenge tasks');
-      await _deleteSubcollections(uid, 'daily_reset'); // daily_reset 하위 컬렉션 추가
+      await _deleteSubcollections(uid, 'daily_reset'); // 추가로 daily_reset 하위 컬렉션 삭제
+
+      // 사용자가 작성한 게시글 삭제
+      await deleteUserPosts(uid);
 
       // 사용자 메인 문서 삭제
       await _firestore.collection('users').doc(uid).delete();
@@ -281,10 +284,30 @@ class UserService {
     }
   }
 
+  // 사용자가 작성한 게시글 삭제
+  Future<void> deleteUserPosts(String uid) async {
+    try {
+      // 사용자의 모든 게시글 가져오기
+      final userPosts = await _firestore.collection('posts').where('userId', isEqualTo: uid).get();
+
+      // 각 게시글 삭제
+      for (var doc in userPosts.docs) {
+        await doc.reference.delete();
+      }
+
+      if (kDebugMode) {
+        print("사용자가 작성한 모든 게시글 삭제 완료: $uid");
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("사용자 게시글 삭제 중 오류 발생: $e");
+      }
+    }
+  }
+
   // 하위 컬렉션 삭제 메서드
   Future<void> _deleteSubcollections(String uid, String subcollection) async {
-    final subcollectionRef =
-        _firestore.collection('users').doc(uid).collection(subcollection);
+    final subcollectionRef = _firestore.collection('users').doc(uid).collection(subcollection);
     final snapshots = await subcollectionRef.get();
 
     for (var doc in snapshots.docs) {
