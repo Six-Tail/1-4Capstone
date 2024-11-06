@@ -1,17 +1,14 @@
-import 'dart:io';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../rank/RankingScreen.dart';
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // 기본 프로필 이미지 경로 (assets 폴더에 있는 이미지)
-  String? defaultProfileImageUrl = 'assets/default_profile.png';
+  String defaultProfileImageUrl =
+  'https://firebasestorage.googleapis.com/v0/b/to-do-best-72308.firebasestorage.app/o/images%2Fdefault_profile.png?alt=media&token=69822f73-86c6-4da8-a129-83c013a2fcfa';
 
   // Firestore에 사용자 기본 정보를 설정하는 공통 메서드
   Map<String, dynamic> _defaultUserData(User firebaseUser) {
@@ -44,26 +41,12 @@ class UserService {
     });
   }
 
-  // 프로필 이미지 업로드 및 URL 반환
-  Future<String?> uploadProfileImage(String uid, File imageFile) async {
-    try {
-      final storageRef = _storage.ref().child('user_images/$uid.jpg');
-      await storageRef.putFile(imageFile);
-      return await storageRef.getDownloadURL();
-    } catch (e) {
-      if (kDebugMode) {
-        print("Error uploading profile image: $e");
-      }
-      return null;
-    }
-  }
-
   // 사용자 정보 업데이트 (프로필 이미지 포함)
   Future<void> updateUserInfo(String uid,
       {String? userName,
-      String? birthday,
-      String? gender,
-      String? profileImageUrl}) async {
+        String? birthday,
+        String? gender,
+        String? profileImageUrl}) async {
     Map<String, dynamic> updates = {};
     if (userName != null) updates['userName'] = userName;
     if (birthday != null) updates['birthday'] = birthday;
@@ -79,7 +62,7 @@ class UserService {
   Future<Map<String, dynamic>?> getUserInfo(String uid) async {
     try {
       DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(uid).get();
+      await _firestore.collection('users').doc(uid).get();
       return userDoc.exists ? userDoc.data() as Map<String, dynamic>? : null;
     } catch (e) {
       if (kDebugMode) {
@@ -173,8 +156,8 @@ class UserService {
   Future<void> updateWeeklyTaskStatus(
       String uid, String taskName, DateTime? lastClaimedTime,
       {bool isCompleted = false,
-      bool hasClaimedXP = false,
-      required int currentAttendance}) async {
+        bool hasClaimedXP = false,
+        required int currentAttendance}) async {
     await _firestore
         .collection('users')
         .doc(uid)
@@ -204,8 +187,8 @@ class UserService {
   Future<void> updateChallengeTaskStatus(
       String uid, String taskName, DateTime? lastClaimedTime,
       {bool isCompleted = false,
-      bool hasClaimedXP = false,
-      required int currentAttendance}) async {
+        bool hasClaimedXP = false,
+        required int currentAttendance}) async {
     await _firestore
         .collection('users')
         .doc(uid)

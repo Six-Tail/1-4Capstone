@@ -18,7 +18,8 @@ class ManageScreen extends StatefulWidget {
   final Function(bool) toggleTheme;
   final bool isDarkMode;
 
-  const ManageScreen({super.key, required this.toggleTheme, required this.isDarkMode});
+  const ManageScreen(
+      {super.key, required this.toggleTheme, required this.isDarkMode});
 
   @override
   _ManageScreenState createState() => _ManageScreenState();
@@ -26,7 +27,7 @@ class ManageScreen extends StatefulWidget {
 
 class _ManageScreenState extends State<ManageScreen> {
   final UserService _userService = UserService();
-  String accountType = 'ToDoBest 계정';
+  String accountType = '';
   String userEmail = '';
   String userName = '';
   String userImage = '';
@@ -73,28 +74,35 @@ class _ManageScreenState extends State<ManageScreen> {
       setState(() {
         userPhone = newPhoneNumber;
       });
-      await _userService.updateUserPhoneNumber(firebaseUser!.uid, newPhoneNumber);
+      await _userService.updateUserPhoneNumber(
+          firebaseUser!.uid, newPhoneNumber);
     }
   }
 
-  // 현재 사용자 정보 가져오기
   void _getCurrentUserInfo() async {
     firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
 
     if (firebaseUser != null) {
-      // Firebase User 정보 설정
-      setState(() {
-        userEmail = firebaseUser!.email ?? '';
-        userName = firebaseUser!.displayName ?? 'Unknown';
-        userImage = firebaseUser!.photoURL ?? 'https://example.com/default_image.jpg';
-      });
+      // // Firebase User 정보 설정
+      // setState(() {
+      //   userEmail = firebaseUser!.email ?? '';
+      //   userName = firebaseUser!.displayName ?? 'Unknown';
+      //   userImage = 'https://example.com/default_image.jpg'; // 기본 이미지 설정
+      // });
 
-      // 사용자 Firestore 정보 가져오기
+      // Firestore에서 사용자 정보 가져오기
       final userInfo = await _userService.getUserInfo(firebaseUser!.uid);
-      setState(() {
-        userPhone = userInfo?['phoneNumber'] ?? '전화번호를 설정하세요'; // 저장된 전화번호 불러오기
-        userName = userInfo?['userName'] ?? userName; // 저장된 사용자 이름 불러오기
-      });
+      if (userInfo != null) {
+        setState(() {
+          userEmail = firebaseUser!.email ?? '';
+          userName = firebaseUser!.displayName ?? 'Unknown';
+          userPhone = userInfo['phoneNumber']?.isNotEmpty == true
+              ? userInfo['phoneNumber']
+              : '전화번호를 설정하세요'; // 전화번호가 없으면 기본값 설정
+          userName = userInfo['userName'] ?? userName;
+          userImage = userInfo['userImage'] ?? userImage;
+        });
+      }
 
       // 계정 종류 확인
       if (await _isGoogleUser()) {
@@ -164,7 +172,6 @@ class _ManageScreenState extends State<ManageScreen> {
       }
     }
 
-
     try {
       await GoogleSignIn().signOut();
       if (kDebugMode) {
@@ -195,7 +202,7 @@ class _ManageScreenState extends State<ManageScreen> {
     if (logoutSuccessful) {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const FirstScreen()),
-            (Route<dynamic> route) => false,
+        (Route<dynamic> route) => false,
       );
     }
   }
@@ -217,7 +224,7 @@ class _ManageScreenState extends State<ManageScreen> {
               },
             ),
             TextButton(
-              child: const Text('아니오',style: TextStyle(color: Colors.black)),
+              child: const Text('아니오', style: TextStyle(color: Colors.black)),
               onPressed: () {
                 Navigator.of(context).pop(); // 다이얼로그 닫기
               },
@@ -239,50 +246,54 @@ class _ManageScreenState extends State<ManageScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Color(0xff73b1e7), // 프로필 배경 색상을 하얀색으로 설정
-                      backgroundImage: NetworkImage(userImage),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          userName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white, // 배경 색을 흰색으로 설정
+                    backgroundImage: userImage.isNotEmpty
+                        ? NetworkImage(userImage)
+                        : const AssetImage('assets/images/default_profile.png')
+                            as ImageProvider,
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        userName,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () async {
+                  final updatedUserInfo = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileDetailScreen(),
                     ),
-                  ],
-                ),
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: () async {
-                    final updatedUserName = await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProfileDetailScreen()),
-                    );
+                  );
 
-                    // ProfileDetailScreen에서 변경된 userName을 가져와서 업데이트
-                    if (updatedUserName != null) {
-                      setState(() {
-                        userName = updatedUserName;
-                      });
-                    }
-                  },
-                ),
-              ],
-            ),
+                  // ProfileDetailScreen에서 변경된 userName과 userImage를 가져와서 업데이트
+                  if (updatedUserInfo != null) {
+                    setState(() {
+                      userName = updatedUserInfo['userName'];
+                      userImage = updatedUserInfo['userImage'];
+                    });
+                  }
+                },
+              ),
+            ],
           ),
           ListTile(
             leading: const Icon(Icons.account_circle),
@@ -302,17 +313,18 @@ class _ManageScreenState extends State<ManageScreen> {
             title: const Text('내 정보 관리'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
-              final updatedUserName = await Navigator.push(
+              final updatedUserInfo = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProfileDetailScreen(),
+                  builder: (context) => const ProfileDetailScreen(),
                 ),
               );
 
-              // ProfileDetailScreen에서 변경된 userName을 가져와서 업데이트
-              if (updatedUserName != null) {
+              // ProfileDetailScreen에서 변경된 userName과 userImage를 가져와서 업데이트
+              if (updatedUserInfo != null) {
                 setState(() {
-                  userName = updatedUserName;
+                  userName = updatedUserInfo['userName'];
+                  userImage = updatedUserInfo['userImage'];
                 });
               }
             },
@@ -338,7 +350,8 @@ class _ManageScreenState extends State<ManageScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => NotificationSettingsScreen()),
+                MaterialPageRoute(
+                    builder: (context) => NotificationSettingsScreen()),
               );
             },
           ),
@@ -349,7 +362,8 @@ class _ManageScreenState extends State<ManageScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CalendarListScreen(isDarkMode: widget.isDarkMode),
+                  builder: (context) =>
+                      CalendarListScreen(isDarkMode: widget.isDarkMode),
                 ),
               );
             },
@@ -360,7 +374,7 @@ class _ManageScreenState extends State<ManageScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => FeedbackScreen()),
+                MaterialPageRoute(builder: (context) => const FeedbackScreen()),
               );
             },
           ),
@@ -377,11 +391,10 @@ class _ManageScreenState extends State<ManageScreen> {
             onTap: _showLogoutDialog,
           ),
           const Divider(),
-
           ListTile(
             leading: const Icon(Icons.delete_forever),
             title: const Text('회원탈퇴'),
-            trailing: Icon(Icons.chevron_right),
+            trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
                 context,

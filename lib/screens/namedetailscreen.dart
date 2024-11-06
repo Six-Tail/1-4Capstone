@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../service/User_Service.dart';
@@ -8,6 +10,8 @@ import 'genderselectionscreen.dart';
 import 'editnicknamescreen.dart';
 
 class ProfileDetailScreen extends StatefulWidget {
+  const ProfileDetailScreen({super.key});
+
   @override
   _ProfileDetailScreenState createState() => _ProfileDetailScreenState();
 }
@@ -49,15 +53,48 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
       setState(() {
         _profileImage = File(pickedFile.path);
       });
-      final downloadUrl = await _userService.uploadProfileImage(_firebaseUser!.uid, _profileImage!);
-      if (downloadUrl != null) {
-        await _userService.updateUserInfo(_firebaseUser!.uid, profileImageUrl: downloadUrl);
-        setState(() {
-          profileImageUrl = downloadUrl;
-        });
+      
+      try {
+        final downloadUrl = await _uploadProfileImage(_firebaseUser!.uid, _profileImage!);
+        
+        if (downloadUrl != null) {
+         // 이미지 URL을 사용자 정보에 업데이트
+         await _userService.updateUserInfo(_firebaseUser!.uid, profileImageUrl: downloadUrl);
+
+         setState(() {
+           profileImageUrl = downloadUrl; // 프로필 이미지 URL을 업데이트
+         });
+        } else {
+          throw Exception("이미지 업로드 실패");
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print("Error uploading image: $e");
+        }
       }
     }
   }
+
+  // Firebase Storage에 이미지를 업로드하고 다운로드 URL을 반환하는 함수
+  Future<String?> _uploadProfileImage(String userId, File profileImage) async {
+    try {
+      // Firebase Storage에 업로드할 경로 설정
+      final storageRef = FirebaseStorage.instance.ref().child('profile_images').child('$userId.png');
+
+      // 이미지 파일을 Firebase Storage에 업로드
+      await storageRef.putFile(profileImage);
+
+      // 업로드된 이미지의 다운로드 URL 가져오기
+      String downloadUrl = await storageRef.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error uploading image: $e");
+      }
+      return null;
+    }
+  }
+
 
   Future<void> _updateUserName(String newUserName) async {
     if (_firebaseUser != null) {
@@ -82,12 +119,12 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
-        title: Text('내 정보 관리', style: TextStyle(color: Colors.black)), // 텍스트를 검정색으로 설정
-        backgroundColor: Color(0xffffffff),
-        iconTheme: IconThemeData(color: Colors.black),
+        title: const Text('내 정보 관리', style: TextStyle(color: Colors.black)), // 텍스트를 검정색으로 설정
+        backgroundColor: const Color(0xffffffff),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: ListView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         children: [
           Center(
             child: Stack(
@@ -95,7 +132,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
               children: [
                 CircleAvatar(
                   radius: 50,
-                  backgroundColor: Color(0xff73b1e7), // 프로필 배경 색상을 하얀색으로 설정
+                  backgroundColor: const Color(0xffffffff), // 프로필 배경 색상을 하얀색으로 설정
                   backgroundImage: _profileImage != null
                       ? FileImage(_profileImage!)
                       : NetworkImage(profileImageUrl) as ImageProvider,
@@ -115,11 +152,11 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
               ],
             ),
           ),
-          SizedBox(height: 16.0),
-          Divider(),
+          const SizedBox(height: 16.0),
+          const Divider(),
           ListTile(
-            title: Text('사용자 이름', style: TextStyle(color: Colors.black)), // 검정색으로 변경
-            trailing: Text(userName, style: TextStyle(color: Colors.black)),
+            title: const Text('사용자 이름', style: TextStyle(color: Colors.black)), // 검정색으로 변경
+            trailing: Text(userName, style: const TextStyle(color: Colors.black)),
             onTap: () async {
               final newUserName = await Navigator.push(
                 context,
@@ -133,10 +170,10 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
               }
             },
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            title: Text('생일', style: TextStyle(color: Colors.black)), // 검정색으로 변경
-            trailing: Text(birthday, style: TextStyle(color: Colors.black)),
+            title: const Text('생일', style: TextStyle(color: Colors.black)), // 검정색으로 변경
+            trailing: Text(birthday, style: const TextStyle(color: Colors.black)),
             onTap: () async {
               final newBirthday = await Navigator.push(
                 context,
@@ -150,10 +187,10 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
               }
             },
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            title: Text('성별', style: TextStyle(color: Colors.black)), // 검정색으로 변경
-            trailing: Text(gender, style: TextStyle(color: Colors.black)),
+            title: const Text('성별', style: TextStyle(color: Colors.black)), // 검정색으로 변경
+            trailing: Text(gender, style: const TextStyle(color: Colors.black)),
             onTap: () async {
               final newGender = await Navigator.push(
                 context,

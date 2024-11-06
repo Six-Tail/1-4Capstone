@@ -1,7 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:todobest_home/rank/task_button.dart';
 import '../service/User_Service.dart';
 import '../utils/Themes.Colors.dart';
@@ -94,21 +94,28 @@ class _RankMoreState extends State<RankMore> {
 
   Future<String?> _getProfileImageUrl() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user?.photoURL != null) {
-      return user!.photoURL;
-    } else if (user != null) {
+    if (user != null) {
       try {
-        final ref = FirebaseStorage.instance.ref().child('profile_images/${user.uid}.png');
-        return await ref.getDownloadURL();
+        // Firestore에서 현재 사용자 정보 가져오기
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          final userImage = userDoc.data()?['userImage'];
+          if (userImage != null && userImage is String) {
+            return userImage; // Firestore에서 가져온 userImage URL 반환
+          }
+        }
+        // userImage가 없으면 기본 프로필 이미지 반환
+        return user.photoURL ?? 'assets/profile_placeholder.png';
       } catch (e) {
         if (kDebugMode) {
           print("프로필 이미지 가져오기 오류: $e");
         }
-        return null;
+        return 'assets/profile_placeholder.png'; // 오류 시 기본 프로필 이미지
       }
     }
-    return null;
+    return null; // 로그인하지 않은 경우
   }
+
 
   // 경험치 포맷팅 함수
   String _formatExperience(int exp) {
@@ -153,13 +160,13 @@ class _RankMoreState extends State<RankMore> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return CircleAvatar(
                         radius: screenWidth * 0.1,
-                        backgroundColor: Colors.grey,
+                        backgroundColor: Colors.white,
                         child: const CircularProgressIndicator(),
                       );
                     }
                     return CircleAvatar(
                       radius: screenWidth * 0.1,
-                      backgroundColor: Colors.grey,
+                      backgroundColor: Colors.white,
                       backgroundImage: snapshot.data != null
                           ? NetworkImage(snapshot.data!)
                           : const AssetImage('assets/profile_placeholder.png')
@@ -251,7 +258,7 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => WeeklyTasksPage()),
+                        MaterialPageRoute(builder: (context) => const WeeklyTasksPage()),
                       ).then((_) => _loadUserInfo());
                     },
                     icon: Icons.calendar_view_week,
@@ -273,7 +280,7 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ChallengePage()),
+                        MaterialPageRoute(builder: (context) => const ChallengePage()),
                       ).then((_) => _loadUserInfo());
                     },
                     icon: Icons.flag,

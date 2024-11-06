@@ -85,7 +85,7 @@ class RankingPage extends StatelessWidget {
               level: 1,
               currentExp: 0,
               rank: 0,
-              profileImageUrl: userService.defaultProfileImageUrl ?? 'https://default-image-url.com/default.png',
+              profileImageUrl: userService.defaultProfileImageUrl,
             ),
           );
           return Column(
@@ -118,7 +118,7 @@ class RankingPage extends StatelessWidget {
                         right: 40,
                         child: Column(
                           children: [
-                            CircleAvatar(radius: 20, backgroundImage: NetworkImage(topThreeUsers[2].profileImageUrl)),
+                            CircleAvatar(radius: 20, backgroundColor: Colors.white, backgroundImage: NetworkImage(topThreeUsers[2].profileImageUrl)),
                             const SizedBox(height: 4),
                             Text(
                               topThreeUsers[2].name.length > 4 ? '${topThreeUsers[2].name.substring(0, 4)}...' : topThreeUsers[2].name,
@@ -136,7 +136,7 @@ class RankingPage extends StatelessWidget {
                         left: 40,
                         child: Column(
                           children: [
-                            CircleAvatar(radius: 25, backgroundImage: NetworkImage(topThreeUsers[1].profileImageUrl)),
+                            CircleAvatar(radius: 25, backgroundColor: Colors.white, backgroundImage: NetworkImage(topThreeUsers[1].profileImageUrl)),
                             const SizedBox(height: 4),
                             Text(
                               topThreeUsers[1].name.length > 4 ? '${topThreeUsers[1].name.substring(0, 4)}...' : topThreeUsers[1].name,
@@ -153,7 +153,7 @@ class RankingPage extends StatelessWidget {
                         bottom: 40,
                         child: Column(
                           children: [
-                            CircleAvatar(radius: 30, backgroundImage: NetworkImage(topThreeUsers[0].profileImageUrl)),
+                            CircleAvatar(radius: 30, backgroundColor: Colors.white, backgroundImage: NetworkImage(topThreeUsers[0].profileImageUrl)),
                             const SizedBox(height: 4),
                             Text(
                               topThreeUsers[0].name.length > 4 ? '${topThreeUsers[0].name.substring(0, 4)}...' : topThreeUsers[0].name,
