@@ -430,6 +430,7 @@ class _CalenderScreenState extends State<CalenderScreen>
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('통계 선택'),
+          backgroundColor: Colors.white,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -487,62 +488,53 @@ class _CalenderScreenState extends State<CalenderScreen>
               minHeight: MediaQuery.of(context).size.height * 0.5,
             ),
             child: Container(
-              child: Stack(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(1.0),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '$currentYear년 $currentMonth월 통계',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        // 원형 게이지 바 크기 조정
-                        SizedBox(
-                          width: 100, // 너비
-                          height: 100, // 높이
-                          child: CircularProgressIndicator(
-                            value: completionRate / 100,
-                            strokeWidth: 10, // 두께
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                            backgroundColor: Colors.grey[200],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text('완료한 일정: $completedEvents / $totalEvents'),
-                        const SizedBox(height: 20),
-                        Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
-                      ],
+                  Text(
+                    '$currentYear년 $currentMonth월 통계',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
-                  Positioned(
-                    bottom: 20,
-                    right: 20,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text(
-                        '확인',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
+                  const SizedBox(height: 20),
+                  // 원형 게이지 바 크기 조정
+                  SizedBox(
+                    width: 100, // 너비
+                    height: 100, // 높이
+                    child: CircularProgressIndicator(
+                      value: completionRate / 100,
+                      strokeWidth: 10, // 두께
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                      backgroundColor: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text('완료한 일정: $completedEvents / $totalEvents'),
+                  const SizedBox(height: 20),
+                  Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
+                  const SizedBox(height: 20),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      '확인',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
                       ),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
                   ),
                 ],
