@@ -19,7 +19,8 @@ class DailyTasksPage extends StatefulWidget {
   _DailyTasksPageState createState() => _DailyTasksPageState();
 }
 
-class _DailyTasksPageState extends State<DailyTasksPage> {
+class _DailyTasksPageState extends State<DailyTasksPage> with WidgetsBindingObserver {
+  late Timer timer;
   final UserService userService = UserService();
   final User? currentUser = FirebaseAuth.instance.currentUser;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -28,6 +29,8 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
   Future<int>? _completedEventsCountFuture;
   int totalRegisteredEvents = 0;
   int totalCompletedEvents = 0;
+  DateTime? lastClaimedTime;
+  Duration timeUntilReset = Duration.zero;
 
   List<DailyTask> dailyTasks = [
     DailyTask(name: '일일 출석하기', isCompleted: false, xp: 30, hasClaimedXP: false),
@@ -81,26 +84,48 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
     }
   }
 
-
-  DateTime? lastClaimedTime;
-  late Timer timer;
-  Duration timeUntilReset = Duration.zero;
-
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this); // 앱 라이프사이클 감지 시작
     _calculateTimeUntilReset();
     _startTimer();
-    loadTasks(); // 페이지가 열릴 때 태스크 정보를 불러옴
-    _achievementProgressFuture = _calculateAchievementProgress(); // 초기에 진행률 계산
-    _totalEventsCountFuture = _getTotalEventsCount(); // 일정 수를 미리 불러옴
-    _completedEventsCountFuture = _getCompletedEventsCount(); // 완료된 일정 개수 초기화
+    loadTasks();
+    _achievementProgressFuture = _calculateAchievementProgress();
+    _totalEventsCountFuture = _getTotalEventsCount();
+    _completedEventsCountFuture = _getCompletedEventsCount();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // 앱 라이프사이클 감지 해제
     timer.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // 앱이 포그라운드로 돌아올 때 자정이 지났는지 확인
+      _checkAndResetMissionsIfNeeded();
+    }
+  }
+
+  void _checkAndResetMissionsIfNeeded() {
+    final now = DateTime.now();
+    final lastReset = lastClaimedTime ?? DateTime(now.year, now.month, now.day);
+    final nextReset = DateTime(lastReset.year, lastReset.month, lastReset.day + 1);
+
+    if (now.isAfter(nextReset)) {
+      lastClaimedTime = null; // 자정이 지나면 lastClaimedTime 초기화
+      for (var task in dailyTasks) {
+        task.hasClaimedXP = false;
+        task.isCompleted = false;
+      }
+      _resetDailyMetrics();
+      _calculateTimeUntilReset(); // 새 자정 시간 계산
+    }
   }
 
   void _startTimer() {
@@ -108,16 +133,7 @@ class _DailyTasksPageState extends State<DailyTasksPage> {
       setState(() {
         _calculateTimeUntilReset();
         if (timeUntilReset.isNegative) {
-          lastClaimedTime = null; // 자정이 지나면 lastClaimedTime 초기화
-
-          // 각 미션의 획득 상태 및 완료 상태 초기화
-          for (var task in dailyTasks) {
-            task.hasClaimedXP = false; // 각 미션의 획득 상태 초기화
-            task.isCompleted = false; // 각 미션의 완료 상태 초기화
-          }
-
-          // 일간 미션의 수치를 Firebase에 초기화
-          _resetDailyMetrics();
+          _checkAndResetMissionsIfNeeded();
         }
       });
     });
