@@ -361,21 +361,45 @@ class _WeeklyTasksPageState extends State<WeeklyTasksPage> {
     totalRegisteredEvents = await _getTotalEventsCount(); // 일정 수를 미리 불러옴
     for (int i = 0; i < weeklyTasks.length; i++) {
       var taskStatus = await userService.getWeeklyTaskStatus(currentUser!.uid, weeklyTasks[i].name);
+
       if (taskStatus != null) {
         weeklyTasks[i].hasClaimedXP = taskStatus['hasClaimedXP'] ?? false;
         weeklyTasks[i].lastClaimedTime = taskStatus['lastClaimedTime']?.toDate();
         weeklyTasks[i].isCompleted = taskStatus['isCompleted'] ?? false;
+
+        // "5일 출석하기" 과제의 currentAttendance를 불러와 업데이트
+        if (weeklyTasks[i].name == '5일 출석하기') {
+          weeklyTasks[i].currentAttendance = taskStatus['currentAttendance'] ?? 0;
+
+          // 출석 횟수가 5에 도달했는지 확인하고, 미션을 완료 처리
+          if (weeklyTasks[i].currentAttendance >= 5) {
+            weeklyTasks[i].isCompleted = true;  // isCompleted를 true로 설정하여 경험치 획득 가능
+
+            // Firestore에 상태 업데이트
+            await userService.updateWeeklyTaskStatus(
+              currentUser!.uid,
+              weeklyTasks[i].name,
+              weeklyTasks[i].lastClaimedTime,
+              isCompleted: weeklyTasks[i].isCompleted,
+              hasClaimedXP: weeklyTasks[i].hasClaimedXP,
+              currentAttendance: weeklyTasks[i].currentAttendance,
+            );
+          }
+        }
       } else {
+        // Firestore에 데이터가 없는 경우 기본값 설정
         weeklyTasks[i].hasClaimedXP = false;
         weeklyTasks[i].isCompleted = false;
         weeklyTasks[i].lastClaimedTime = null;
+        weeklyTasks[i].currentAttendance = 0;
       }
     }
+
     await addDailyTasksToFirestore();
-    await Future.wait([checkTaskForFiftyEvents(), checkTaskForThreeCompletedEvents(), checkTaskAchievement(),
-    ]);
+    await Future.wait([checkTaskForFiftyEvents(), checkTaskForThreeCompletedEvents(), checkTaskAchievement()]);
     setState(() {}); // 모든 작업이 완료된 후 UI 업데이트
   }
+
 
   Future<void> _updateTotalEventsCountInUsersWeeklyReset(int totalEvents) async {
     if (currentUser == null) return;

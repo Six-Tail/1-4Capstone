@@ -50,6 +50,54 @@ class _DailyTasksPageState extends State<DailyTasksPage> with WidgetsBindingObse
 // completeDailyAttendanceTask 함수 내에서 사용
   Future<void> completeDailyAttendanceTask() async {
     if (currentUser != null) {
+      // 일일 과제의 상태를 Firestore에서 가져옵니다.
+      var taskStatus = await userService.getDailyTaskStatus(currentUser!.uid, dailyTasks[0].name);
+
+      // 이전에 경험치를 획득하지 않은 경우에만 실행합니다.
+      if (taskStatus == null || !(taskStatus['hasClaimedXP'] ?? false)) {
+        dailyTasks[0].isCompleted = true;
+        dailyTasks[0].hasClaimedXP = false;
+
+        // 주간 미션 '5일 출석하기' 과제를 weeklyTasks에서 찾습니다.
+        var weeklyTask = weeklyTasks.firstWhere((task) => task.name == '5일 출석하기');
+
+        // 주간 출석 상태를 Firestore에서 최신 상태로 가져와 업데이트합니다.
+        var weeklyTaskStatus = await userService.getWeeklyTaskStatus(currentUser!.uid, weeklyTask.name);
+        if (weeklyTaskStatus != null) {
+          weeklyTask.currentAttendance = weeklyTaskStatus['currentAttendance'] ?? 0;
+        }
+
+        // 출석 횟수를 증가시킨 후 Firestore에 업데이트합니다.
+        weeklyTask.currentAttendance++;
+
+        // 일일 출석 미션 상태를 Firestore에 업데이트
+        await userService.updateDailyTaskStatus(
+          currentUser!.uid,
+          dailyTasks[0].name,
+          null,
+          isCompleted: true,
+          hasClaimedXP: false,
+        );
+
+        // 주간 미션 '5일 출석하기'의 출석 횟수를 Firestore에 업데이트
+        await userService.updateWeeklyTaskStatus(
+          currentUser!.uid,
+          weeklyTask.name,
+          null,
+          isCompleted: false,
+          hasClaimedXP: false,
+          currentAttendance: weeklyTask.currentAttendance, // 증가된 출석 횟수를 Firestore에 저장
+        );
+
+        if (kDebugMode) {
+          print('currentAttendance: ${weeklyTask.currentAttendance}');
+        }
+      }
+    }
+  }
+  /* 전 코드
+  Future<void> completeDailyAttendanceTask() async {
+    if (currentUser != null) {
       var taskStatus = await userService.getDailyTaskStatus(currentUser!.uid, dailyTasks[0].name);
 
       if (taskStatus == null || !(taskStatus['hasClaimedXP'] ?? false)) {
@@ -83,6 +131,8 @@ class _DailyTasksPageState extends State<DailyTasksPage> with WidgetsBindingObse
       }
     }
   }
+  */
+
 
   @override
   void initState() {
