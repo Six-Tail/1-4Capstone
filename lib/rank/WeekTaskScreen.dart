@@ -631,7 +631,7 @@ class _WeeklyTasksPageState extends State<WeeklyTasksPage> {
         currentTime,
         isCompleted: true, // 태스크는 이미 완료된 상태이므로 true로 유지
         hasClaimedXP: true, // 경험치를 청구했으므로 hasClaimedXP를 true로 설정
-        currentAttendance: 0,
+        currentAttendance: weeklyTasks[index].currentAttendance, // 현재 currentAttendance 값 유지
       );
       // 콘솔에 경험치 획득 로그 출력
       if (kDebugMode) {
