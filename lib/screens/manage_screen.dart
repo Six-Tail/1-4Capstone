@@ -377,12 +377,30 @@ class _ManageScreenState extends State<ManageScreen> {
                 MaterialPageRoute(builder: (context) => const FeedbackScreen()),
               );
             },
-          ),
-          const ListTile(
-            title: Text('ToDoBest pro'),
-            subtitle: Text('광고 제거 및 기능 잠금 해제'),
-            trailing: Icon(Icons.chevron_right),
-            leading: Icon(Icons.stars),
+          ),ListTile(
+            title: const Text('ToDoBest pro'),
+            subtitle: const Text('광고 제거 및 기능 잠금 해제'),
+            trailing: const Icon(Icons.chevron_right),
+            leading: const Icon(Icons.stars),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("알림"),
+                    content: const Text("아직 준비중인 서비스입니다! 이용해주셔서 감사합니다"),
+                    actions: [
+                      TextButton(
+                        child: const Text("확인"),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // 팝업 닫기
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
           ListTile(
             title: const Text('로그아웃'),
