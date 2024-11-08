@@ -129,7 +129,6 @@ class CustomCalendar extends StatelessWidget {
           } else {
             textStyle = const TextStyle(color: Colors.black); // 평일 텍스트 색상
           }
-
           return Center(
             child: Text(
               '${day.day}',
