@@ -544,11 +544,6 @@ class _CalenderScreenState extends State<CalenderScreen>
         );
       },
     );
-
-
-
-
-
   }
 
   void _showTotalStatsDialog() {

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_naver_login/flutter_naver_login.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import '../service/User_Service.dart';
@@ -83,14 +84,6 @@ class _ManageScreenState extends State<ManageScreen> {
     firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
 
     if (firebaseUser != null) {
-      // // Firebase User 정보 설정
-      // setState(() {
-      //   userEmail = firebaseUser!.email ?? '';
-      //   userName = firebaseUser!.displayName ?? 'Unknown';
-      //   userImage = 'https://example.com/default_image.jpg'; // 기본 이미지 설정
-      // });
-
-      // Firestore에서 사용자 정보 가져오기
       final userInfo = await _userService.getUserInfo(firebaseUser!.uid);
       if (userInfo != null) {
         setState(() {
@@ -98,19 +91,19 @@ class _ManageScreenState extends State<ManageScreen> {
           userName = firebaseUser!.displayName ?? 'Unknown';
           userPhone = userInfo['phoneNumber']?.isNotEmpty == true
               ? userInfo['phoneNumber']
-              : '전화번호를 설정하세요'; // 전화번호가 없으면 기본값 설정
+              : '전화번호를 설정하세요';
           userName = userInfo['userName'] ?? userName;
           userImage = userInfo['userImage'] ?? userImage;
         });
       }
 
       // 계정 종류 확인
-      if (await _isGoogleUser()) {
+      if (await _isNaverUser()) {
+        setState(() => accountType = 'Naver 계정');
+      } else if (await _isGoogleUser()) {
         setState(() => accountType = 'Google 계정');
       } else if (await _isKakaoUser()) {
         setState(() => accountType = 'Kakao 계정');
-      } else if (await _isNaverUser()) {
-        setState(() => accountType = 'Naver 계정');
       } else {
         setState(() => accountType = 'ToDoBest 계정');
       }
@@ -124,8 +117,8 @@ class _ManageScreenState extends State<ManageScreen> {
 
   Future<bool> _isKakaoUser() async {
     try {
-      final kakao.User user = await kakao.UserApi.instance.me();
-      return user != null;
+      await kakao.UserApi.instance.me(); // user 변수를 만들 필요 없음
+      return true;
     } catch (e) {
       return false;
     }
@@ -134,7 +127,7 @@ class _ManageScreenState extends State<ManageScreen> {
   Future<bool> _isNaverUser() async {
     try {
       final currentToken = await FlutterNaverLogin.currentAccessToken;
-      return currentToken != null && currentToken.accessToken.isNotEmpty;
+      return currentToken.accessToken.isNotEmpty;
     } catch (e) {
       return false;
     }
@@ -198,12 +191,9 @@ class _ManageScreenState extends State<ManageScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
 
-    // 로그아웃이 성공한 경우 FirstScreen으로 이동하고 모든 화면 제거
+    // 로그아웃이 성공한 경우 GetX로 FirstScreen으로 이동
     if (logoutSuccessful) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const FirstScreen()),
-        (Route<dynamic> route) => false,
-      );
+      Get.offAll(() => const FirstScreen());
     }
   }
 
