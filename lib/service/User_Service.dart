@@ -23,6 +23,7 @@ class UserService {
       'phoneNumber': '',
       'birthday': '',
       'gender': '',
+      'accountType': 'ToDoBest',  // Add accountType field
     };
   }
 
