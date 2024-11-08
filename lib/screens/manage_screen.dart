@@ -300,10 +300,33 @@ class _ManageScreenState extends State<ManageScreen> {
             title: const Text('계정 비밀번호 변경'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => PWChangeScreen()),
-              );
+              // 계정 타입 확인
+              if (accountType != 'ToDoBest 계정') {
+                // ToDoBest 계정이 아닌 경우 팝업 메시지 띄우기
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('오류'),
+                      content: const Text('ToDoBest 계정 이용자만 가능합니다'),
+                      actions: [
+                        TextButton(
+                          child: const Text("확인"),
+                          onPressed: () {
+                            Navigator.of(context).pop(); // 다이얼로그 닫기
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else {
+                // ToDoBest 계정일 경우 PWChangeScreen으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PWChangeScreen()),
+                );
+              }
             },
           ),
           const Divider(color: Colors.grey),
