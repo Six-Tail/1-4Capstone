@@ -159,9 +159,9 @@ class _SocialLoginState extends State<SocialLogin> {
           await user.updateDisplayName(name);
           await user.updatePhotoURL(profileImage);
 
-          await saveUserToFirestore(user.uid, name, profileImage); // Firestore에 사용자 정보 저장
-
+          await saveUserToFirestore(user.uid, name, profileImage,"Naver 계정"); // Firestore에 사용자 정보 저장
           if (kDebugMode) {
+            print('네이버 계정 Firestore 저장 성공');
             print("네이버 로그인 성공: ${user.email}, UID: ${user.uid}");
           }
           await _saveLoginState();
@@ -178,25 +178,21 @@ class _SocialLoginState extends State<SocialLogin> {
     }
   }
 
-  Future<void> saveUserToFirestore(String uid, String? name, String? profileImage) async {
+  Future<void> saveUserToFirestore(String uid, String? name, String? profileImage, String accountType) async {
     final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
-    final userDoc = await userRef.get();
 
-    if (!userDoc.exists) {
-      await userRef.set({
-        'userName': name ?? '',
-        'userImage': profileImage ?? '',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-      if (kDebugMode) {
-        print("사용자 정보가 Firestore에 저장되었습니다.");
-      }
-    } else {
-      if (kDebugMode) {
-        print("Firestore에 이미 사용자 정보가 존재합니다.");
-      }
+    await userRef.set({
+      'userName': name ?? '',
+      'userImage': profileImage ?? '',
+      'accountType': accountType,
+      'createdAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true)); // merge: true 옵션 추가
+
+    if (kDebugMode) {
+      print("사용자 정보가 Firestore에 저장되었습니다.");
     }
   }
+
 
   Future<void> signInWithKakao() async {
     setState(() {
@@ -237,11 +233,7 @@ class _SocialLoginState extends State<SocialLogin> {
         if (user.kakaoAccount?.profile?.profileImageUrl != null) {
           await currentUser.updatePhotoURL(user.kakaoAccount!.profile!.profileImageUrl);
         }
-        await saveUserToFirestore(
-          currentUser.uid,
-          user.kakaoAccount?.profile?.nickname,
-          user.kakaoAccount?.profile?.profileImageUrl,
-        );
+        await saveUserToFirestore(currentUser.uid, user.kakaoAccount?.profile?.nickname, user.kakaoAccount?.profile?.profileImageUrl, "Kakao 계정");
         if (kDebugMode) {
           print('Firebase 사용자 프로필 업데이트 및 Firestore에 저장 완료');
         }
@@ -267,7 +259,7 @@ class _SocialLoginState extends State<SocialLogin> {
 
       final firebase_auth.User? user = firebase_auth.FirebaseAuth.instance.currentUser;
       if (user != null) {
-        await saveUserToFirestore(user.uid, user.displayName, user.photoURL);
+        await saveUserToFirestore(user.uid, user.displayName, user.photoURL, "Kakao 계정");
         if (kDebugMode) {
           print('카카오 계정 Firestore 저장 성공');
         }
@@ -302,9 +294,9 @@ class _SocialLoginState extends State<SocialLogin> {
 
       final firebase_auth.User? user = firebase_auth.FirebaseAuth.instance.currentUser;
       if (user != null) {
-        await saveUserToFirestore(user.uid, user.displayName, user.photoURL);
+        await saveUserToFirestore(user.uid, user.displayName, user.photoURL, "Google 계정");
         if (kDebugMode) {
-          print('Google Firestore 저장 성공');
+          print('구글 계정 Firestore 저장 성공');
         }
       }
       navigatorToMainPage();

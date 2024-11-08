@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -81,14 +82,24 @@ class _ManageScreenState extends State<ManageScreen> {
   }
 
   void _getCurrentUserInfo() async {
-    firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
+    final firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
 
     if (firebaseUser != null) {
-      final userInfo = await _userService.getUserInfo(firebaseUser!.uid);
+      final userInfo = await _userService.getUserInfo(firebaseUser.uid);
+
+      // Firestore에서 accountType 불러오기
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).get();
+      if (userDoc.exists) {
+        setState(() {
+          accountType = userDoc.data()?['accountType'] ?? 'ToDoBest 계정';
+        });
+      }
+
+      // 나머지 사용자 정보 설정
       if (userInfo != null) {
         setState(() {
-          userEmail = firebaseUser!.email ?? '';
-          userName = firebaseUser!.displayName ?? 'Unknown';
+          userEmail = firebaseUser.email ?? '';
+          userName = firebaseUser.displayName ?? 'Unknown';
           userPhone = userInfo['phoneNumber']?.isNotEmpty == true
               ? userInfo['phoneNumber']
               : '전화번호를 설정하세요';
@@ -96,40 +107,6 @@ class _ManageScreenState extends State<ManageScreen> {
           userImage = userInfo['userImage'] ?? userImage;
         });
       }
-
-      // 계정 종류 확인
-      if (await _isNaverUser()) {
-        setState(() => accountType = 'Naver 계정');
-      } else if (await _isGoogleUser()) {
-        setState(() => accountType = 'Google 계정');
-      } else if (await _isKakaoUser()) {
-        setState(() => accountType = 'Kakao 계정');
-      } else {
-        setState(() => accountType = 'ToDoBest 계정');
-      }
-    }
-  }
-
-  Future<bool> _isGoogleUser() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
-    return await googleSignIn.isSignedIn();
-  }
-
-  Future<bool> _isKakaoUser() async {
-    try {
-      await kakao.UserApi.instance.me(); // user 변수를 만들 필요 없음
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> _isNaverUser() async {
-    try {
-      final currentToken = await FlutterNaverLogin.currentAccessToken;
-      return currentToken.accessToken.isNotEmpty;
-    } catch (e) {
-      return false;
     }
   }
 
