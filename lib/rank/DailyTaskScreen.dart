@@ -47,7 +47,6 @@ class _DailyTasksPageState extends State<DailyTasksPage> with WidgetsBindingObse
     WeeklyTask(name: '달성률 100% 달성하기', isCompleted: false, xp: 800, hasClaimedXP: false),
   ];
 
-// completeDailyAttendanceTask 함수 내에서 사용
   Future<void> completeDailyAttendanceTask() async {
     if (currentUser != null) {
       // 일일 과제의 상태를 Firestore에서 가져옵니다.
@@ -60,14 +59,15 @@ class _DailyTasksPageState extends State<DailyTasksPage> with WidgetsBindingObse
 
         // 주간 미션 '5일 출석하기' 과제를 weeklyTasks에서 찾습니다.
         var weeklyTask = weeklyTasks.firstWhere((task) => task.name == '5일 출석하기');
-
-        // 주간 출석 상태를 Firestore에서 최신 상태로 가져와 업데이트합니다.
         var weeklyTaskStatus = await userService.getWeeklyTaskStatus(currentUser!.uid, weeklyTask.name);
+
+        // Firestore에서 주간 출석 상태를 최신 상태로 가져와 업데이트합니다.
         if (weeklyTaskStatus != null) {
           weeklyTask.currentAttendance = weeklyTaskStatus['currentAttendance'] ?? 0;
+          weeklyTask.hasClaimedXP = weeklyTaskStatus['hasClaimedXP'] ?? false; // 기존 상태 유지
         }
 
-        // 출석 횟수를 증가시킨 후 Firestore에 업데이트합니다.
+        // 출석 횟수를 증가시킵니다.
         weeklyTask.currentAttendance++;
 
         // 일일 출석 미션 상태를 Firestore에 업데이트
@@ -79,22 +79,34 @@ class _DailyTasksPageState extends State<DailyTasksPage> with WidgetsBindingObse
           hasClaimedXP: false,
         );
 
-        // 주간 미션 '5일 출석하기'의 출석 횟수를 Firestore에 업데이트
+        // 주간 미션 '5일 출석하기'의 상태 업데이트
+        if (weeklyTask.currentAttendance >= 5) {
+          weeklyTask.isCompleted = true;
+
+          // 이미 경험치를 획득한 경우 상태를 유지
+          if (!weeklyTask.hasClaimedXP) {
+            weeklyTask.hasClaimedXP = false;
+          }
+        }
+
+        // Firestore에 주간 미션 상태 업데이트
         await userService.updateWeeklyTaskStatus(
           currentUser!.uid,
           weeklyTask.name,
           null,
-          isCompleted: false,
-          hasClaimedXP: false,
-          currentAttendance: weeklyTask.currentAttendance, // 증가된 출석 횟수를 Firestore에 저장
+          isCompleted: weeklyTask.isCompleted,
+          hasClaimedXP: weeklyTask.hasClaimedXP,
+          currentAttendance: weeklyTask.currentAttendance,
         );
 
         if (kDebugMode) {
           print('currentAttendance: ${weeklyTask.currentAttendance}');
+          print('hasClaimedXP: ${weeklyTask.hasClaimedXP}');
         }
       }
     }
   }
+
   /* 전 코드
   Future<void> completeDailyAttendanceTask() async {
     if (currentUser != null) {
