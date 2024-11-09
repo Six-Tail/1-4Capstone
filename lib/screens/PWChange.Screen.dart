@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class PWChangeScreen extends StatefulWidget {
+  const PWChangeScreen({super.key});
+
   @override
   _PWChangeScreenState createState() => _PWChangeScreenState();
 }
@@ -30,12 +32,12 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
         if (_newPasswordController.text == _confirmNewPasswordController.text) {
           await user?.updatePassword(_newPasswordController.text);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("비밀번호가 성공적으로 변경되었습니다.")),
+            const SnackBar(content: Text("비밀번호가 성공적으로 변경되었습니다.")),
           );
           Navigator.pop(context); // 화면 종료
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("새 비밀번호가 일치하지 않습니다.")),
+            const SnackBar(content: Text("새 비밀번호가 일치하지 않습니다.")),
           );
         }
       } catch (e) {
@@ -59,8 +61,8 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffffffff), // 배경색 흰색으로 설정
       appBar: AppBar(
-        title: Text('비밀번호 변경'),
-        backgroundColor: Color(0xff73b1e7), // AppBar 배경색 설정
+        title: const Text('비밀번호 변경'),
+        backgroundColor: const Color(0xff73b1e7), // AppBar 배경색 설정
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -71,7 +73,7 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
               TextFormField(
                 controller: _currentPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: '현재 비밀번호',
                   labelStyle: TextStyle(color: Colors.black), // 라벨 색상 검정으로
                 ),
@@ -82,11 +84,11 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _newPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: '새 비밀번호',
                   labelStyle: TextStyle(color: Colors.black),
                 ),
@@ -99,11 +101,11 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _confirmNewPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: '새 비밀번호 확인',
                   labelStyle: TextStyle(color: Colors.black),
                 ),
@@ -116,13 +118,13 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _changePassword,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff73b1e7), // 버튼 색상 설정
+                  backgroundColor: const Color(0xff73b1e7), // 버튼 색상 설정
                 ),
-                child: Text('비밀번호 변경',style: TextStyle(color: Colors.black)),
+                child: const Text('비밀번호 변경',style: TextStyle(color: Colors.black)),
               ),
             ],
           ),

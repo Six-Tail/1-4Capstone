@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FeedbackScreen extends StatelessWidget {
-  const FeedbackScreen({Key? key}) : super(key: key);
+  const FeedbackScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class FeedbackScreen extends StatelessWidget {
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: '좋은 점, 나쁜 점, 개선을 위한 제안, 잘못된 번역 등',
-                hintStyle: TextStyle(color: Colors.white),
+                hintStyle: const TextStyle(color: Colors.white),
                 filled: true,
                 fillColor: Colors.blueGrey,
                 border: OutlineInputBorder(
@@ -64,9 +64,9 @@ class FeedbackScreen extends StatelessWidget {
               ],
             ),
             const Spacer(),
-            Column(
+            const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   '광고 제거 및 기능 잠금 해제',
                   style: TextStyle(color: Colors.blue),

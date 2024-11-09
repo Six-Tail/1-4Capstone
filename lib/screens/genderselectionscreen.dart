@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class GenderSelectionScreen extends StatefulWidget {
   final String currentGender;
 
-  GenderSelectionScreen({required this.currentGender});
+  const GenderSelectionScreen({super.key, required this.currentGender});
 
   @override
   _GenderSelectionScreenState createState() => _GenderSelectionScreenState();
@@ -36,12 +36,12 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
-        title: Text('ToDoBest계정'),
+        title: const Text('ToDoBest계정'),
         backgroundColor: const Color(0xffffffff),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.close),
+            icon: const Icon(Icons.close),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -49,16 +49,16 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               '성별을 알려 주세요.',
               style: TextStyle(fontSize: 16),
             ),
             RadioListTile<String>(
-              title: Text('여성'),
+              title: const Text('여성'),
               value: '여성',
               groupValue: selectedGender,
               onChanged: (value) {
@@ -68,7 +68,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               },
             ),
             RadioListTile<String>(
-              title: Text('남성'),
+              title: const Text('남성'),
               value: '남성',
               groupValue: selectedGender,
               onChanged: (value) {
@@ -78,7 +78,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               },
             ),
             RadioListTile<String>(
-              title: Text('선택안함'),
+              title: const Text('선택안함'),
               value: '선택안함',
               groupValue: selectedGender,
               onChanged: (value) {
@@ -87,16 +87,16 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 });
               },
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.black,
                   backgroundColor: Colors.yellow, // 버튼 텍스트 색상
-                  minimumSize: Size(double.infinity, 50), // 버튼 크기
+                  minimumSize: const Size(double.infinity, 50), // 버튼 크기
                 ),
                 onPressed: _updateGender, // 성별 업데이트 함수 호출
-                child: Text('확인'),
+                child: const Text('확인'),
               ),
             ),
           ],

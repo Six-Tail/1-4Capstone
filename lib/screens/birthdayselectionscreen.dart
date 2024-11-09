@@ -4,6 +4,8 @@ import '../service/User_Service.dart'; // UserService import
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BirthdaySelectionScreen extends StatefulWidget {
+  const BirthdaySelectionScreen({super.key});
+
   @override
   _BirthdaySelectionScreenState createState() => _BirthdaySelectionScreenState();
 }
@@ -21,7 +23,7 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
     if (_firebaseUser != null) {
       String birthday = '$_selectedYear년 $_selectedMonth월 $_selectedDay일';
       // Firebase에 생일 업데이트
-      await _userService.updateUserInfo(_firebaseUser!.uid, birthday: birthday);
+      await _userService.updateUserInfo(_firebaseUser.uid, birthday: birthday);
       Navigator.pop(context, birthday); // 새로운 생일 정보 전달하며 화면 닫기
     }
   }
@@ -31,12 +33,12 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
     return Scaffold(
         backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
-        title: Text('생일 선택'),
+        title: const Text('생일 선택'),
         backgroundColor: const Color(0xffffffff),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.close),
+            icon: const Icon(Icons.close),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -44,11 +46,11 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('생일을 알려 주세요.', style: TextStyle(fontSize: 16)),
+            const Text('생일을 알려 주세요.', style: TextStyle(fontSize: 16)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -87,11 +89,11 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Center(
               child: ElevatedButton(
                 onPressed: _updateBirthday, // 버튼 클릭 시 생일 업데이트 함수 호출
-                child: Text('확인',style: TextStyle(color: Colors.black)),
+                child: const Text('확인',style: TextStyle(color: Colors.black)),
               ),
             ),
           ],

@@ -324,7 +324,7 @@ class _ManageScreenState extends State<ManageScreen> {
                 // ToDoBest 계정일 경우 PWChangeScreen으로 이동
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PWChangeScreen()),
+                  MaterialPageRoute(builder: (context) => const PWChangeScreen()),
                 );
               }
             },
@@ -360,7 +360,7 @@ class _ManageScreenState extends State<ManageScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => NotificationSettingsScreen()),
+                    builder: (context) => const NotificationSettingsScreen()),
               );
             },
           ),
