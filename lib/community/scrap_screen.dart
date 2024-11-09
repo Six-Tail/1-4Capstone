@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../utils/Themes.Colors.dart';
-import 'Post.Detail.dart';
+import 'post_detail.dart';
 
 class ScrapPage extends StatelessWidget {
   final String userId = FirebaseAuth.instance.currentUser!.uid;
@@ -11,7 +11,7 @@ class ScrapPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF1F3F5), // 배경 색상 설정
+      backgroundColor: const Color(0xFFF1F3F5), // 배경 색상 설정
       appBar: AppBar(
         title: Text(
           '스크랩한 게시글',
@@ -34,10 +34,10 @@ class ScrapPage extends StatelessWidget {
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(child: Text('스크랩한 게시글이 없습니다.'));
+              return const Center(child: Text('스크랩한 게시글이 없습니다.'));
             }
 
             final scraps = snapshot.data!.docs;
@@ -52,7 +52,7 @@ class ScrapPage extends StatelessWidget {
                   future: FirebaseFirestore.instance.collection('posts').doc(postId).get(),
                   builder: (context, postSnapshot) {
                     if (!postSnapshot.hasData || !postSnapshot.data!.exists) {
-                      return SizedBox.shrink(); // 게시글이 삭제된 경우 빈 공간
+                      return const SizedBox.shrink(); // 게시글이 삭제된 경우 빈 공간
                     }
 
                     final post = postSnapshot.data!.data() as Map<String, dynamic>;
@@ -63,7 +63,7 @@ class ScrapPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                       elevation: 3,
-                      margin: EdgeInsets.symmetric(vertical: 8),
+                      margin: const EdgeInsets.symmetric(vertical: 8),
                       child: InkWell(
                         onTap: () {
                           Navigator.push(
@@ -90,41 +90,41 @@ class ScrapPage extends StatelessWidget {
                                     children: [
                                       Text(
                                         post['userName'] ?? '익명',
-                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
                                       ),
                                       Text(
                                         DateFormat('yyyy-MM-dd HH:mm').format(
                                           (post['timestamp'] as Timestamp).toDate(),
                                         ),
-                                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                                        style: const TextStyle(color: Colors.grey, fontSize: 12),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
                                 post['title'] ?? '',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
                                 post['content'] ?? '',
-                                style: TextStyle(fontSize: 14, color: Colors.black87),
+                                style: const TextStyle(fontSize: 14, color: Colors.black87),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(height: 12),
+                              const SizedBox(height: 12),
                               Row(
                                 children: [
-                                  Icon(Icons.thumb_up, size: 18, color: Colors.blue),
-                                  SizedBox(width: 4),
+                                  const Icon(Icons.thumb_up, size: 18, color: Colors.blue),
+                                  const SizedBox(width: 4),
                                   Text(post['likes']?.toString() ?? '0'),
-                                  SizedBox(width: 16),
-                                  Icon(Icons.comment, size: 18, color: Colors.green),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 16),
+                                  const Icon(Icons.comment, size: 18, color: Colors.green),
+                                  const SizedBox(width: 4),
                                   Text(post['commentsCount']?.toString() ?? '0'),
                                 ],
                               ),

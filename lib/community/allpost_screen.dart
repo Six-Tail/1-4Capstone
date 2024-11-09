@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../utils/Themes.Colors.dart';
-import 'Post.Detail.dart';
+import 'post_detail.dart';
 
 class AllPostsScreen extends StatefulWidget {
+  const AllPostsScreen({super.key});
+
   @override
   _AllPostsScreenState createState() => _AllPostsScreenState();
 }
@@ -17,7 +19,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF1F3F5), // 배경 색상 설정
+      backgroundColor: const Color(0xFFF1F3F5), // 배경 색상 설정
       appBar: AppBar(
         title: Text(
           '모든 게시글',
@@ -43,7 +45,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                 // 검색 조건 선택 Dropdown
                 DropdownButton<String>(
                   value: searchType,
-                  items: [
+                  items: const [
                     DropdownMenuItem(
                       value: "title",
                       child: Text("제목만 검색"),
@@ -59,7 +61,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                     });
                   },
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 // 검색 입력창
                 Expanded(
                   child: TextField(
@@ -68,7 +70,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -79,16 +81,16 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: _getPostStream(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('게시글이 없습니다.'));
+                    return const Center(child: Text('게시글이 없습니다.'));
                   }
 
                   final posts = snapshot.data!.docs;
@@ -108,7 +110,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                         elevation: 3,
-                        margin: EdgeInsets.symmetric(vertical: 8),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
                         child: InkWell(
                           onTap: () {
                             Navigator.push(
@@ -135,43 +137,43 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                                       children: [
                                         Text(
                                           post['userName'] ?? '익명',
-                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           formattedDate,
-                                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                                          style: const TextStyle(color: Colors.grey, fontSize: 12),
                                         ),
                                       ],
                                     ),
-                                    Spacer(),
+                                    const Spacer(),
                                     Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
                                         color: Colors.grey[200],
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
                                         board,
-                                        style: TextStyle(fontSize: 12),
+                                        style: const TextStyle(fontSize: 12),
                                       ),
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 8),
+                                const SizedBox(height: 8),
                                 Text(
                                   post['title'] ?? '',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Text(
                                   post['content'] ?? '',
-                                  style: TextStyle(fontSize: 14, color: Colors.black87),
+                                  style: const TextStyle(fontSize: 14, color: Colors.black87),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                SizedBox(height: 12),
+                                const SizedBox(height: 12),
                                 Row(
                                   children: [
                                     Icon(
@@ -183,11 +185,11 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                                           ? Colors.blue
                                           : Colors.grey,
                                     ),
-                                    SizedBox(width: 4),
+                                    const SizedBox(width: 4),
                                     Text(post['likes']?.toString() ?? '0'),
-                                    SizedBox(width: 16),
-                                    Icon(Icons.comment, size: 18, color: Colors.green),
-                                    SizedBox(width: 4),
+                                    const SizedBox(width: 16),
+                                    const Icon(Icons.comment, size: 18, color: Colors.green),
+                                    const SizedBox(width: 4),
                                     Text(post['commentsCount']?.toString() ?? '0'),
                                   ],
                                 ),
@@ -215,7 +217,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
       // 검색어가 입력된 경우, 해당 조건에 맞춰 필터링
       return collectionRef
           .where(searchType, isGreaterThanOrEqualTo: searchQuery)
-          .where(searchType, isLessThan: searchQuery + '\uf8ff') // 파이어베이스에서 텍스트 필터링을 위해 사용하는 코드
+          .where(searchType, isLessThan: '$searchQuery\uf8ff') // 파이어베이스에서 텍스트 필터링을 위해 사용하는 코드
           .orderBy(searchType)
           .snapshots();
     } else {

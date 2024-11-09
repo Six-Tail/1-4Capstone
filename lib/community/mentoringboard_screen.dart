@@ -3,18 +3,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../service/User_Service.dart';
 import '../utils/Themes.Colors.dart';
-import 'Post.Detail.dart';
+import 'post_detail.dart';
 
-class FreeBoardScreen extends StatelessWidget {
+class MentoringBoardScreen extends StatelessWidget {
   final UserService userService = UserService();
+
+  MentoringBoardScreen({super.key}); // UserService 인스턴스 생성
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF1F3F5), // 배경 색상 #f1f3f5 설정
+      backgroundColor: const Color(0xFFF1F3F5), // 배경 색상 설정
       appBar: AppBar(
         title: Text(
-          '자유게시판',
+          '멘토링 요청 게시판',
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.bold,
@@ -40,14 +42,14 @@ class FreeBoardScreen extends StatelessWidget {
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('posts')
-              .where('board', isEqualTo: '자유 게시판')
+              .where('board', isEqualTo: '멘토링 요청 게시판') // '멘토링 요청 게시판' 게시글만 필터링
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(child: Text('게시글이 없습니다.'));
+              return const Center(child: Text('게시글이 없습니다.'));
             }
 
             final posts = snapshot.data!.docs;
@@ -67,13 +69,13 @@ class FreeBoardScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                   elevation: 3,
-                  margin: EdgeInsets.symmetric(vertical: 8),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
                   child: InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostDetail(postId: postId),
+                          builder: (context) => PostDetail(postId: postId), // postId 전달
                         ),
                       );
                     },
@@ -86,7 +88,7 @@ class FreeBoardScreen extends StatelessWidget {
                             future: userService.getUserInfo(userId),
                             builder: (context, userSnapshot) {
                               if (!userSnapshot.hasData) {
-                                return Row(
+                                return const Row(
                                   children: [
                                     CircleAvatar(
                                       backgroundColor: Colors.grey,
@@ -108,19 +110,19 @@ class FreeBoardScreen extends StatelessWidget {
                                     backgroundImage: NetworkImage(post['userImage'] ?? ''),
                                     radius: 20,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         userName,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       Text(
                                         formattedDate,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.grey,
                                           fontSize: 12,
                                         ),
@@ -131,47 +133,47 @@ class FreeBoardScreen extends StatelessWidget {
                               );
                             },
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
                             post['title'] ?? '',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             post['content'] ?? '',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               color: Colors.black87,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 12),
+                          const SizedBox(height: 12),
                           Row(
                             children: [
-                              Icon(Icons.thumb_up, size: 18, color: Colors.blue), // 좋아요 아이콘 파란색 설정
-                              SizedBox(width: 4),
+                              const Icon(Icons.thumb_up, size: 18, color: Colors.blue), // 좋아요 아이콘 파란색 설정
+                              const SizedBox(width: 4),
                               Text(post['likes'].toString()),
-                              SizedBox(width: 16),
-                              Icon(Icons.comment, size: 18, color: Colors.green), // 댓글 아이콘 초록색 설정
-                              SizedBox(width: 4),
+                              const SizedBox(width: 16),
+                              const Icon(Icons.comment, size: 18, color: Colors.green), // 댓글 아이콘 초록색 설정
+                              const SizedBox(width: 4),
                               Text(post['commentsCount'].toString()),
-                              Spacer(),
+                              const Spacer(),
                               Container(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: Colors.grey[200],
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
-                                  post['category'] ?? '자유',
-                                  style: TextStyle(fontSize: 12),
+                                  post['category'] ?? '멘토링',
+                                  style: const TextStyle(fontSize: 12),
                                 ),
                               ),
                             ],

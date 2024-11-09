@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +8,7 @@ import '../utils/Themes.Colors.dart';
 class PostDetail extends StatefulWidget {
   final String postId;
 
-  const PostDetail({Key? key, required this.postId}) : super(key: key);
+  const PostDetail({super.key, required this.postId});
 
   @override
   _PostDetailState createState() => _PostDetailState();
@@ -102,7 +103,9 @@ class _PostDetailState extends State<PostDetail> {
         });
       }
     } catch (e) {
-      print("좋아요 업데이트 오류: $e");
+      if (kDebugMode) {
+        print("좋아요 업데이트 오류: $e");
+      }
     }
   }
 
@@ -142,7 +145,9 @@ class _PostDetailState extends State<PostDetail> {
 
       _commentController.clear();
     } catch (e) {
-      print("댓글 추가 오류: $e");
+      if (kDebugMode) {
+        print("댓글 추가 오류: $e");
+      }
     } finally {
       setState(() => _isCommentLoading = false);
     }
@@ -154,9 +159,13 @@ class _PostDetailState extends State<PostDetail> {
         'title': newTitle,
         'content': newContent,
       });
-      print("게시글 수정 완료");
+      if (kDebugMode) {
+        print("게시글 수정 완료");
+      }
     } catch (e) {
-      print("게시글 수정 오류: $e");
+      if (kDebugMode) {
+        print("게시글 수정 오류: $e");
+      }
     }
   }
 
@@ -164,9 +173,13 @@ class _PostDetailState extends State<PostDetail> {
     try {
       await FirebaseFirestore.instance.collection('posts').doc(widget.postId).delete();
       Navigator.pop(context);
-      print("게시글 삭제 완료");
+      if (kDebugMode) {
+        print("게시글 삭제 완료");
+      }
     } catch (e) {
-      print("게시글 삭제 오류: $e");
+      if (kDebugMode) {
+        print("게시글 삭제 오류: $e");
+      }
     }
   }
 
@@ -180,7 +193,9 @@ class _PostDetailState extends State<PostDetail> {
           .doc(commentId)
           .update({'content': newContent});
     } catch (e) {
-      print("댓글 수정 오류: $e");
+      if (kDebugMode) {
+        print("댓글 수정 오류: $e");
+      }
     }
   }
 
@@ -197,7 +212,9 @@ class _PostDetailState extends State<PostDetail> {
         'commentsCount': FieldValue.increment(-1),
       });
     } catch (e) {
-      print("댓글 삭제 오류: $e");
+      if (kDebugMode) {
+        print("댓글 삭제 오류: $e");
+      }
     }
   }
 
@@ -224,7 +241,9 @@ class _PostDetailState extends State<PostDetail> {
         _isReplying[commentId] = false;
       });
     } catch (e) {
-      print("답글 추가 오류: $e");
+      if (kDebugMode) {
+        print("답글 추가 오류: $e");
+      }
     } finally {
       setState(() => _isReplyLoading[commentId] = false);
     }
@@ -242,7 +261,9 @@ class _PostDetailState extends State<PostDetail> {
           .doc(replyId)
           .update({'content': newContent});
     } catch (e) {
-      print("답글 수정 오류: $e");
+      if (kDebugMode) {
+        print("답글 수정 오류: $e");
+      }
     }
   }
 
@@ -257,7 +278,9 @@ class _PostDetailState extends State<PostDetail> {
           .doc(replyId)
           .delete();
     } catch (e) {
-      print("답글 삭제 오류: $e");
+      if (kDebugMode) {
+        print("답글 삭제 오류: $e");
+      }
     }
   }
 
@@ -298,7 +321,7 @@ class _PostDetailState extends State<PostDetail> {
                             .doc(widget.postId)
                             .snapshots(),
                         builder: (context, snapshot) {
-                          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                           final post = (snapshot.data!.data() ?? {}) as Map<String, dynamic>;
 
                           final likedBy = List<String>.from(post['likedBy'] ?? []);
@@ -328,7 +351,7 @@ class _PostDetailState extends State<PostDetail> {
                                       ),
                                     ],
                                   ),
-                                  Spacer(),
+                                  const Spacer(),
                                   IconButton(
                                     icon: Icon(
                                       isScraped ? Icons.bookmark_border : Icons.bookmark_border_outlined,
@@ -346,23 +369,23 @@ class _PostDetailState extends State<PostDetail> {
                                         }
                                       },
                                       itemBuilder: (context) => [
-                                        PopupMenuItem(
+                                        const PopupMenuItem(
                                           value: 'edit',
                                           child: Text("수정"),
                                         ),
-                                        PopupMenuItem(
+                                        const PopupMenuItem(
                                           value: 'delete',
                                           child: Text("삭제"),
                                         ),
                                       ],
-                                      icon: Icon(Icons.more_vert),
+                                      icon: const Icon(Icons.more_vert),
                                     ),
                                 ],
                               ),
                               const SizedBox(height: 10),
                               Text(
                                 post['title'] ?? '',
-                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 10),
                               Text(post['content'] ?? ''),
@@ -394,7 +417,7 @@ class _PostDetailState extends State<PostDetail> {
                             .orderBy('timeStamp', descending: false)
                             .snapshots(),
                         builder: (context, snapshot) {
-                          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                           final comments = snapshot.data!.docs;
 
                           return ListView.builder(
@@ -432,7 +455,7 @@ class _PostDetailState extends State<PostDetail> {
                                             Row(
                                               children: [
                                                 IconButton(
-                                                  icon: Icon(
+                                                  icon: const Icon(
                                                     Icons.reply,
                                                     color: Colors.grey,
                                                   ),
@@ -480,10 +503,10 @@ class _PostDetailState extends State<PostDetail> {
                                               showDialog(
                                                 context: context,
                                                 builder: (context) => AlertDialog(
-                                                  title: Text("댓글 수정"),
+                                                  title: const Text("댓글 수정"),
                                                   content: TextField(
                                                     controller: _editControllers[commentId],
-                                                    decoration: InputDecoration(hintText: "댓글 수정"),
+                                                    decoration: const InputDecoration(hintText: "댓글 수정"),
                                                   ),
                                                   actions: [
                                                     TextButton(
@@ -491,11 +514,11 @@ class _PostDetailState extends State<PostDetail> {
                                                         _editComment(commentId, _editControllers[commentId]!.text);
                                                         Navigator.of(context).pop();
                                                       },
-                                                      child: Text("저장"),
+                                                      child: const Text("저장"),
                                                     ),
                                                     TextButton(
                                                       onPressed: () => Navigator.of(context).pop(),
-                                                      child: Text("취소"),
+                                                      child: const Text("취소"),
                                                     ),
                                                   ],
                                                 ),
@@ -505,16 +528,16 @@ class _PostDetailState extends State<PostDetail> {
                                             }
                                           },
                                           itemBuilder: (context) => [
-                                            PopupMenuItem(
+                                            const PopupMenuItem(
                                               value: 'edit',
                                               child: Text("수정"),
                                             ),
-                                            PopupMenuItem(
+                                            const PopupMenuItem(
                                               value: 'delete',
                                               child: Text("삭제"),
                                             ),
                                           ],
-                                          icon: Icon(Icons.more_vert),
+                                          icon: const Icon(Icons.more_vert),
                                         ),
                                     ],
                                   ),
@@ -573,10 +596,10 @@ class _PostDetailState extends State<PostDetail> {
                                                         showDialog(
                                                           context: context,
                                                           builder: (context) => AlertDialog(
-                                                            title: Text("답글 수정"),
+                                                            title: const Text("답글 수정"),
                                                             content: TextField(
                                                               controller: _replyEditControllers[replyId],
-                                                              decoration: InputDecoration(hintText: "답글 수정"),
+                                                              decoration: const InputDecoration(hintText: "답글 수정"),
                                                             ),
                                                             actions: [
                                                               TextButton(
@@ -584,11 +607,11 @@ class _PostDetailState extends State<PostDetail> {
                                                                   _editReply(commentId, replyId, _replyEditControllers[replyId]!.text);
                                                                   Navigator.of(context).pop();
                                                                 },
-                                                                child: Text("저장"),
+                                                                child: const Text("저장"),
                                                               ),
                                                               TextButton(
                                                                 onPressed: () => Navigator.of(context).pop(),
-                                                                child: Text("취소"),
+                                                                child: const Text("취소"),
                                                               ),
                                                             ],
                                                           ),
@@ -598,16 +621,16 @@ class _PostDetailState extends State<PostDetail> {
                                                       }
                                                     },
                                                     itemBuilder: (context) => [
-                                                      PopupMenuItem(
+                                                      const PopupMenuItem(
                                                         value: 'edit',
                                                         child: Text("수정"),
                                                       ),
-                                                      PopupMenuItem(
+                                                      const PopupMenuItem(
                                                         value: 'delete',
                                                         child: Text("삭제"),
                                                       ),
                                                     ],
-                                                    icon: Icon(Icons.more_vert),
+                                                    icon: const Icon(Icons.more_vert),
                                                   ),
                                               ],
                                             ),
@@ -668,17 +691,17 @@ class _PostDetailState extends State<PostDetail> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("게시글 수정"),
+        title: const Text("게시글 수정"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              decoration: InputDecoration(labelText: "제목"),
+              decoration: const InputDecoration(labelText: "제목"),
             ),
             TextField(
               controller: contentController,
-              decoration: InputDecoration(labelText: "내용"),
+              decoration: const InputDecoration(labelText: "내용"),
               maxLines: 3,
             ),
           ],
@@ -686,14 +709,14 @@ class _PostDetailState extends State<PostDetail> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text("취소"),
+            child: const Text("취소"),
           ),
           TextButton(
             onPressed: () {
               _editPost(titleController.text, contentController.text);
               Navigator.of(context).pop();
             },
-            child: Text("저장"),
+            child: const Text("저장"),
           ),
         ],
       ),

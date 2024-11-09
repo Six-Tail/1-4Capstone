@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/Themes.Colors.dart';
-import 'Post.Detail.dart';
+import 'post_detail.dart';
 
 class WroteBoardScreen extends StatelessWidget {
   final String? userId;
 
-  WroteBoardScreen({Key? key, this.userId}) : super(key: key);
+  const WroteBoardScreen({super.key, this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class WroteBoardScreen extends StatelessWidget {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
     if (currentUserId == null) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: Text('로그인이 필요합니다.'),
         ),
@@ -56,10 +56,10 @@ class WroteBoardScreen extends StatelessWidget {
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(child: Text('내가 쓴 게시글이 없습니다.'));
+              return const Center(child: Text('내가 쓴 게시글이 없습니다.'));
             }
 
             final posts = snapshot.data!.docs;

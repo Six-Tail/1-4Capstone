@@ -1,11 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/Themes.Colors.dart';
-import 'Post.Detail.dart'; // 상세 페이지 import
+import 'post_detail.dart'; // 상세 페이지 import
 import '../service/User_Service.dart'; // UserService import
 
 class WritePostScreen extends StatefulWidget {
+  const WritePostScreen({super.key});
+
   @override
   _WritePostScreenState createState() => _WritePostScreenState();
 }
@@ -79,7 +82,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
             children: <Widget>[
               DropdownButtonFormField<String>(
                 value: selectedBoard,
-                hint: Text('게시판을 선택하세요'),
+                hint: const Text('게시판을 선택하세요'),
                 onChanged: (value) {
                   setState(() {
                     selectedBoard = value;
@@ -99,27 +102,27 @@ class _WritePostScreenState extends State<WritePostScreen> {
                 ))
                     .toList(),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: titleController,
-                decoration: InputDecoration(labelText: '제목'),
+                decoration: const InputDecoration(labelText: '제목'),
                 validator: (value) => value!.isEmpty ? '제목을 입력하세요' : null,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: contentController,
-                decoration: InputDecoration(labelText: '내용'),
+                decoration: const InputDecoration(labelText: '내용'),
                 maxLines: 5,
                 validator: (value) => value!.isEmpty ? '내용을 입력하세요' : null,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Center(
                 child: ElevatedButton(
                   onPressed: handleComplete,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue, // 여기서 배경색을 설정합니다.
                   ),
-                  child: Text('완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: const Text('완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ),
 
@@ -137,7 +140,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
       if (userId == null || userName == null || userImage == null) {
         // 알림 추가: 유저 정보가 없는 경우 사용자에게 경고
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('유저 정보가 누락되었습니다. 다시 로그인해 주세요.')),
+          const SnackBar(content: Text('유저 정보가 누락되었습니다. 다시 로그인해 주세요.')),
         );
         return;
       }
@@ -157,7 +160,9 @@ class _WritePostScreenState extends State<WritePostScreen> {
         'userImage': userImage,
       });
 
-      print('게시글 Firestore에 성공적으로 저장되었습니다. postId: ${postRef.id}');
+      if (kDebugMode) {
+        print('게시글 Firestore에 성공적으로 저장되었습니다. postId: ${postRef.id}');
+      }
 
       // 게시글 저장 후 텍스트 초기화
       titleController.clear();
@@ -171,9 +176,11 @@ class _WritePostScreenState extends State<WritePostScreen> {
         ),
       );
     } catch (e) {
-      print('게시글 Firestore 저장 오류: $e');
+      if (kDebugMode) {
+        print('게시글 Firestore 저장 오류: $e');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('게시글 저장에 실패했습니다. 다시 시도해 주세요.')),
+        const SnackBar(content: Text('게시글 저장에 실패했습니다. 다시 시도해 주세요.')),
       );
     }
   }
@@ -185,7 +192,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
           selectedBoard!, titleController.text, contentController.text);
     } else if (selectedBoard == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('게시판을 선택해주세요.')),
+        const SnackBar(content: Text('게시판을 선택해주세요.')),
       );
     }
   }

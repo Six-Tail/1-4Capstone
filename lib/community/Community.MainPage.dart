@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import '../screen/ChatScreen.dart';
 import '../utils/Themes.Colors.dart';
-import 'AllpostScreen.dart';
-import 'CommentScreen.dart';
-import 'ScrapScreen.dart';
-import 'WritePost.Screen.dart';
-import 'FreeBoard.Screen.dart';
-import 'GoalshareBoard.Screen.dart';
-import 'TipBoard.Screen.dart';
-import 'MentoringBoard.Screen.dart';
-import 'PromotionBoard.Screen.dart';
-import 'HotBoard.Screen.dart';
-import 'WroteBoard.Screen.dart';
+import 'allpost_screen.dart';
+import 'comment_screen.dart';
+import 'scrap_screen.dart';
+import 'writepost_screen.dart';
+import 'freeboard_screen.dart';
+import 'goalshareboard_screen.dart';
+import 'tipboard_screen.dart';
+import 'mentoringboard_screen.dart';
+import 'promotionboard_screen.dart';
+import 'hotboard_screen.dart';
+import 'wroteboard_screen.dart';
+
 
 class CommunityMainPage extends StatefulWidget {
+  const CommunityMainPage({super.key});
+
   @override
   _CommunityMainPageState createState() => _CommunityMainPageState();
 }
@@ -109,7 +111,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => WroteBoardScreen(userId: ''),
+                            builder: (context) => const WroteBoardScreen(userId: ''),
                           ),
                         );
                       },
@@ -124,7 +126,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                           children: [
                             SizedBox(height: 6),
                             Padding(
-                              padding: const EdgeInsets.only(left: 6), // 아이콘을 약간 오른쪽으로 이동
+                              padding: EdgeInsets.only(left: 6), // 아이콘을 약간 오른쪽으로 이동
                               child: Icon(Icons.edit_note_sharp, size: 42, color: Colors.blueAccent),
                             ),
                             SizedBox(height: 10),
@@ -147,7 +149,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AllPostsScreen(),
+                            builder: (context) => const AllPostsScreen(),
                           ),
                         );
                       },
@@ -307,7 +309,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xff73b1e7),
         onPressed: () async {
-          Get.to(() => WritePostScreen());
+          Get.to(() => const WritePostScreen());
         },
         child: const Icon(Icons.add),
       ),
