@@ -172,7 +172,12 @@ class _PostDetailState extends State<PostDetail> {
   Future<void> _deletePost() async {
     try {
       await FirebaseFirestore.instance.collection('posts').doc(widget.postId).delete();
-      Navigator.pop(context);
+
+      // 위젯이 활성 상태인지 확인 후 화면 닫기
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
       if (kDebugMode) {
         print("게시글 삭제 완료");
       }
@@ -182,6 +187,7 @@ class _PostDetailState extends State<PostDetail> {
       }
     }
   }
+
 
   Future<void> _editComment(String commentId, String newContent) async {
     if (newContent.isEmpty) return;

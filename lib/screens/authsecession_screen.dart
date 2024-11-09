@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +6,8 @@ import '../screen/First.Screen.dart';
 import '../service/User_Service.dart';
 
 class AuthSeccessionScreen extends StatefulWidget {
+  const AuthSeccessionScreen({super.key});
+
   @override
   _AuthSeccessionScreenState createState() => _AuthSeccessionScreenState();
 }
@@ -35,22 +38,28 @@ class _AuthSeccessionScreenState extends State<AuthSeccessionScreen> {
         await prefs.clear();
 
         // 성공적으로 탈퇴 후 FirstScreen으로 이동
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => FirstScreen()),
-              (Route<dynamic> route) => false,
-        );
-      } on firebase_auth.FirebaseAuthException catch (e) {
-        if (e.code == 'requires-recent-login') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("보안을 위해 다시 로그인해 주세요.")),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("회원 탈퇴 중 오류가 발생했습니다.")),
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const FirstScreen()),
+                (Route<dynamic> route) => false,
           );
         }
+      } on firebase_auth.FirebaseAuthException catch (e) {
+        if (mounted) {
+          if (e.code == 'requires-recent-login') {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("보안을 위해 다시 로그인해 주세요.")),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("회원 탈퇴 중 오류가 발생했습니다.")),
+            );
+          }
+        }
       } catch (e) {
-        print("Error deleting account: $e");
+        if (kDebugMode) {
+          print("Error deleting account: $e");
+        }
       }
     }
   }
@@ -62,9 +71,11 @@ class _AuthSeccessionScreenState extends State<AuthSeccessionScreen> {
     final confirmPassword = _confirmPasswordController.text.trim();
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("비밀번호가 일치하지 않습니다.")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("비밀번호가 일치하지 않습니다.")),
+        );
+      }
       return;
     }
 
@@ -76,9 +87,11 @@ class _AuthSeccessionScreenState extends State<AuthSeccessionScreen> {
       // 재인증 성공 시 회원 탈퇴 실행
       await _deleteAccount();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("재인증에 실패했습니다. 이메일과 비밀번호를 확인하세요.")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("재인증에 실패했습니다. 이메일과 비밀번호를 확인하세요.")),
+        );
+      }
     }
   }
 

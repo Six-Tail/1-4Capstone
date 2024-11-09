@@ -55,7 +55,7 @@ class AuthWrapper extends StatelessWidget {
           return const Center(child: CircularProgressIndicator()); // 로딩 중 화면
         } else if (snapshot.hasData) {
           // 사용자가 이미 로그인되어 있는 경우
-          return RouterPage(); // 로그인한 경우 캘린더 화면
+          return const RouterPage(); // 로그인한 경우 캘린더 화면
         } else {
           // 사용자가 로그인하지 않은 경우
           return const FirstScreen(); // 로그인하지 않은 경우 로그인 화면

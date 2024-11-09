@@ -6,7 +6,8 @@ class UserInfoDialog extends StatelessWidget {
   final String userImage;
   final int userLevel;
 
-  UserInfoDialog({
+  const UserInfoDialog({
+    super.key,
     required this.userName,
     required this.userImage,
     required this.userLevel,

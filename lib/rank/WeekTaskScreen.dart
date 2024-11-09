@@ -347,7 +347,7 @@ class _WeeklyTasksPageState extends State<WeeklyTasksPage> {
               ),
             ),
             onPressed: () {
-              Get.to(() => RouterPage());
+              Get.to(() => const RouterPage());
             },
             child: const Text('이동 하기'),
           ),

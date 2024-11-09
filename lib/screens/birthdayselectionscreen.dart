@@ -22,11 +22,17 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
   Future<void> _updateBirthday() async {
     if (_firebaseUser != null) {
       String birthday = '$_selectedYear년 $_selectedMonth월 $_selectedDay일';
+
       // Firebase에 생일 업데이트
       await _userService.updateUserInfo(_firebaseUser.uid, birthday: birthday);
-      Navigator.pop(context, birthday); // 새로운 생일 정보 전달하며 화면 닫기
+
+      // 위젯이 여전히 활성 상태인지 확인 후 화면 닫기
+      if (mounted) {
+        Navigator.pop(context, birthday); // 새로운 생일 정보 전달하며 화면 닫기
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

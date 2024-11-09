@@ -168,7 +168,7 @@ class _LoginTextBoxState extends State<LoginTextBox> {
                         print('사용자 : ${newUser.user!.uid}');
                         print('사용자 프로필 Url : ${newUser.user!.photoURL}');
                       }
-                      Get.offAll(() => RouterPage());
+                      Get.offAll(() => const RouterPage());
                     }
                   } catch (e) {
                     if (kDebugMode) {

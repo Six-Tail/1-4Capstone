@@ -15,7 +15,6 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
   final _confirmNewPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  // 비밀번호 변경 함수
   Future<void> _changePassword() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
@@ -31,19 +30,26 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
         // 새 비밀번호 업데이트
         if (_newPasswordController.text == _confirmNewPasswordController.text) {
           await user?.updatePassword(_newPasswordController.text);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("비밀번호가 성공적으로 변경되었습니다.")),
-          );
-          Navigator.pop(context); // 화면 종료
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("비밀번호가 성공적으로 변경되었습니다.")),
+            );
+            Navigator.pop(context); // 화면 종료
+          }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("새 비밀번호가 일치하지 않습니다.")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("새 비밀번호가 일치하지 않습니다.")),
+            );
+          }
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("비밀번호 변경 실패: $e")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("비밀번호 변경 실패: $e")),
+          );
+        }
       }
     }
   }

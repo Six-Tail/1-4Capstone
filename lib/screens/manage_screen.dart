@@ -17,11 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'PWChange.Screen.dart';
 
 class ManageScreen extends StatefulWidget {
-  final Function(bool) toggleTheme;
-  final bool isDarkMode;
-
-  const ManageScreen(
-      {super.key, required this.toggleTheme, required this.isDarkMode});
+  const ManageScreen({super.key});
 
   @override
   _ManageScreenState createState() => _ManageScreenState();
@@ -321,7 +317,7 @@ class _ManageScreenState extends State<ManageScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      CalendarListScreen(isDarkMode: widget.isDarkMode),
+                      const CalendarListScreen(),
                 ),
               );
             },
@@ -375,7 +371,7 @@ class _ManageScreenState extends State<ManageScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AuthSeccessionScreen()),
+                MaterialPageRoute(builder: (context) => const AuthSeccessionScreen()),
               );
             },
           ),

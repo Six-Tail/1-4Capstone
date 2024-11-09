@@ -498,7 +498,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                 children: [
                   Text(
                     '$currentYear년 $currentMonth월 통계',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -512,7 +512,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                     child: CircularProgressIndicator(
                       value: completionRate / 100,
                       strokeWidth: 10, // 두께
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
                       backgroundColor: Colors.grey,
                     ),
                   ),
@@ -525,16 +525,16 @@ class _CalenderScreenState extends State<CalenderScreen>
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
                     child: const Text(
                       '확인',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
                       ),
-                    ),
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
                   ),
                 ],

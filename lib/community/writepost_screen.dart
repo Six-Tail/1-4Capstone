@@ -133,15 +133,16 @@ class _WritePostScreenState extends State<WritePostScreen> {
     );
   }
 
-  // Firestore에 게시글 저장 함수
   Future<void> _addPostToFirestore(
       String board, String title, String content) async {
     try {
       if (userId == null || userName == null || userImage == null) {
         // 알림 추가: 유저 정보가 없는 경우 사용자에게 경고
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('유저 정보가 누락되었습니다. 다시 로그인해 주세요.')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('유저 정보가 누락되었습니다. 다시 로그인해 주세요.')),
+          );
+        }
         return;
       }
 
@@ -168,22 +169,28 @@ class _WritePostScreenState extends State<WritePostScreen> {
       titleController.clear();
       contentController.clear();
 
-      // 게시글 저장 후 상세 페이지로 이동하고 작성 페이지 닫기
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PostDetail(postId: postRef.id),
-        ),
-      );
+      // 위젯이 여전히 활성 상태인지 확인 후 상세 페이지로 이동
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PostDetail(postId: postRef.id),
+          ),
+        );
+      }
     } catch (e) {
       if (kDebugMode) {
         print('게시글 Firestore 저장 오류: $e');
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('게시글 저장에 실패했습니다. 다시 시도해 주세요.')),
-      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('게시글 저장에 실패했습니다. 다시 시도해 주세요.')),
+        );
+      }
     }
   }
+
 
   // 완료 버튼 클릭 시 Firestore에 저장
   void handleComplete() {

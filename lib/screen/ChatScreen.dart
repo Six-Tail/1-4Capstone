@@ -8,6 +8,8 @@ import '../utils/UserInfoDialog.dart';
 import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -36,14 +38,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // 1시간마다 오래된 메시지 삭제
   void _startAutoDeleteOldMessages() {
-    _timer = Timer.periodic(Duration(hours: 1), (timer) {
+    _timer = Timer.periodic(const Duration(hours: 1), (timer) {
       _deleteOldMessages();
     });
   }
 
   // Firestore에서 1시간 이상 된 메시지 삭제
   Future<void> _deleteOldMessages() async {
-    final cutoff = DateTime.now().subtract(Duration(hours: 1));
+    final cutoff = DateTime.now().subtract(const Duration(hours: 1));
     final oldMessages = await _firestore
         .collection('chatRooms')
         .doc('global_chat')

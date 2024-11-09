@@ -301,7 +301,7 @@ class _ChallengePageState extends State<ChallengePage> {
               ),
             ),
             onPressed: () {
-              Get.to(() => RouterPage());
+              Get.to(() => const RouterPage());
             },
             child: const Text('이동 하기'),
           ),

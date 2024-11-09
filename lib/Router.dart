@@ -6,6 +6,8 @@ import 'package:todobest_home/screen/Calender.Screen.dart';
 import 'package:todobest_home/screens/manage_screen.dart';
 
 class RouterPage extends StatefulWidget {
+  const RouterPage({super.key});
+
   @override
   _RouterPageState createState() => _RouterPageState();
 }
@@ -16,9 +18,9 @@ class _RouterPageState extends State<RouterPage> {
 
   final List<Widget> _pages = [
     const CalenderScreen(),
-    CommunityMainPage(),
+    const CommunityMainPage(),
     const RankMore(),
-    ManageScreen(toggleTheme: (bool) {  }, isDarkMode : false,),
+    const ManageScreen(),
   ];
 
   @override
@@ -26,7 +28,7 @@ class _RouterPageState extends State<RouterPage> {
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: CurvedNavigationBar(
-        color: Color(0xff73b1e7),
+        color: const Color(0xff73b1e7),
         backgroundColor: const Color(0xffffffff)
         , // 네비게이션 바 배경색을 설정
         key: _bottomNavigationKey,

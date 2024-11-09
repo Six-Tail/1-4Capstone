@@ -26,8 +26,12 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
   Future<void> _updateGender() async {
     if (_firebaseUser != null) {
       // Firebase에 성별 업데이트
-      await _userService.updateUserInfo(_firebaseUser!.uid, gender: selectedGender);
-      Navigator.pop(context, selectedGender); // 선택한 성별을 반환하며 화면 닫기
+      await _userService.updateUserInfo(_firebaseUser.uid, gender: selectedGender);
+
+      // 위젯이 여전히 활성 상태인지 확인 후 화면 닫기
+      if (mounted) {
+        Navigator.pop(context, selectedGender); // 선택한 성별을 반환하며 화면 닫기
+      }
     }
   }
 

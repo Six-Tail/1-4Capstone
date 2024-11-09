@@ -27,7 +27,11 @@ class _EditNicknameScreenState extends State<EditNicknameScreen> {
       if (newUserName.isNotEmpty) {
         // Firebase에 사용자 이름 업데이트
         await _userService.updateUserInfo(_firebaseUser.uid, userName: newUserName);
-        Navigator.pop(context, newUserName); // 새로운 사용자 이름을 전달하며 화면 닫기
+
+        // 위젯이 여전히 활성 상태인지 확인 후 화면 닫기
+        if (mounted) {
+          Navigator.pop(context, newUserName); // 새로운 사용자 이름을 전달하며 화면 닫기
+        }
       }
     }
   }

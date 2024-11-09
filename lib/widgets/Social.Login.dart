@@ -107,7 +107,7 @@ class _SocialLoginState extends State<SocialLogin> {
   }
 
   void navigatorToMainPage() {
-    Get.off(() => RouterPage());
+    Get.off(() => const RouterPage());
   }
 
   Future<void> signInWithNaver() async {

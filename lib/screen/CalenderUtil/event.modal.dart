@@ -182,7 +182,7 @@ class _EventModalState extends State<EventModal> {
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      backgroundColor: Color(0xffffffff),
+      backgroundColor: const Color(0xffffffff),
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxHeight: screenHeight * 0.85,

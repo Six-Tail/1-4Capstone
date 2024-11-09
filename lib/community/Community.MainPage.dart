@@ -53,7 +53,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChatScreen(), // 채팅 화면으로 연결
+                  builder: (context) => const ChatScreen(), // 채팅 화면으로 연결
                 ),
               );
             },

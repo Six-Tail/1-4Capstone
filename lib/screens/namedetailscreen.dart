@@ -201,7 +201,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
             onTap: () async {
               final newUserName = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EditNicknameScreen()),
+                MaterialPageRoute(builder: (context) => const EditNicknameScreen()),
               );
               if (newUserName != null) {
                 setState(() {
@@ -218,7 +218,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
             onTap: () async {
               final newBirthday = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => BirthdaySelectionScreen()),
+                MaterialPageRoute(builder: (context) => const BirthdaySelectionScreen()),
               );
               if (newBirthday != null) {
                 setState(() {
