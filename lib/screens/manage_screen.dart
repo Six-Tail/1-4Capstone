@@ -330,9 +330,28 @@ class _ManageScreenState extends State<ManageScreen> {
             },
           ),
           const Divider(color: Colors.grey),
-          const ListTile(
-            leading: Icon(Icons.access_time),
-            title: Text('시간대'),
+          ListTile(
+            leading: const Icon(Icons.access_time),
+            title: const Text('시간대'),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("알림"),
+                    content: const Text("업데이트 중인 서비스입니다"),
+                    actions: [
+                      TextButton(
+                        child: const Text("확인"),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // 팝업 닫기
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.notifications),
