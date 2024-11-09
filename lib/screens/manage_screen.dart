@@ -42,45 +42,6 @@ class _ManageScreenState extends State<ManageScreen> {
     _getCurrentUserInfo();
   }
 
-  // 전화번호 변경 함수
-  void _changePhoneNumber() async {
-    String? newPhoneNumber = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        TextEditingController phoneController = TextEditingController();
-        return AlertDialog(
-          title: const Text('전화번호 변경'),
-          content: TextField(
-            controller: phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(hintText: '새 전화번호 입력'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(null), // 취소
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(phoneController.text); // 입력된 번호 반환
-              },
-              child: const Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
-
-    // 입력된 새 전화번호가 있을 경우 업데이트
-    if (newPhoneNumber != null && newPhoneNumber.isNotEmpty) {
-      setState(() {
-        userPhone = newPhoneNumber;
-      });
-      await _userService.updateUserPhoneNumber(
-          firebaseUser!.uid, newPhoneNumber);
-    }
-  }
-
   void _getCurrentUserInfo() async {
     final firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
 
@@ -130,7 +91,6 @@ class _ManageScreenState extends State<ManageScreen> {
     // 소셜 로그아웃 개별 시도
     try {
       await FlutterNaverLogin.logOutAndDeleteToken();
-      // 로그아웃 후 SharedPreferences에 저장된 네이버 로그인 상태 초기화
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('isLoggedIn');
       if (kDebugMode) {
@@ -164,11 +124,9 @@ class _ManageScreenState extends State<ManageScreen> {
       }
     }
 
-    // SharedPreferences 초기화로 자동 로그인 상태 해제
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
 
-    // 로그아웃이 성공한 경우 GetX로 FirstScreen으로 이동
     if (logoutSuccessful) {
       Get.offAll(() => const FirstScreen());
     }
@@ -220,11 +178,11 @@ class _ManageScreenState extends State<ManageScreen> {
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundColor: Colors.white, // 배경 색을 흰색으로 설정
+                    backgroundColor: Colors.white,
                     backgroundImage: userImage.isNotEmpty
                         ? NetworkImage(userImage)
                         : const AssetImage('assets/images/default_profile.png')
-                            as ImageProvider,
+                    as ImageProvider,
                   ),
                   const SizedBox(width: 16),
                   Column(
@@ -251,7 +209,6 @@ class _ManageScreenState extends State<ManageScreen> {
                     ),
                   );
 
-                  // ProfileDetailScreen에서 변경된 userName과 userImage를 가져와서 업데이트
                   if (updatedUserInfo != null) {
                     setState(() {
                       userName = updatedUserInfo['userName'];
@@ -264,17 +221,13 @@ class _ManageScreenState extends State<ManageScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.account_circle),
-            title: Text(accountType), // 계정 종류 (Google, Kakao, Naver, ToDoBest)
-            subtitle: Text(userEmail), // 이메일 주소
+            title: Text(accountType),
+            subtitle: Text(userEmail),
           ),
           ListTile(
             leading: const Icon(Icons.call),
             title: const Text('전화번호'),
             subtitle: Text(userPhone),
-            trailing: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: _changePhoneNumber,
-            ),
           ),
           ListTile(
             title: const Text('내 정보 관리'),
@@ -287,7 +240,6 @@ class _ManageScreenState extends State<ManageScreen> {
                 ),
               );
 
-              // ProfileDetailScreen에서 변경된 userName과 userImage를 가져와서 업데이트
               if (updatedUserInfo != null) {
                 setState(() {
                   userName = updatedUserInfo['userName'];
@@ -300,9 +252,7 @@ class _ManageScreenState extends State<ManageScreen> {
             title: const Text('계정 비밀번호 변경'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // 계정 타입 확인
               if (accountType != 'ToDoBest 계정') {
-                // ToDoBest 계정이 아닌 경우 팝업 메시지 띄우기
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -313,7 +263,7 @@ class _ManageScreenState extends State<ManageScreen> {
                         TextButton(
                           child: const Text("확인"),
                           onPressed: () {
-                            Navigator.of(context).pop(); // 다이얼로그 닫기
+                            Navigator.of(context).pop();
                           },
                         ),
                       ],
@@ -321,7 +271,6 @@ class _ManageScreenState extends State<ManageScreen> {
                   },
                 );
               } else {
-                // ToDoBest 계정일 경우 PWChangeScreen으로 이동
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const PWChangeScreen()),
@@ -344,7 +293,7 @@ class _ManageScreenState extends State<ManageScreen> {
                       TextButton(
                         child: const Text("확인"),
                         onPressed: () {
-                          Navigator.of(context).pop(); // 팝업 닫기
+                          Navigator.of(context).pop();
                         },
                       ),
                     ],
@@ -386,7 +335,8 @@ class _ManageScreenState extends State<ManageScreen> {
                 MaterialPageRoute(builder: (context) => const FeedbackScreen()),
               );
             },
-          ),ListTile(
+          ),
+          ListTile(
             title: const Text('ToDoBest pro'),
             subtitle: const Text('광고 제거 및 기능 잠금 해제'),
             trailing: const Icon(Icons.chevron_right),
@@ -402,7 +352,7 @@ class _ManageScreenState extends State<ManageScreen> {
                       TextButton(
                         child: const Text("확인"),
                         onPressed: () {
-                          Navigator.of(context).pop(); // 팝업 닫기
+                          Navigator.of(context).pop();
                         },
                       ),
                     ],

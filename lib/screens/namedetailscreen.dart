@@ -23,6 +23,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
   String userName = 'Unknown';
   String gender = '선택안함';
   String birthday = '미설정';
+  String phoneNumber = '미설정';
   String profileImageUrl = 'https://example.com/profile_image.jpg';
   User? _firebaseUser;
 
@@ -41,10 +42,50 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
           userName = userInfo['userName'] ?? 'Unknown';
           gender = userInfo['gender'] ?? '선택안함';
           birthday = userInfo['birthday'] ?? '미설정';
+          phoneNumber = userInfo['phoneNumber'] ?? '미설정';
           profileImageUrl = userInfo['userImage'] ?? profileImageUrl;
         });
       }
     }
+  }
+
+  Future<void> _updatePhoneNumber(String newPhoneNumber) async {
+    if (_firebaseUser != null) {
+      await _userService.updateUserPhoneNumber(_firebaseUser!.uid, newPhoneNumber);
+    }
+  }
+
+  Future<String?> _showPhoneNumberDialog() async {
+    String newPhoneNumber = phoneNumber;
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('전화번호 입력'),
+          content: TextField(
+            onChanged: (value) {
+              newPhoneNumber = value;
+            },
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(hintText: "전화번호를 입력하세요"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop(newPhoneNumber);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _changeProfileImage() async {
@@ -201,6 +242,20 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
                   gender = newGender;
                 });
                 await _updateGender(newGender);
+              }
+            },
+          ),
+          const Divider(),
+          ListTile(
+            title: const Text('전화번호', style: TextStyle(color: Colors.black)), // 텍스트를 검정색으로 설정
+            trailing: Text(phoneNumber, style: const TextStyle(color: Colors.black)),
+            onTap: () async {
+              final newPhoneNumber = await _showPhoneNumberDialog(); // 전화번호 입력 대화상자 호출
+              if (newPhoneNumber != null) {
+                setState(() {
+                  phoneNumber = newPhoneNumber;
+                });
+                await _updatePhoneNumber(newPhoneNumber); // 전화번호 업데이트
               }
             },
           ),
