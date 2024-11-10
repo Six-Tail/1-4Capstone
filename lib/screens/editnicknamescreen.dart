@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../service/User_Service.dart'; // UserService import
+import '../service/User_Service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class EditNicknameScreen extends StatefulWidget {
@@ -38,31 +38,81 @@ class _EditNicknameScreenState extends State<EditNicknameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffffffff),
-      appBar: AppBar(
-        title: const Text('사용자 이름 설정'),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus(); // 화면 탭 시 키보드 숨김
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xffffffff),
+        appBar: AppBar(
           backgroundColor: const Color(0xffffffff),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('사용자 이름을 입력해 주세요.', style: TextStyle(fontSize: 16)),
-            TextField(
-              controller: _nicknameController,
-              maxLength: 20,
-              decoration: const InputDecoration(hintText: '사용자 이름 입력'),
-            ),
-            Center(
-              child: ElevatedButton(
-                onPressed: _updateUserName, // 버튼 클릭 시 사용자 이름 업데이트 함수 호출
-                child: const Text('저장',style: TextStyle(color: Colors.black)),
+          title: const Text('사용자 이름 설정', style: TextStyle(color: Colors.black)),
+          centerTitle: true,
+        ),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(30.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    '사용자 이름을 입력해 주세요.',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 20),
+                  // 사용자 이름 입력 필드
+                  SizedBox(
+                    height: 70,
+                    child: TextField(
+                      controller: _nicknameController,
+                      maxLength: 20,
+                      decoration: const InputDecoration(
+                        hintText: '사용자 이름 입력',
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(width: 4.0, color: Colors.grey),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(width: 4.0, color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // 저장 버튼
+                  GestureDetector(
+                    onTap: _updateUserName,
+                    child: Container(
+                      alignment: Alignment.center,
+                      height: screenHeight * 0.068,
+                      width: screenWidth * 0.8,
+                      decoration: ShapeDecoration(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(width: 3, color: Colors.blue),
+                          borderRadius: BorderRadius.circular(33),
+                        ),
+                      ),
+                      child: Text(
+                        '저장',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: screenHeight * 0.022,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.25,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

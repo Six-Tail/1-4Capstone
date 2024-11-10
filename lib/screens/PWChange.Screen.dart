@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../service/User_Service.dart';
-import '../utils/Themes.Colors.dart';
 
 class PWChangeScreen extends StatefulWidget {
   const PWChangeScreen({super.key});
@@ -292,7 +291,7 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
                         decoration: ShapeDecoration(
                           color: Colors.white,
                           shape: RoundedRectangleBorder(
-                            side: BorderSide(width: 3, color: Theme1Colors.textColor),
+                            side: const BorderSide(width: 3, color: Colors.blue),
                             borderRadius: BorderRadius.circular(33),
                           ),
                         ),
@@ -300,7 +299,7 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
                           '비밀번호 변경',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Theme1Colors.textColor,
+                            color: Colors.blue,
                             fontSize: screenHeight * 0.022,
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.w600,

@@ -61,32 +61,45 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white, // 대화상자 배경을 흰색으로 설정
           title: const Text('전화번호 입력'),
           content: TextField(
             onChanged: (value) {
               newPhoneNumber = value;
             },
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(hintText: "전화번호를 입력하세요"),
+            decoration: const InputDecoration(
+              hintText: "전화번호를 입력하세요",
+              focusedBorder: UnderlineInputBorder( // 포커스 시 줄 색상을 파란색으로 설정
+                borderSide: BorderSide(color: Colors.blue),
+              ),
+            ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('취소'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blue, // 취소 버튼 텍스트를 파란색으로 설정
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
+              child: const Text('취소'),
             ),
             TextButton(
-              child: const Text('확인'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blue, // 확인 버튼 텍스트를 파란색으로 설정
+              ),
               onPressed: () {
                 Navigator.of(context).pop(newPhoneNumber);
               },
+              child: const Text('확인'),
             ),
           ],
         );
       },
     );
   }
+
 
   Future<void> _changeProfileImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);

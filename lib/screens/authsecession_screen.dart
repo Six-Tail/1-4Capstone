@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import '../screen/First.Screen.dart';
 import '../service/User_Service.dart';
-import '../utils/Themes.Colors.dart';
 
 class AuthSeccessionScreen extends StatefulWidget {
   const AuthSeccessionScreen({super.key});
@@ -270,7 +269,7 @@ class _AuthSeccessionScreenState extends State<AuthSeccessionScreen> {
                         decoration: ShapeDecoration(
                           color: Colors.white,
                           shape: RoundedRectangleBorder(
-                            side: BorderSide(width: 3, color: Theme1Colors.textColor),
+                            side: const BorderSide(width: 3, color: Colors.blue),
                             borderRadius: BorderRadius.circular(33),
                           ),
                         ),
@@ -278,7 +277,7 @@ class _AuthSeccessionScreenState extends State<AuthSeccessionScreen> {
                           '회원 탈퇴',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Theme1Colors.textColor,
+                            color: Colors.blue,
                             fontSize: screenHeight * 0.022,
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.w600,
