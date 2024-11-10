@@ -306,7 +306,12 @@ class _PostDetailState extends State<PostDetail> {
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        title: const Text('게시글 상세보기'),
+        title: Text(
+            '게시글 상세보기',
+          style: TextStyle(fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: Theme1Colors.textColor)
+        ),
         backgroundColor: Theme1Colors.mainColor,
         centerTitle: true,
         leading: BackButton(color: Theme1Colors.textColor),
@@ -367,7 +372,13 @@ class _PostDetailState extends State<PostDetail> {
                                     onPressed: _toggleScrap, // 즐겨찾기 토글 함수
                                   ),
                                   if (post['userId'] == userId)
-                                    PopupMenuButton<String>(
+                                  Theme(
+                                  data: Theme.of(context).copyWith(
+                                    popupMenuTheme: const PopupMenuThemeData(
+                                    color: Colors.white, // 팝업 메뉴의 배경색을 흰색으로 설정
+                                     ),
+                                    ),
+                                    child: PopupMenuButton<String>(
                                       onSelected: (value) {
                                         if (value == 'edit') {
                                           _showEditPostDialog(post['title'], post['content']);
@@ -387,7 +398,7 @@ class _PostDetailState extends State<PostDetail> {
                                       ],
                                       icon: const Icon(Icons.more_vert),
                                     ),
-                                ],
+                          )],
                               ),
                               const SizedBox(height: 10),
                               Text(
@@ -502,18 +513,34 @@ class _PostDetailState extends State<PostDetail> {
                                           ],
                                         ),
                                       ),
+
                                       if (isUserComment)
-                                        PopupMenuButton<String>(
+                                        Theme(
+                                          data: Theme.of(context).copyWith(
+                                            popupMenuTheme: const PopupMenuThemeData(
+                                              color: Colors.white, // 팝업 메뉴의 배경색을 흰색으로 설정
+                                            ),
+                                          ),
+                                          child: PopupMenuButton<String>(
                                           onSelected: (value) {
                                             if (value == 'edit') {
                                               _editControllers[commentId] = TextEditingController(text: commentData['content']);
                                               showDialog(
                                                 context: context,
                                                 builder: (context) => AlertDialog(
+                                                  backgroundColor: Colors.white, // 배경색을 흰색으로 설정
                                                   title: const Text("댓글 수정"),
                                                   content: TextField(
                                                     controller: _editControllers[commentId],
-                                                    decoration: const InputDecoration(hintText: "댓글 수정"),
+                                                    decoration: InputDecoration(
+                                                      hintText: "댓글 수정",
+                                                      focusedBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
+                                                      ),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                                                      ),
+                                                    ),
                                                   ),
                                                   actions: [
                                                     TextButton(
@@ -522,10 +549,16 @@ class _PostDetailState extends State<PostDetail> {
                                                         Navigator.of(context).pop();
                                                       },
                                                       child: const Text("저장"),
+                                                      style: TextButton.styleFrom(
+                                                        foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
+                                                      ),
                                                     ),
                                                     TextButton(
                                                       onPressed: () => Navigator.of(context).pop(),
                                                       child: const Text("취소"),
+                                                      style: TextButton.styleFrom(
+                                                        foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -546,7 +579,7 @@ class _PostDetailState extends State<PostDetail> {
                                           ],
                                           icon: const Icon(Icons.more_vert),
                                         ),
-                                    ],
+                                        )],
                                   ),
                                   const SizedBox(height: 10),
                                   StreamBuilder<QuerySnapshot>(
@@ -596,17 +629,32 @@ class _PostDetailState extends State<PostDetail> {
                                                   ),
                                                 ),
                                                 if (isUserReply)
-                                                  PopupMenuButton<String>(
+                                                 Theme(
+                                                data: Theme.of(context).copyWith(
+                                                popupMenuTheme: const PopupMenuThemeData(
+                                                 color: Colors.white, // 팝업 메뉴의 배경색을 흰색으로 설정
+                                                   ),
+                                          ),
+                                          child: PopupMenuButton<String>(
                                                     onSelected: (value) {
                                                       if (value == 'edit') {
                                                         _replyEditControllers[replyId] = TextEditingController(text: replyData['content']);
                                                         showDialog(
                                                           context: context,
                                                           builder: (context) => AlertDialog(
+                                                            backgroundColor: Colors.white, // 배경색을 흰색으로 설정
                                                             title: const Text("답글 수정"),
                                                             content: TextField(
                                                               controller: _replyEditControllers[replyId],
-                                                              decoration: const InputDecoration(hintText: "답글 수정"),
+                                                              decoration: InputDecoration(
+                                                                hintText: "답글 수정",
+                                                                focusedBorder: UnderlineInputBorder(
+                                                                  borderSide: BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
+                                                                ),
+                                                                enabledBorder: UnderlineInputBorder(
+                                                                  borderSide: BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                                                                ),
+                                                              ),
                                                             ),
                                                             actions: [
                                                               TextButton(
@@ -615,10 +663,16 @@ class _PostDetailState extends State<PostDetail> {
                                                                   Navigator.of(context).pop();
                                                                 },
                                                                 child: const Text("저장"),
+                                                                style: TextButton.styleFrom(
+                                                                  foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
+                                                                ),
                                                               ),
                                                               TextButton(
                                                                 onPressed: () => Navigator.of(context).pop(),
                                                                 child: const Text("취소"),
+                                                                style: TextButton.styleFrom(
+                                                                  foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
+                                                                ),
                                                               ),
                                                             ],
                                                           ),
@@ -639,7 +693,7 @@ class _PostDetailState extends State<PostDetail> {
                                                     ],
                                                     icon: const Icon(Icons.more_vert),
                                                   ),
-                                              ],
+                                                 )],
                                             ),
                                           );
                                         },
@@ -660,14 +714,28 @@ class _PostDetailState extends State<PostDetail> {
             if (_isCommentLoading) const LinearProgressIndicator(),
             Container(
               padding: const EdgeInsets.all(8.0),
-              decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))),
+              decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.white))),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       focusNode: _commentFocusNode,
                       controller: _commentController,
-                      decoration: const InputDecoration(labelText: '댓글을 입력하세요'),
+                      decoration: InputDecoration(
+                        labelText: '댓글을 입력하세요',
+                        fillColor: Colors.white, // 배경색을 하얀색으로 설정
+                        filled: true, // 배경색 적용
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
+                          borderRadius: BorderRadius.circular(8.0), // 모서리 둥글게 설정
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16), // 내부 여백 설정
+                        labelStyle: const TextStyle(color: Colors.black54), // 라벨 텍스트 색상 설정
+                      ),
                       onSubmitted: (content) {
                         _addComment(content);
                         _commentFocusNode.unfocus();
@@ -675,7 +743,7 @@ class _PostDetailState extends State<PostDetail> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send),
+                    icon: const Icon(Icons.send,color:Colors.blue),
                     onPressed: () {
                       _addComment(_commentController.text);
                       _commentFocusNode.unfocus();
@@ -698,17 +766,29 @@ class _PostDetailState extends State<PostDetail> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white, // 배경색을 흰색으로 설정
         title: const Text("게시글 수정"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: "제목"),
+              decoration: InputDecoration(
+                labelText: "제목",
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue), // 포커스 시 테두리 색상을 파란색으로 설정
+                ),
+              ),
             ),
+            const SizedBox(height: 8), // 간격 추가
             TextField(
               controller: contentController,
-              decoration: const InputDecoration(labelText: "내용"),
+              decoration: InputDecoration(
+                labelText: "내용",
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue), // 포커스 시 테두리 색상을 파란색으로 설정
+                ),
+              ),
               maxLines: 3,
             ),
           ],
@@ -717,6 +797,9 @@ class _PostDetailState extends State<PostDetail> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text("취소"),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -724,6 +807,9 @@ class _PostDetailState extends State<PostDetail> {
               Navigator.of(context).pop();
             },
             child: const Text("저장"),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
+            ),
           ),
         ],
       ),

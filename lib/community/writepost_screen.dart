@@ -65,16 +65,8 @@ class _WritePostScreenState extends State<WritePostScreen> {
         leading: BackButton(
           color: Theme1Colors.textColor,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // 알림 기능 추가 가능
-            },
-          ),
-        ],
       ),
-      body: Padding(
+      body: SingleChildScrollView( // 키보드가 올라올 때 스크롤 가능하게 설정
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -90,6 +82,19 @@ class _WritePostScreenState extends State<WritePostScreen> {
                   });
                 },
                 validator: (value) => value == null ? '게시판을 선택하세요' : null,
+                dropdownColor: Colors.white, // 드롭다운 메뉴의 배경색을 흰색으로 설정
+                decoration: InputDecoration(
+                  fillColor: Colors.white, // 배경색을 하얀색으로 설정
+                  filled: true, // fillColor 적용을 위해 true로 설정
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                ),
                 items: [
                   '자유 게시판',
                   '목표 공유 게시판',
@@ -106,14 +111,38 @@ class _WritePostScreenState extends State<WritePostScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: titleController,
-                decoration: const InputDecoration(labelText: '제목'),
+                decoration: const InputDecoration(
+                  labelText: '제목',
+                  fillColor: Colors.white, // 배경색을 하얀색으로 설정
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                  ),
+                ),
                 validator: (value) => value!.isEmpty ? '제목을 입력하세요' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: contentController,
-                decoration: const InputDecoration(labelText: '내용'),
-                maxLines: 5,
+                decoration: InputDecoration(
+                  labelText: '내용',
+                  fillColor: Colors.white, // 배경색을 하얀색으로 설정
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
+                    borderRadius: BorderRadius.circular(8.0), // 모서리 둥글게 설정
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16), // 내부 여백 설정
+                  labelStyle: const TextStyle(color: Colors.black54), // 라벨 텍스트 색상 설정
+                ),
+                maxLines: 10,
                 validator: (value) => value!.isEmpty ? '내용을 입력하세요' : null,
               ),
               const SizedBox(height: 16),
@@ -126,7 +155,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
                   child: const Text('완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ),
-
             ],
           ),
         ),
@@ -191,7 +219,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
       }
     }
   }
-
 
   // 완료 버튼 클릭 시 Firestore에 저장
   void handleComplete() {
