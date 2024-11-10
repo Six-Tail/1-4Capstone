@@ -69,7 +69,8 @@ class CustomCalendar extends StatelessWidget {
         markerBuilder: (context, day, events) {
           if (events.isNotEmpty) {
             final totalEvents = events.length;
-            final completedEvents = events.where((event) => (event as Event).isCompleted).length;
+            final completedEvents =
+                events.where((event) => (event as Event).isCompleted).length;
 
             if (completedEvents == totalEvents) {
               return Positioned(

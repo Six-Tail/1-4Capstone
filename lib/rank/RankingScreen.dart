@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../service/User_Service.dart';
 
 class AppUser {
-  final String uid;  // UID 필드 추가
+  final String uid; // UID 필드 추가
   final String name;
   final int level;
   final int currentExp;
@@ -11,7 +11,7 @@ class AppUser {
   final String profileImageUrl;
 
   AppUser({
-    required this.uid,  // 생성자에서 UID를 받도록 수정
+    required this.uid, // 생성자에서 UID를 받도록 수정
     required this.name,
     required this.level,
     required this.currentExp,
@@ -29,7 +29,8 @@ class AppUser {
     String? profileImageUrl,
   }) {
     return AppUser(
-      uid: uid ?? this.uid,  // copyWith에서 UID를 수정할 수 있도록 추가
+      uid: uid ?? this.uid,
+      // copyWith에서 UID를 수정할 수 있도록 추가
       name: name ?? this.name,
       level: level ?? this.level,
       currentExp: currentExp ?? this.currentExp,
@@ -38,7 +39,6 @@ class AppUser {
     );
   }
 }
-
 
 class RankingPage extends StatelessWidget {
   const RankingPage({super.key});
@@ -78,7 +78,7 @@ class RankingPage extends StatelessWidget {
           List<AppUser> remainingUsers = users.skip(3).take(97).toList();
 
           AppUser? currentUserData = users.firstWhere(
-                (user) => user.uid == currentUser?.uid,
+            (user) => user.uid == currentUser?.uid,
             orElse: () => AppUser(
               uid: 'Unknown',
               name: currentUser?.displayName ?? 'Unknown',
@@ -92,13 +92,13 @@ class RankingPage extends StatelessWidget {
           Color getRankColor(int rank) {
             switch (rank) {
               case 1:
-                return const Color(0xFFFFD700);  // 금메달 색상
+                return const Color(0xFFFFD700); // 금메달 색상
               case 2:
-                return const Color(0xFFC0C0C0);  // 은메달 색상
+                return const Color(0xFFC0C0C0); // 은메달 색상
               case 3:
-                return const Color(0xFFCD7F32);  // 동메달 색상
+                return const Color(0xFFCD7F32); // 동메달 색상
               default:
-                return Colors.black;  // 일반 색상
+                return Colors.black; // 일반 색상
             }
           }
 
@@ -121,21 +121,21 @@ class RankingPage extends StatelessWidget {
                     if (topThreeUsers.length > 1) ...[
                       _buildPlayerCard(
                         user: topThreeUsers[1],
-                        color: const Color(0xFFC0C0C0),  // 은메달 색상 (2등)
+                        color: const Color(0xFFC0C0C0), // 은메달 색상 (2등)
                         radius: 25,
                       ),
                     ],
                     if (topThreeUsers.isNotEmpty) ...[
                       _buildPlayerCard(
                         user: topThreeUsers[0],
-                        color: const Color(0xFFFFD700),  // 금메달 색상 (1등)
+                        color: const Color(0xFFFFD700), // 금메달 색상 (1등)
                         radius: 30,
                       ),
                     ],
                     if (topThreeUsers.length > 2) ...[
                       _buildPlayerCard(
                         user: topThreeUsers[2],
-                        color: const Color(0xFFCD7F32),  // 동메달 색상 (3등)
+                        color: const Color(0xFFCD7F32), // 동메달 색상 (3등)
                         radius: 20,
                       ),
                     ],
@@ -152,9 +152,12 @@ class RankingPage extends StatelessWidget {
                     return Card(
                       color: const Color(0xffcae1f6),
                       child: ListTile(
-                        leading: Text((index + 4).toString(), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        leading: Text((index + 4).toString(),
+                            style: const TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold)),
                         title: Text(user.name),
-                        subtitle: Text("레벨: ${user.level}, EXP: ${_formatExperience(user.currentExp)}"),
+                        subtitle: Text(
+                            "레벨: ${user.level}, EXP: ${_formatExperience(user.currentExp)}"),
                         trailing: const Icon(Icons.emoji_events),
                       ),
                     );
@@ -181,7 +184,8 @@ class RankingPage extends StatelessWidget {
                     ),
                   ),
                   title: Text(currentUserData.name),
-                  subtitle: Text("레벨: ${currentUserData.level}, EXP: ${_formatExperience(currentUserData.currentExp)}"),
+                  subtitle: Text(
+                      "레벨: ${currentUserData.level}, EXP: ${_formatExperience(currentUserData.currentExp)}"),
                   trailing: const Icon(Icons.person),
                 ),
               ),
@@ -194,7 +198,8 @@ class RankingPage extends StatelessWidget {
 }
 
 // _buildPlayerCard 메서드 추가
-Widget _buildPlayerCard({required AppUser user, required Color color, required double radius}) {
+Widget _buildPlayerCard(
+    {required AppUser user, required Color color, required double radius}) {
   return Container(
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(10),
@@ -221,7 +226,8 @@ Widget _buildPlayerCard({required AppUser user, required Color color, required d
         const SizedBox(height: 4),
         Text(
           user.name.length > 4 ? '${user.name.substring(0, 4)}...' : user.name,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: color),
         ),
         Text("레벨: ${user.level}"),
         Text("EXP: ${_formatExperience(user.currentExp)}"),

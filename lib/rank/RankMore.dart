@@ -84,7 +84,8 @@ class _RankMoreState extends State<RankMore> {
   Future<void> _saveUserLevelAndExp() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      await userService.updateUserLevelAndExp(user.uid, level, currentExp, maxExp);
+      await userService.updateUserLevelAndExp(
+          user.uid, level, currentExp, maxExp);
     }
   }
 
@@ -92,7 +93,10 @@ class _RankMoreState extends State<RankMore> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
         if (userDoc.exists) {
           final userImage = userDoc.data()?['userImage'];
           if (userImage != null && userImage is String) {
@@ -170,7 +174,7 @@ class _RankMoreState extends State<RankMore> {
                         backgroundImage: snapshot.data != null
                             ? NetworkImage(snapshot.data!)
                             : const AssetImage('assets/profile_placeholder.png')
-                        as ImageProvider,
+                                as ImageProvider,
                       );
                     },
                   ),
@@ -207,7 +211,8 @@ class _RankMoreState extends State<RankMore> {
                             LinearProgressIndicator(
                               value: expRatio,
                               backgroundColor: Colors.grey[300],
-                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xff73b1e7)),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color(0xff73b1e7)),
                               minHeight: screenHeight * 0.02,
                             ),
                             Text(
@@ -247,7 +252,8 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const DailyTasksPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const DailyTasksPage()),
                       ).then((_) => _loadUserInfo());
                     },
                     icon: Icons.assignment,
@@ -258,7 +264,8 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const WeeklyTasksPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const WeeklyTasksPage()),
                       ).then((_) => _loadUserInfo());
                     },
                     icon: Icons.calendar_view_week,
@@ -269,7 +276,8 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const RankingPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const RankingPage()),
                       ).then((_) => _loadUserInfo());
                     },
                     icon: Icons.leaderboard,
@@ -280,7 +288,8 @@ class _RankMoreState extends State<RankMore> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ChallengePage()),
+                        MaterialPageRoute(
+                            builder: (context) => const ChallengePage()),
                       ).then((_) => _loadUserInfo());
                     },
                     icon: Icons.flag,

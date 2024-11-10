@@ -27,10 +27,7 @@ class TaskButton extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center, // 아이콘과 텍스트 중앙 정렬
         children: [
-          Icon(
-            icon, size: 30,
-            color: const Color(0xff4496de)
-          ), // 아이콘 추가
+          Icon(icon, size: 30, color: const Color(0xff4496de)), // 아이콘 추가
           const SizedBox(height: 8), // 아이콘과 텍스트 사이의 간격
           Text(
             label,

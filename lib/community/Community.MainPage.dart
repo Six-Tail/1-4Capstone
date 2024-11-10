@@ -14,7 +14,6 @@ import 'promotionboard_screen.dart';
 import 'hotboard_screen.dart';
 import 'wroteboard_screen.dart';
 
-
 class CommunityMainPage extends StatefulWidget {
   const CommunityMainPage({super.key});
 
@@ -60,7 +59,6 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
           ),
         ],
       ),
-
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -92,9 +90,12 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         child: const Column(
                           children: [
                             SizedBox(height: 9), // 아이콘 위치 조정
-                            Icon(Icons.local_fire_department, size: 40, color: Colors.deepOrange),
+                            Icon(Icons.local_fire_department,
+                                size: 40, color: Colors.deepOrange),
                             SizedBox(height: 10),
-                            Text('HOT 게시판', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text('HOT 게시판',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -111,7 +112,8 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const WroteBoardScreen(userId: ''),
+                            builder: (context) =>
+                                const WroteBoardScreen(userId: ''),
                           ),
                         );
                       },
@@ -126,13 +128,16 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                           children: [
                             SizedBox(height: 6),
                             Padding(
-                              padding: EdgeInsets.only(left: 6), // 아이콘을 약간 오른쪽으로 이동
-                              child: Icon(Icons.edit_note_sharp, size: 42, color: Colors.blueAccent),
+                              padding: EdgeInsets.only(left: 6),
+                              // 아이콘을 약간 오른쪽으로 이동
+                              child: Icon(Icons.edit_note_sharp,
+                                  size: 42, color: Colors.blueAccent),
                             ),
                             SizedBox(height: 10),
-                            Text('내가 쓴 글', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text('내가 쓴 글',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
-
                         ),
                       ),
                     ),
@@ -140,7 +145,6 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                 ],
               ),
               const SizedBox(height: 16),
-
               Row(
                 children: [
                   Expanded(
@@ -163,9 +167,12 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         child: const Column(
                           children: [
                             SizedBox(height: 8),
-                            Icon(Icons.paste, size: 40, color: Colors.blueAccent),
+                            Icon(Icons.paste,
+                                size: 40, color: Colors.blueAccent),
                             SizedBox(height: 15),
-                            Text('전체 글', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text('전체 글',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -192,9 +199,12 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         child: const Column(
                           children: [
                             SizedBox(height: 8),
-                            Icon(Icons.bookmark_border_outlined, size: 40, color: Color(0xffefe684)),
+                            Icon(Icons.bookmark_border_outlined,
+                                size: 40, color: Color(0xffefe684)),
                             SizedBox(height: 15),
-                            Text('스크랩', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text('스크랩',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -221,9 +231,12 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                         child: const Column(
                           children: [
                             SizedBox(height: 10),
-                            Icon(Icons.comment, size: 35, color: Colors.blueAccent),
+                            Icon(Icons.comment,
+                                size: 35, color: Colors.blueAccent),
                             SizedBox(height: 15),
-                            Text('댓글 단 글', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text('댓글 단 글',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -232,9 +245,9 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
                 ],
               ),
               const SizedBox(height: 16),
-
               Theme(
-                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
                 child: ExpansionTile(
                   title: const Text(
                     '게시판',
