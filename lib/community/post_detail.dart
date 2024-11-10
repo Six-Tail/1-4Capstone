@@ -333,7 +333,12 @@ class _PostDetailState extends State<PostDetail> {
                             .doc(widget.postId)
                             .snapshots(),
                         builder: (context, snapshot) {
-                          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                          // 데이터가 없거나 삭제된 경우
+                          if (!snapshot.hasData || snapshot.data == null || !snapshot.data!.exists) {
+                            return const Center(child: Text("이 게시글은 삭제되었습니다.")); // 또는 Navigator.pop(context)로 이전 화면으로 이동
+                          }
+
+                          // 정상적으로 데이터가 있는 경우 처리
                           final post = (snapshot.data!.data() ?? {}) as Map<String, dynamic>;
 
                           final likedBy = List<String>.from(post['likedBy'] ?? []);
