@@ -39,14 +39,6 @@ class WroteBoardScreen extends StatelessWidget {
         leading: BackButton(
           color: Theme1Colors.textColor,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // 알림 기능 추가 가능
-            },
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
