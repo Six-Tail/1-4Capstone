@@ -493,13 +493,23 @@ class _PostDetailState extends State<PostDetail> {
                                                     Expanded(
                                                       child: TextField(
                                                         controller: _replyControllers[commentId] ??= TextEditingController(),
-                                                        decoration: const InputDecoration(labelText: '답글을 입력하세요'),
+                                                        decoration: const InputDecoration(
+                                                          labelText: '답글을 입력하세요',
+                                                          labelStyle: TextStyle(color: Colors.grey), // 기본 상태의 라벨 색상 설정
+                                                          floatingLabelStyle: TextStyle(color: Colors.blue), // 포커스 시 라벨 색상 설정
+                                                          focusedBorder: UnderlineInputBorder(
+                                                            borderSide: BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
+                                                          ),
+                                                          enabledBorder: UnderlineInputBorder(
+                                                            borderSide: BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
                                                     _isReplyLoading[commentId] == true
                                                         ? const CircularProgressIndicator()
                                                         : IconButton(
-                                                      icon: const Icon(Icons.send),
+                                                      icon: const Icon(Icons.send, color: Colors.blue),
                                                       onPressed: () {
                                                         _addReply(
                                                           _replyControllers[commentId]!.text,
@@ -532,7 +542,7 @@ class _PostDetailState extends State<PostDetail> {
                                                   title: const Text("댓글 수정"),
                                                   content: TextField(
                                                     controller: _editControllers[commentId],
-                                                    decoration: InputDecoration(
+                                                    decoration: const InputDecoration(
                                                       hintText: "댓글 수정",
                                                       focusedBorder: UnderlineInputBorder(
                                                         borderSide: BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
@@ -548,17 +558,17 @@ class _PostDetailState extends State<PostDetail> {
                                                         _editComment(commentId, _editControllers[commentId]!.text);
                                                         Navigator.of(context).pop();
                                                       },
-                                                      child: const Text("저장"),
                                                       style: TextButton.styleFrom(
                                                         foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
                                                       ),
+                                                      child: const Text("저장"),
                                                     ),
                                                     TextButton(
                                                       onPressed: () => Navigator.of(context).pop(),
-                                                      child: const Text("취소"),
                                                       style: TextButton.styleFrom(
                                                         foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
                                                       ),
+                                                      child: const Text("취소"),
                                                     ),
                                                   ],
                                                 ),
@@ -646,7 +656,7 @@ class _PostDetailState extends State<PostDetail> {
                                                             title: const Text("답글 수정"),
                                                             content: TextField(
                                                               controller: _replyEditControllers[replyId],
-                                                              decoration: InputDecoration(
+                                                              decoration: const InputDecoration(
                                                                 hintText: "답글 수정",
                                                                 focusedBorder: UnderlineInputBorder(
                                                                   borderSide: BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
@@ -662,17 +672,17 @@ class _PostDetailState extends State<PostDetail> {
                                                                   _editReply(commentId, replyId, _replyEditControllers[replyId]!.text);
                                                                   Navigator.of(context).pop();
                                                                 },
-                                                                child: const Text("저장"),
                                                                 style: TextButton.styleFrom(
                                                                   foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
                                                                 ),
+                                                                child: const Text("저장"),
                                                               ),
                                                               TextButton(
                                                                 onPressed: () => Navigator.of(context).pop(),
-                                                                child: const Text("취소"),
                                                                 style: TextButton.styleFrom(
                                                                   foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
                                                                 ),
+                                                                child: const Text("취소"),
                                                               ),
                                                             ],
                                                           ),
@@ -773,7 +783,7 @@ class _PostDetailState extends State<PostDetail> {
           children: [
             TextField(
               controller: titleController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "제목",
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.blue), // 포커스 시 테두리 색상을 파란색으로 설정
@@ -783,7 +793,7 @@ class _PostDetailState extends State<PostDetail> {
             const SizedBox(height: 8), // 간격 추가
             TextField(
               controller: contentController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "내용",
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.blue), // 포커스 시 테두리 색상을 파란색으로 설정
@@ -796,20 +806,20 @@ class _PostDetailState extends State<PostDetail> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text("취소"),
             style: TextButton.styleFrom(
               foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
             ),
+            child: const Text("취소"),
           ),
           TextButton(
             onPressed: () {
               _editPost(titleController.text, contentController.text);
               Navigator.of(context).pop();
             },
-            child: const Text("저장"),
             style: TextButton.styleFrom(
               foregroundColor: Colors.blue, // 텍스트 색상을 파란색으로 설정
             ),
+            child: const Text("저장"),
           ),
         ],
       ),
