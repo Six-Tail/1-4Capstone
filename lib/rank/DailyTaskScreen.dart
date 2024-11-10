@@ -258,7 +258,9 @@ class _DailyTasksPageState extends State<DailyTasksPage> with WidgetsBindingObse
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('일간 미션')),
+      appBar: AppBar(
+          scrolledUnderElevation: 0,
+          title: const Text('일간 미션')),
       body: Column(
         children: [
           Padding(

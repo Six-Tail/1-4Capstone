@@ -14,6 +14,7 @@ class FeedbackScreen extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
+          scrolledUnderElevation: 0,
           title: const Text(
             '피드백',
             style: TextStyle(color: Colors.black),

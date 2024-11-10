@@ -13,9 +13,12 @@ class ScrapPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F3F5), // 배경 색상 설정
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Text(
           '스크랩한 게시글',
-          style: TextStyle(fontSize: 26, color: Theme1Colors.textColor),
+          style: TextStyle(fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: Theme1Colors.textColor),
         ),
         centerTitle: true,
         backgroundColor: Theme1Colors.mainColor,

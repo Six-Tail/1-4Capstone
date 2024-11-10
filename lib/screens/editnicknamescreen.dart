@@ -48,6 +48,7 @@ class _EditNicknameScreenState extends State<EditNicknameScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xffffffff),
         appBar: AppBar(
+          scrolledUnderElevation: 0,
           backgroundColor: const Color(0xffffffff),
           title: const Text('사용자 이름 설정', style: TextStyle(color: Colors.black)),
           centerTitle: true,

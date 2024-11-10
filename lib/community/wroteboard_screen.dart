@@ -25,6 +25,7 @@ class WroteBoardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Text(
           '내가 쓴 글',
           style: TextStyle(

@@ -15,6 +15,7 @@ class FreeBoardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F3F5), // 배경 색상 #f1f3f5 설정
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Text(
           '자유게시판',
           style: TextStyle(

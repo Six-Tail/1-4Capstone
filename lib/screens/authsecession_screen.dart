@@ -116,6 +116,7 @@ class _AuthSeccessionScreenState extends State<AuthSeccessionScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xffffffff),
         appBar: AppBar(
+          scrolledUnderElevation: 0,
           backgroundColor: const Color(0xffffffff),
           title: const Text('회원 탈퇴', style: TextStyle(color: Colors.black)),
         ),

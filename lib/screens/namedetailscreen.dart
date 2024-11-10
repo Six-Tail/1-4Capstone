@@ -173,6 +173,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: const Text('내 정보 관리', style: TextStyle(color: Colors.black)), // 텍스트를 검정색으로 설정
         backgroundColor: const Color(0xffffffff),
         iconTheme: const IconThemeData(color: Colors.black),

@@ -15,6 +15,7 @@ class MentoringBoardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F3F5), // 배경 색상 설정
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Text(
           '멘토링 요청 게시판',
           style: TextStyle(

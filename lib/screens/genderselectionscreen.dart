@@ -46,6 +46,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xffffffff),
         appBar: AppBar(
+          scrolledUnderElevation: 0,
           backgroundColor: const Color(0xffffffff),
           title: const Text('성별 선택', style: TextStyle(color: Colors.black)),
           centerTitle: true,

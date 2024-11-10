@@ -108,6 +108,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: const Text('실시간 채팅방'),
         backgroundColor: const Color(0xff73b1e7),
       ),

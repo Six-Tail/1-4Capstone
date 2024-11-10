@@ -99,6 +99,7 @@ class _PWChangeScreenState extends State<PWChangeScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xffffffff),
         appBar: AppBar(
+          scrolledUnderElevation: 0,
           backgroundColor: const Color(0xffffffff),
           title: const Text('비밀번호 변경', style: TextStyle(color: Colors.black)),
         ),

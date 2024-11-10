@@ -21,6 +21,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F3F5), // 배경 색상 설정
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Text(
           '모든 게시글',
           style: TextStyle(

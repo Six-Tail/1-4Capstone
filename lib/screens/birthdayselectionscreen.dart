@@ -44,6 +44,7 @@ class _BirthdaySelectionScreenState extends State<BirthdaySelectionScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xffffffff),
         appBar: AppBar(
+          scrolledUnderElevation: 0,
           backgroundColor: const Color(0xffffffff),
           title: const Text('생일 선택', style: TextStyle(color: Colors.black)),
           centerTitle: true,

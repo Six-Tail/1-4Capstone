@@ -26,6 +26,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return Scaffold(
       backgroundColor: const Color(0xffffffff), // 전체 배경색 설정
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: const Text('알림 및 배지'),
         backgroundColor: const Color(0xffffffff), // 전체 배경색 설정
       ),

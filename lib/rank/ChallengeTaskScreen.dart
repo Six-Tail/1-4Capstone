@@ -113,7 +113,9 @@ class _ChallengePageState extends State<ChallengePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('도전 과제')),
+      appBar: AppBar(
+          scrolledUnderElevation: 0,
+          title: const Text('도전 과제')),
       body: Column(
         children: [
           Expanded(

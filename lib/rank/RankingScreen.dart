@@ -50,6 +50,7 @@ class RankingPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: const Text("랭킹"),
         backgroundColor: Colors.white,
       ),

@@ -305,6 +305,7 @@ class _PostDetailState extends State<PostDetail> {
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: const Text('게시글 상세보기'),
         backgroundColor: Theme1Colors.mainColor,
         centerTitle: true,

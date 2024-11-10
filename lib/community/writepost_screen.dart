@@ -51,6 +51,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Text(
           '게시글 작성',
           style: TextStyle(

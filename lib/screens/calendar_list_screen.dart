@@ -25,6 +25,7 @@ class _CalendarListScreenState extends State<CalendarListScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: const Text(
           '캘린더 목록',
           style: TextStyle(color: Colors.black),
