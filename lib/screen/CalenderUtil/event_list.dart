@@ -31,13 +31,25 @@ class EventList extends StatelessWidget {
         (selectedDay != null) ? events[selectedDay!.toUtc()] ?? [] : [];
 
     final List<PopupMenuEntry<String>> menuItems = [
-      const PopupMenuItem(
+      const PopupMenuItem<String>(
         value: 'edit',
-        child: Text('수정'),
+        child: Text(
+          '수정',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,  // 볼드체 설정
+            color: Colors.black,          // 검정색 텍스트 색상
+          ),
+        ),
       ),
-      const PopupMenuItem(
+      const PopupMenuItem<String>(
         value: 'delete',
-        child: Text('삭제'),
+        child: Text(
+          '삭제',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,  // 볼드체 설정
+            color: Colors.red,            // 빨간색 텍스트 색상
+          ),
+        ),
       ),
     ];
 
@@ -71,6 +83,8 @@ class EventList extends StatelessWidget {
                             int eventIndex = selectedEvents.indexOf(event);
                             toggleEventCompletion(eventIndex, value ?? false);
                           },
+                          activeColor: Colors.black,
+                          checkColor: Colors.white,
                         ),
                         Expanded(
                           child: Text(
@@ -115,6 +129,7 @@ class EventList extends StatelessWidget {
                         }
                       },
                       itemBuilder: (BuildContext context) => menuItems,
+                      color: const Color(0xffcae1f6),
                     ),
                   ),
                 );

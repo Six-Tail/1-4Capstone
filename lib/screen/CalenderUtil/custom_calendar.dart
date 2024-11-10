@@ -47,20 +47,20 @@ class CustomCalendar extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      calendarStyle: CalendarStyle(
-        selectedDecoration: const BoxDecoration(
-          color: Colors.blueAccent,
+      calendarStyle: const CalendarStyle(
+        selectedDecoration: BoxDecoration(
+          color: Color(0xff4496de),
           shape: BoxShape.circle,
         ),
         todayDecoration: BoxDecoration(
-          color: Colors.blueAccent.shade100,
+          color: Color(0xffcae1f6),
           shape: BoxShape.circle,
         ),
-        defaultTextStyle: const TextStyle(
+        defaultTextStyle: TextStyle(
           fontSize: 16,
           color: Colors.black,
         ),
-        weekendTextStyle: const TextStyle(
+        weekendTextStyle: TextStyle(
           color: Colors.black,
         ),
         outsideDaysVisible: false,
@@ -72,25 +72,31 @@ class CustomCalendar extends StatelessWidget {
             final completedEvents = events.where((event) => (event as Event).isCompleted).length;
 
             if (completedEvents == totalEvents) {
-              return const Positioned(
-                bottom: 1,
-                child: Icon(
-                  Icons.check_circle,
-                  color: Colors.greenAccent,
-                  size: 20,
+              return Positioned(
+                bottom: -2,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white, // 배경색 설정
+                    shape: BoxShape.circle, // 아이콘 배경을 원형으로 설정
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    color: Colors.black,
+                    size: 20, // 아이콘을 살짝 줄여서 배경에 맞춤
+                  ),
                 ),
               );
             } else {
               final progressWidth = (completedEvents / totalEvents) * 50;
 
               return Positioned(
-                bottom: 1,
+                bottom: 4,
                 child: Container(
                   width: 50,
                   height: 6,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
-                    color: Colors.redAccent,
+                    color: Colors.grey,
                   ),
                   child: Stack(
                     children: [
@@ -98,7 +104,7 @@ class CustomCalendar extends StatelessWidget {
                         width: progressWidth,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
-                          color: Colors.greenAccent,
+                          color: Colors.black,
                         ),
                       ),
                       if (completedEvents < totalEvents)
@@ -108,7 +114,7 @@ class CustomCalendar extends StatelessWidget {
                             width: 50 - progressWidth,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(5),
-                              color: Colors.redAccent,
+                              color: Colors.grey,
                             ),
                           ),
                         ),

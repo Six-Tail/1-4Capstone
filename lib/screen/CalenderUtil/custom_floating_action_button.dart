@@ -103,7 +103,7 @@ class _CustomFloatingActionButtonState extends State<CustomFloatingActionButton>
                     },
                     label: const Text('일정 추가'),
                     icon: const Icon(Icons.add),
-                    backgroundColor: Theme1Colors.textColor,
+                    backgroundColor: const Color(0xff4496de),
                   ),
                   SizedBox(height: screenHeight * 0.01),
                 ],
@@ -122,7 +122,7 @@ class _CustomFloatingActionButtonState extends State<CustomFloatingActionButton>
               duration: const Duration(milliseconds: 300),
               child: FloatingActionButton(
                 onPressed: _toggleMenu,  // 토글 동작 수정
-                backgroundColor: const Color(0xff73b1e7),
+                backgroundColor: const Color(0xff4496de),
                 child: Icon(_isExpanded ? Icons.close : Icons.add),
               ),
             ),

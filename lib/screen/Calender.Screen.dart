@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:todobest_home/utils/Themes.Colors.dart';
 
 import 'CalenderUtil/custom_calendar.dart';
 import 'CalenderUtil/custom_floating_action_button.dart';
@@ -706,25 +705,23 @@ class _CalenderScreenState extends State<CalenderScreen>
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
-        title: Text(
-          'ToDoBest',
-          style: TextStyle(fontSize: 26, color: Theme1Colors.textColor),
+        title: Image.asset(
+          'assets/images/icon.png',
+          width: screenWidth * 0.12, // 아이콘 크기
+          height: screenHeight * 0.12,
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xff73b1e7),
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Image.asset('assets/images/icon.png'),
-        ),
+        backgroundColor: const Color(0xffffffff),
         actions: [
           IconButton(
             icon: const Icon(
               Icons.bar_chart,
-              color: Colors.white60,
-              size: 30,
+              color: Color(0xff4496de),
+              size: 34,
             ),
             onPressed: _showCompletionStats, // 아이콘 클릭 시 팝업창 띄우는 함수 호출
           ),

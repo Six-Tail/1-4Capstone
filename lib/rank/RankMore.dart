@@ -136,16 +136,13 @@ class _RankMoreState extends State<RankMore> {
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
-        title: Text(
-          'ToDoBest',
-          style: TextStyle(fontSize: 26, color: Theme1Colors.textColor),
+        title: Image.asset(
+          'assets/images/icon.png',
+          width: screenWidth * 0.12, // 아이콘 크기
+          height: screenHeight * 0.12,
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xff73b1e7),
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Image.asset('assets/images/icon.png'),
-        ),
+        backgroundColor: const Color(0xffffffff),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

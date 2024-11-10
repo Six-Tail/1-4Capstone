@@ -159,10 +159,17 @@ class _ManageScreenState extends State<ManageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
-        title: const Text('설정'),
+        title: Image.asset(
+          'assets/images/icon.png',
+          width: screenWidth * 0.12, // 아이콘 크기
+          height: screenHeight * 0.12,
+        ),
+        centerTitle: true,
         backgroundColor: const Color(0xffffffff),
       ),
       body: ListView(
