@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 
 class EventModal extends StatefulWidget {
   final DateTime selectedDate;
-  final Function(String, String, DateTime, DateTime, String, int, List<String>, List<int>, List<int>)
-  onSave;
+  final Function(String, String, DateTime, DateTime, String, int, List<String>,
+      List<int>, List<int>) onSave;
   final String? initialValue;
   final String? initialTime;
   final String? initialEndTime;
@@ -54,16 +54,26 @@ class _EventModalState extends State<EventModal> {
   final List<bool> _selectedDays = List.generate(7, (_) => false);
 
   // 추가된 반복할 일수 선택용 상태 변수
-  final List<String> _daysInMonth = List.generate(31, (index) => (index + 1).toString());
+  final List<String> _daysInMonth =
+      List.generate(31, (index) => (index + 1).toString());
   final List<bool> _selectedDaysInMonth = List.generate(31, (_) => false);
 
   // 추가된 연간 반복할 월 선택용 상태 변수
   final List<String> _months = [
-    '1월', '2월', '3월', '4월', '5월', '6월',
-    '7월', '8월', '9월', '10월', '11월', '12월'
+    '1월',
+    '2월',
+    '3월',
+    '4월',
+    '5월',
+    '6월',
+    '7월',
+    '8월',
+    '9월',
+    '10월',
+    '11월',
+    '12월'
   ];
   final List<bool> _selectedMonths = List.generate(12, (_) => false);
-
 
   @override
   void initState() {
@@ -129,8 +139,9 @@ class _EventModalState extends State<EventModal> {
     final TimeOfDay? pickedTime = await showCupertinoDialog<TimeOfDay>(
       context: context,
       builder: (BuildContext context) {
-        TimeOfDay selectedTime =
-        isStartTime ? (startTime ?? TimeOfDay.now()) : (endTime ?? TimeOfDay.now());
+        TimeOfDay selectedTime = isStartTime
+            ? (startTime ?? TimeOfDay.now())
+            : (endTime ?? TimeOfDay.now());
 
         return CupertinoAlertDialog(
           title: Text(isStartTime ? '시작 시간 선택' : '종료 시간 선택'),
@@ -139,7 +150,7 @@ class _EventModalState extends State<EventModal> {
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
               initialDateTime:
-              DateTime(0, 0, 0, selectedTime.hour, selectedTime.minute),
+                  DateTime(0, 0, 0, selectedTime.hour, selectedTime.minute),
               onDateTimeChanged: (DateTime newDateTime) {
                 selectedTime = TimeOfDay(
                     hour: newDateTime.hour, minute: newDateTime.minute);
@@ -148,13 +159,23 @@ class _EventModalState extends State<EventModal> {
           ),
           actions: <Widget>[
             CupertinoDialogAction(
-              child: const Text('취소'),
+              child: const Text(
+                '취소',
+                style: TextStyle(
+                  color: Color(0xff4496de),  // 텍스트 색상 변경
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             CupertinoDialogAction(
-              child: const Text('확인'),
+              child: const Text(
+                '확인',
+                style: TextStyle(
+                  color: Color(0xff4496de),  // 텍스트 색상 변경
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop(selectedTime);
               },
@@ -202,7 +223,35 @@ class _EventModalState extends State<EventModal> {
                 SizedBox(height: screenHeight * 0.01),
                 TextField(
                   controller: eventController,
-                  decoration: const InputDecoration(hintText: '일정 내용을 입력하세요'),
+                  decoration: InputDecoration(
+                    hintText: '일정 내용을 입력하세요',
+                    filled: true,
+                    fillColor: Colors.white,
+                    // 배경색 설정
+                    contentPadding: const EdgeInsets.all(12),
+                    // 내부 여백 설정
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12), // 둥근 테두리 설정
+                      borderSide: const BorderSide(
+                        color: Colors.grey, // 테두리 색상 설정
+                        width: 1.0, // 테두리 두께 설정
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xff4496de), // 포커스 시 테두리 색상
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
                   maxLines: 3,
                 ),
                 SizedBox(height: screenHeight * 0.01),
@@ -214,21 +263,32 @@ class _EventModalState extends State<EventModal> {
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
-                Row(
+                Column(
                   children: [
-                    const Icon(Icons.access_time),
-                    SizedBox(width: screenWidth * 0.02),
-                    const Text('하루 종일'),
-                    Transform.scale(
-                      scale: 0.6,
-                      child: Switch(
-                        value: _isAllDay,
-                        onChanged: (value) {
-                          setState(() {
-                            _isAllDay = value;
-                          });
-                        },
-                      ),
+                    Row(
+                      children: [
+                        const Icon(Icons.access_time),
+                        SizedBox(width: screenWidth * 0.02),
+                        const Text('하루 종일'),
+                        Transform.scale(
+                          scale: 0.6,
+                          child: Switch(
+                            value: _isAllDay,
+                            onChanged: (value) {
+                              setState(() {
+                                _isAllDay = value;
+                              });
+                            },
+                            activeColor: Colors.white,
+                            activeTrackColor: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(
+                      color: Colors.grey, // 경계선 색상
+                      thickness: 1.0, // 경계선 두께
+                      height: 20.0, // 위젯 간 여백
                     ),
                   ],
                 ),
@@ -241,7 +301,8 @@ class _EventModalState extends State<EventModal> {
                         child: Text(
                           DateFormat('yy년 MM월 dd일').format(startDate!),
                           style: const TextStyle(
-                              overflow: TextOverflow.ellipsis),
+                            color: Color(0xff4496de), // 텍스트 색상 변경
+                          ),
                         ),
                       ),
                     ),
@@ -252,7 +313,8 @@ class _EventModalState extends State<EventModal> {
                         child: Text(
                           DateFormat('yy년 MM월 dd일').format(endDate!),
                           style: const TextStyle(
-                              overflow: TextOverflow.ellipsis),
+                            color: Color(0xff4496de), // 텍스트 색상 변경
+                          ),
                         ),
                       ),
                     ),
@@ -266,11 +328,23 @@ class _EventModalState extends State<EventModal> {
                         children: [
                           TextButton(
                             onPressed: () => _selectTime(context, true),
-                            child: Text(startTime != null
-                                ? startTime!.format(context)
-                                : '시작 시간'),
-                          ),
+                            child: Text(
+                              startTime != null
+                                  ? startTime!.format(context)
+                                  : '시작 시간',
+                              style: const TextStyle(
+                                color: Color(0xff4496de), // 텍스트 색상 변경
+                              ),
+                            ),
+                          )
                         ],
+                      ),
+                      const Text(
+                        ":",
+                        style: TextStyle(
+                            fontSize: 20, // 글꼴 크기
+                            color: Colors.black, // 텍스트 색상
+                            fontWeight: FontWeight.bold),
                       ),
                       Column(
                         children: [
@@ -280,6 +354,9 @@ class _EventModalState extends State<EventModal> {
                               endTime != null
                                   ? endTime!.format(context)
                                   : '종료 시간',
+                              style: const TextStyle(
+                                color: Color(0xff4496de), // 텍스트 색상 변경
+                              ),
                             ),
                           ),
                         ],
@@ -294,6 +371,7 @@ class _EventModalState extends State<EventModal> {
                     const Text('반복'),
                     const Spacer(),
                     DropdownButton<String>(
+                      dropdownColor: Colors.white,
                       value: _selectedRepeat,
                       items: _repeatOptions.map((String option) {
                         return DropdownMenuItem<String>(
@@ -304,10 +382,14 @@ class _EventModalState extends State<EventModal> {
                       onChanged: (String? newValue) {
                         setState(() {
                           _selectedRepeat = newValue!;
-                          _repeatCount = 1; // Reset repeat count when repeat option changes
-                          _selectedDays.fillRange(0, 7, false); // Reset days of the week
-                          _selectedDaysInMonth.fillRange(0, 31, false); // Reset days in month
-                          _selectedMonths.fillRange(0, 12, false); // Reset selected months
+                          _repeatCount =
+                              1; // Reset repeat count when repeat option changes
+                          _selectedDays.fillRange(
+                              0, 7, false); // Reset days of the week
+                          _selectedDaysInMonth.fillRange(
+                              0, 31, false); // Reset days in month
+                          _selectedMonths.fillRange(
+                              0, 12, false); // Reset selected months
                         });
                       },
                     ),
@@ -326,14 +408,18 @@ class _EventModalState extends State<EventModal> {
                         child: Container(
                           padding: const EdgeInsets.all(8.0), // 패딩 조정
                           decoration: BoxDecoration(
-                            color: _selectedDays[index] ? Colors.blue : Colors.grey[300], // 선택된 경우 색상 변경
+                            color: _selectedDays[index]
+                                ? Colors.blue
+                                : Colors.grey[300], // 선택된 경우 색상 변경
                             shape: BoxShape.circle, // 동그라미 형태
                           ),
                           child: Text(
                             _daysOfWeek[index],
                             style: TextStyle(
                               fontSize: 12,
-                              color: _selectedDays[index] ? Colors.white : Colors.black, // 글자 색상 변경
+                              color: _selectedDays[index]
+                                  ? Colors.white
+                                  : Colors.black, // 글자 색상 변경
                             ),
                           ),
                         ),
@@ -349,26 +435,35 @@ class _EventModalState extends State<EventModal> {
                     // 수정
                     children: List.generate(_daysInMonth.length, (index) {
                       int day = int.parse(_daysInMonth[index]);
-                      double circleSize = day < 10 ? 28.0 : 28.0; // 한 자리 숫자와 두 자리 숫자에 따라 크기 조정
+                      double circleSize =
+                          day < 10 ? 28.0 : 28.0; // 한 자리 숫자와 두 자리 숫자에 따라 크기 조정
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            _selectedDaysInMonth[index] = !_selectedDaysInMonth[index];
+                            _selectedDaysInMonth[index] =
+                                !_selectedDaysInMonth[index];
                           });
                         },
                         child: Container(
-                          width: circleSize, // 동그라미의 가로 크기
-                          height: circleSize, // 동그라미의 세로 크기
-                          alignment: Alignment.center, // 텍스트 중앙 정렬
+                          width: circleSize,
+                          // 동그라미의 가로 크기
+                          height: circleSize,
+                          // 동그라미의 세로 크기
+                          alignment: Alignment.center,
+                          // 텍스트 중앙 정렬
                           decoration: BoxDecoration(
-                            color: _selectedDaysInMonth[index] ? Colors.blue : Colors.grey[300], // 선택된 경우 색상 변경
+                            color: _selectedDaysInMonth[index]
+                                ? Colors.blue
+                                : Colors.grey[300], // 선택된 경우 색상 변경
                             shape: BoxShape.circle, // 동그라미 형태
                           ),
                           child: Text(
                             day.toString(), // 1부터 시작하는 숫자
                             style: TextStyle(
                               fontSize: 16, // 텍스트 크기
-                              color: _selectedDaysInMonth[index] ? Colors.white : Colors.black, // 글자 색상 변경
+                              color: _selectedDaysInMonth[index]
+                                  ? Colors.white
+                                  : Colors.black, // 글자 색상 변경
                             ),
                           ),
                         ),
@@ -385,22 +480,30 @@ class _EventModalState extends State<EventModal> {
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            _selectedMonths[index] = !_selectedMonths[index]; // 선택된 달 상태 변경
+                            _selectedMonths[index] =
+                                !_selectedMonths[index]; // 선택된 달 상태 변경
                           });
                         },
                         child: Container(
-                          width: 50.0, // 동그라미의 가로 크기
-                          height: 50.0, // 동그라미의 세로 크기
-                          alignment: Alignment.center, // 텍스트 중앙 정렬
+                          width: 50.0,
+                          // 동그라미의 가로 크기
+                          height: 50.0,
+                          // 동그라미의 세로 크기
+                          alignment: Alignment.center,
+                          // 텍스트 중앙 정렬
                           decoration: BoxDecoration(
-                            color: _selectedMonths[index] ? Colors.blue : Colors.grey[300], // 선택된 경우 색상 변경
+                            color: _selectedMonths[index]
+                                ? Colors.blue
+                                : Colors.grey[300], // 선택된 경우 색상 변경
                             shape: BoxShape.circle, // 동그라미 형태
                           ),
                           child: Text(
                             _months[index], // 월의 이름을 표시
                             style: TextStyle(
                               fontSize: 16, // 텍스트 크기
-                              color: _selectedMonths[index] ? Colors.white : Colors.black, // 글자 색상 변경
+                              color: _selectedMonths[index]
+                                  ? Colors.white
+                                  : Colors.black, // 글자 색상 변경
                             ),
                           ),
                         ),
@@ -439,12 +542,18 @@ class _EventModalState extends State<EventModal> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: const Text('취소'),
+                      child: const Text(
+                        '취소',
+                        style: TextStyle(
+                          color: Color(0xff4496de),  // 텍스트 색상 변경
+                        ),
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
                         if (eventController.text.isNotEmpty) {
-                          if (!_isAllDay && (startTime == null || endTime == null)) {
+                          if (!_isAllDay &&
+                              (startTime == null || endTime == null)) {
                             setState(() {
                               _showError = true;
                               _errorMessage = '시작 시간과 종료 시간을 모두 선택해 주세요.';
@@ -465,7 +574,8 @@ class _EventModalState extends State<EventModal> {
                           }
 
                           // Weekly repeat validation: at least one day of the week must be selected
-                          if (_selectedRepeat == '매주' && !_selectedDays.contains(true)) {
+                          if (_selectedRepeat == '매주' &&
+                              !_selectedDays.contains(true)) {
                             setState(() {
                               _showError = true;
                               _errorMessage = '반복 하고 싶은 요일을 선택하세요.';
@@ -474,7 +584,8 @@ class _EventModalState extends State<EventModal> {
                           }
 
                           // Monthly repeat validation: at least one day of the month must be selected
-                          if (_selectedRepeat == '매월' && !_selectedDaysInMonth.contains(true)) {
+                          if (_selectedRepeat == '매월' &&
+                              !_selectedDaysInMonth.contains(true)) {
                             setState(() {
                               _showError = true;
                               _errorMessage = '반복 하고 싶은 일수를 선택하세요.';
@@ -483,7 +594,8 @@ class _EventModalState extends State<EventModal> {
                           }
 
                           // Yearly repeat validation: at least one month must be selected
-                          if (_selectedRepeat == '매년' && !_selectedMonths.contains(true)) {
+                          if (_selectedRepeat == '매년' &&
+                              !_selectedMonths.contains(true)) {
                             setState(() {
                               _showError = true;
                               _errorMessage = '반복 하고 싶은 월을 선택하세요.';
@@ -507,7 +619,9 @@ class _EventModalState extends State<EventModal> {
                           }
 
                           List<int> selectedDaysInMonth = [];
-                          for (int i = 0; i < _selectedDaysInMonth.length; i++) {
+                          for (int i = 0;
+                              i < _selectedDaysInMonth.length;
+                              i++) {
                             if (_selectedDaysInMonth[i]) {
                               selectedDaysInMonth.add(i + 1);
                             }
@@ -522,15 +636,16 @@ class _EventModalState extends State<EventModal> {
 
                           widget.onSave(
                               eventController.text,
-                              _isAllDay ? '하루 종일' : '$startTimeString - $endTimeString',
+                              _isAllDay
+                                  ? '하루 종일'
+                                  : '$startTimeString - $endTimeString',
                               startDate!,
                               endDate!,
                               _selectedRepeat,
                               _repeatCount,
                               selectedDays,
                               selectedDaysInMonth,
-                              selectedMonths
-                          );
+                              selectedMonths);
                           Navigator.of(context).pop();
                         } else {
                           setState(() {
@@ -539,7 +654,12 @@ class _EventModalState extends State<EventModal> {
                           });
                         }
                       },
-                      child: Text(widget.editMode ? '수정' : '등록'),
+                        child: Text(
+                          widget.editMode ? '수정' : '등록',
+                          style: const TextStyle(
+                            color: Color(0xff4496de),  // 텍스트 색상 변경
+                          ),
+                        ),
                     ),
                   ],
                 ),
