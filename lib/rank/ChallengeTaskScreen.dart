@@ -113,9 +113,7 @@ class _ChallengePageState extends State<ChallengePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          scrolledUnderElevation: 0,
-          title: const Text('도전 과제')),
+      appBar: AppBar(scrolledUnderElevation: 0, title: const Text('도전 과제')),
       body: Column(
         children: [
           Expanded(
@@ -230,12 +228,15 @@ class _ChallengePageState extends State<ChallengePage> {
                       FutureBuilder(
                         future: userService.getUserInfo(currentUser!.uid),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return const CircularProgressIndicator();
                           } else if (snapshot.hasError) {
-                            return const Text('오류 발생', style: TextStyle(color: Colors.red));
+                            return const Text('오류 발생',
+                                style: TextStyle(color: Colors.red));
                           } else if (snapshot.hasData) {
-                            int level = snapshot.data?['level'] ?? 0; // 현재 레벨 가져오기
+                            int level =
+                                snapshot.data?['level'] ?? 0; // 현재 레벨 가져오기
                             return Text(
                               '($level/10)',
                               style: const TextStyle(
@@ -277,41 +278,40 @@ class _ChallengePageState extends State<ChallengePage> {
           const SizedBox(width: 12),
           task.isCompleted
               ? ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor:
-              task.hasClaimedXP ? Colors.grey : Colors.amber,
-              padding:
-              const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            onPressed: task.hasClaimedXP ? null : () => claimXP(index),
-            child: const Text(
-              'EXP 획득',
-              style: TextStyle(color: Colors.black),
-            ),
-          )
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        task.hasClaimedXP ? Colors.grey : Colors.amber,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  onPressed: task.hasClaimedXP ? null : () => claimXP(index),
+                  child: const Text(
+                    'EXP 획득',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                )
               : ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor:
-              task.isCompleted ? Colors.grey : Colors.lightBlueAccent,
-              padding:
-              const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            onPressed: () {
-              Get.to(() => const RouterPage());
-            },
-            child: const Text('이동 하기'),
-          ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        task.isCompleted ? Colors.grey : Colors.lightBlueAccent,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  onPressed: () {
+                    Get.to(() => const RouterPage());
+                  },
+                  child: const Text('이동 하기'),
+                ),
         ],
       ),
     );
   }
-
 
   Future<void> loadTasks() async {
     if (currentUser == null) return;
