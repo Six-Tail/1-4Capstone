@@ -55,18 +55,21 @@ class _CalenderScreenState extends State<CalenderScreen>
         // 이벤트를 _events 맵에 추가
         for (var doc in querySnapshot.docs) {
           final eventData = doc.data();
-          DateTime startDate = (eventData['startDate'] as Timestamp).toDate(); // Firestore의 Timestamp를 DateTime으로 변환
+          DateTime startDate = (eventData['startDate'] as Timestamp)
+              .toDate(); // Firestore의 Timestamp를 DateTime으로 변환
           String uniqueId = doc.id; // 문서 ID
 
           // UTC로 변환하여 _events에 추가
-          DateTime localDate = DateTime.utc(startDate.year, startDate.month, startDate.day);
+          DateTime localDate =
+              DateTime.utc(startDate.year, startDate.month, startDate.day);
 
           // mounted 속성 체크 후 setState 호출
           if (mounted) {
             setState(() {
               if (_events[localDate] != null) {
                 _events[localDate]!.add(Event(
-                  id: uniqueId, // Firestore 문서 ID 사용
+                  id: uniqueId,
+                  // Firestore 문서 ID 사용
                   name: eventData['name'],
                   time: eventData['time'],
                   isCompleted: eventData['isCompleted'],
@@ -78,7 +81,8 @@ class _CalenderScreenState extends State<CalenderScreen>
               } else {
                 _events[localDate] = [
                   Event(
-                    id: uniqueId, // Firestore 문서 ID 사용
+                    id: uniqueId,
+                    // Firestore 문서 ID 사용
                     name: eventData['name'],
                     time: eventData['time'],
                     isCompleted: eventData['isCompleted'],
@@ -113,7 +117,8 @@ class _CalenderScreenState extends State<CalenderScreen>
       _focusedDay = focusedDay;
     });
 
-    DateTime utcSelectedDay = DateTime.utc(selectedDay.year, selectedDay.month, selectedDay.day);
+    DateTime utcSelectedDay =
+        DateTime.utc(selectedDay.year, selectedDay.month, selectedDay.day);
     if (kDebugMode) {
       print('선택한 UTC 날짜: $utcSelectedDay');
       print('현재 _events 맵: $_events');
@@ -144,47 +149,50 @@ class _CalenderScreenState extends State<CalenderScreen>
   }
 
   Future<void> _addEvent(
-      String event,
-      String time,
-      DateTime startDate,
-      DateTime? endDate,
-      String repeat,
-      int repeatCount,
-      String userId,
-      List<String> selectedDays,
-      List<int> selectedDaysInMonth,
-      List<int> selectedMonths,
-      ) async {
-    DateTime currentDate = DateTime.utc(startDate.year, startDate.month, startDate.day);
-    DateTime? lastDate = endDate != null ? DateTime.utc(endDate.year, endDate.month, endDate.day) : null;
+    String event,
+    String time,
+    DateTime startDate,
+    DateTime? endDate,
+    String repeat,
+    int repeatCount,
+    String userId,
+    List<String> selectedDays,
+    List<int> selectedDaysInMonth,
+    List<int> selectedMonths,
+  ) async {
+    DateTime currentDate =
+        DateTime.utc(startDate.year, startDate.month, startDate.day);
+    DateTime? lastDate = endDate != null
+        ? DateTime.utc(endDate.year, endDate.month, endDate.day)
+        : null;
     String userId = _auth.currentUser?.uid ?? '알 수 없음';
 
     if (kDebugMode) print("이벤트 추가 시작: $event, 반복: $repeat, 시작일: $startDate");
 
-    await _addEventsBasedOnRepeat(
-        event, time, currentDate, lastDate, repeat, repeatCount, userId, selectedDays, selectedDaysInMonth, selectedMonths
-    );
+    await _addEventsBasedOnRepeat(event, time, currentDate, lastDate, repeat,
+        repeatCount, userId, selectedDays, selectedDaysInMonth, selectedMonths);
 
     setState(() {
       _selectedDay = startDate;
       _focusedDay = startDate;
     });
 
-    if (kDebugMode) print('이벤트 등록 완료: $event from $startDate to ${endDate ?? '반복 종료 없음'}');
+    if (kDebugMode)
+      print('이벤트 등록 완료: $event from $startDate to ${endDate ?? '반복 종료 없음'}');
   }
 
   Future<void> _addEventsBasedOnRepeat(
-      String event,
-      String time,
-      DateTime currentDate,
-      DateTime? lastDate,
-      String repeat,
-      int repeatCount,
-      String userId,
-      List<String> selectedDays,
-      List<int> selectedDaysInMonth,
-      List<int> selectedMonths,
-      ) async {
+    String event,
+    String time,
+    DateTime currentDate,
+    DateTime? lastDate,
+    String repeat,
+    int repeatCount,
+    String userId,
+    List<String> selectedDays,
+    List<int> selectedDaysInMonth,
+    List<int> selectedMonths,
+  ) async {
     if (repeat == '반복 없음' && lastDate != null) {
       while (!currentDate.isAfter(lastDate)) {
         await _addEventToCalendar(event, time, currentDate, repeat, userId);
@@ -203,10 +211,17 @@ class _CalenderScreenState extends State<CalenderScreen>
               DateTime nextOccurrence = currentDate;
               while (true) {
                 int targetDay = {
-                  '월': 1, '화': 2, '수': 3, '목': 4, '금': 5, '토': 6, '일': 7,
+                  '월': 1,
+                  '화': 2,
+                  '수': 3,
+                  '목': 4,
+                  '금': 5,
+                  '토': 6,
+                  '일': 7,
                 }[day]!;
                 if (nextOccurrence.weekday == targetDay) {
-                  await _addEventToCalendar(event, time, nextOccurrence, repeat, userId);
+                  await _addEventToCalendar(
+                      event, time, nextOccurrence, repeat, userId);
                   break;
                 }
                 nextOccurrence = nextOccurrence.add(const Duration(days: 1));
@@ -217,9 +232,12 @@ class _CalenderScreenState extends State<CalenderScreen>
 
           case '매월':
             for (int day in selectedDaysInMonth) {
-              DateTime eventDate = DateTime(currentDate.year, currentDate.month + count, day);
-              if (eventDate.day <= DateTime(eventDate.year, eventDate.month + 1, 0).day) {
-                await _addEventToCalendar(event, time, eventDate, repeat, userId);
+              DateTime eventDate =
+                  DateTime(currentDate.year, currentDate.month + count, day);
+              if (eventDate.day <=
+                  DateTime(eventDate.year, eventDate.month + 1, 0).day) {
+                await _addEventToCalendar(
+                    event, time, eventDate, repeat, userId);
               } else if (kDebugMode) {
                 print("매월 이벤트 날짜 오류: $eventDate는 유효하지 않음.");
               }
@@ -228,9 +246,11 @@ class _CalenderScreenState extends State<CalenderScreen>
 
           case '매년':
             for (int month in selectedMonths) {
-              DateTime eventDate = DateTime(currentDate.year + count, month, currentDate.day);
+              DateTime eventDate =
+                  DateTime(currentDate.year + count, month, currentDate.day);
               if (eventDate.day <= DateTime(eventDate.year, month + 1, 0).day) {
-                await _addEventToCalendar(event, time, eventDate, repeat, userId);
+                await _addEventToCalendar(
+                    event, time, eventDate, repeat, userId);
               } else if (kDebugMode) {
                 print("매년 이벤트 날짜 오류: $eventDate는 유효하지 않음.");
               }
@@ -242,16 +262,17 @@ class _CalenderScreenState extends State<CalenderScreen>
   }
 
   Future<void> _addEventToCalendar(
-      String event,
-      String time,
-      DateTime date,
-      String repeat,
-      String userId,
-      ) async {
+    String event,
+    String time,
+    DateTime date,
+    String repeat,
+    String userId,
+  ) async {
     if (kDebugMode) print("Firestore에 이벤트 추가 시도: $event, 날짜: $date");
 
     try {
-      DocumentReference value = await FirebaseFirestore.instance.collection('events').add({
+      DocumentReference value =
+          await FirebaseFirestore.instance.collection('events').add({
         'createdAt': FieldValue.serverTimestamp(), // 서버 시간으로 기록
         'uid': userId,
         'name': event,
@@ -302,7 +323,6 @@ class _CalenderScreenState extends State<CalenderScreen>
     }
   }
 
-
   void _editEvent(int index, String updatedEvent, String updatedTime,
       DateTime updatedStartDate, DateTime updatedEndDate, String repeat) async {
     if (_selectedDay != null && _events[_selectedDay!] != null) {
@@ -332,7 +352,8 @@ class _CalenderScreenState extends State<CalenderScreen>
             // 상태를 업데이트
             setState(() {
               _events[currentDate]![index] = Event(
-                id: currentEvent.id, // 기존 이벤트의 ID를 사용
+                id: currentEvent.id,
+                // 기존 이벤트의 ID를 사용
                 name: updatedEvent,
                 time: updatedTime,
                 isCompleted: currentEvent.isCompleted,
@@ -380,7 +401,7 @@ class _CalenderScreenState extends State<CalenderScreen>
         }
       } catch (e) {
         if (kDebugMode) {
-          print('Firebase 이벤트 삭제 실패: $e');  // 오류 메시지 출력
+          print('Firebase 이벤트 삭제 실패: $e'); // 오류 메시지 출력
         }
       }
     }
@@ -393,7 +414,11 @@ class _CalenderScreenState extends State<CalenderScreen>
         Event currentEvent = _events[_selectedDay!]![index];
 
         // Firestore에서 문서가 존재하는지 확인
-        FirebaseFirestore.instance.collection('events').doc(currentEvent.id).get().then((eventDoc) {
+        FirebaseFirestore.instance
+            .collection('events')
+            .doc(currentEvent.id)
+            .get()
+            .then((eventDoc) {
           if (eventDoc.exists) {
             // Firestore에서 isCompleted 값을 업데이트
             eventDoc.reference.update({'isCompleted': isCompleted}).then((_) {
@@ -410,13 +435,16 @@ class _CalenderScreenState extends State<CalenderScreen>
 
         // 기존 이벤트 업데이트
         _events[_selectedDay!]![index] = Event(
-          id: currentEvent.id, // 기존 ID 유지
+          id: currentEvent.id,
+          // 기존 ID 유지
           name: currentEvent.name,
           time: currentEvent.time,
-          isCompleted: isCompleted, // 새로운 완료 상태로 업데이트
+          isCompleted: isCompleted,
+          // 새로운 완료 상태로 업데이트
           startDate: currentEvent.startDate,
           endDate: currentEvent.endDate,
-          repeat: currentEvent.repeat, // repeat 필드 유지
+          repeat: currentEvent.repeat,
+          // repeat 필드 유지
           uid: currentEvent.uid, // 사용자 ID 유지
         );
       }
@@ -428,7 +456,10 @@ class _CalenderScreenState extends State<CalenderScreen>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('[통계 선택]'),
+          title: const Text(
+            '[통계 선택]',
+            textAlign: TextAlign.center,
+          ),
           backgroundColor: Colors.white,
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -486,7 +517,7 @@ class _CalenderScreenState extends State<CalenderScreen>
           content: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.6,
-              minHeight: MediaQuery.of(context).size.height * 0.5,
+              minHeight: MediaQuery.of(context).size.height * 0.4,
             ),
             child: Container(
               padding: const EdgeInsets.all(20),
@@ -513,7 +544,8 @@ class _CalenderScreenState extends State<CalenderScreen>
                     child: CircularProgressIndicator(
                       value: completionRate / 100,
                       strokeWidth: 10, // 두께
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.black),
                       backgroundColor: Colors.grey,
                     ),
                   ),
@@ -534,7 +566,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                       '확인',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: Colors.blue,
                       ),
                     ),
                   ),
@@ -552,12 +584,13 @@ class _CalenderScreenState extends State<CalenderScreen>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('전체 통계 기간 선택'),
+          backgroundColor: Colors.white,
+          title: const Text('[전체 통계 기간 선택]', textAlign: TextAlign.center),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('3개월'),
+                title: const Text('- 3개월'),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showTotalStats(
@@ -567,7 +600,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                 },
               ),
               ListTile(
-                title: const Text('6개월'),
+                title: const Text('- 6개월'),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showTotalStats(
@@ -577,7 +610,7 @@ class _CalenderScreenState extends State<CalenderScreen>
                 },
               ),
               ListTile(
-                title: const Text('1년'),
+                title: const Text('- 1년'),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showTotalStats(
@@ -587,10 +620,9 @@ class _CalenderScreenState extends State<CalenderScreen>
                 },
               ),
               ListTile(
-                title: const Text('전체 기간'),
+                title: const Text('- 전체 기간'),
                 onTap: () {
                   Navigator.of(context).pop();
-
                   int completedEvents = 0;
                   int totalEvents = 0;
 
@@ -610,48 +642,70 @@ class _CalenderScreenState extends State<CalenderScreen>
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
+                        backgroundColor: Colors.white,
                         title: const Center(child: Text('전체 기간')),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // 원형 게이지 바 크기 조정
+                            SizedBox(
+                              width: 100, // 너비
+                              height: 100, // 높이
+                              child: CircularProgressIndicator(
+                                value: completionRate / 100,
+                                strokeWidth: 10, // 두께
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Colors.black),
+                                backgroundColor: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
                             Text('전체 일정: $totalEvents'),
-                            const SizedBox(height: 10),
-                            Text('완료한 일정: $completedEvents'),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 20),
+                            Text('완료한 일정: $completedEvents / $totalEvents'),
+                            const SizedBox(height: 20),
                             Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
+                            const SizedBox(height: 20),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                              child: const Text(
+                                '확인',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                        actions: [
-                          TextButton(
-                            child: const Text('확인'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
                       );
                     },
                   );
                 },
               ),
               ListTile(
-                title: const Text('기간 설정'),
+                title: const Text('- 기간 설정'),
                 onTap: () async {
                   DateTime today = DateTime.now();
                   final DateTimeRange? picked = await showDateRangePicker(
                     context: context,
-                    firstDate: DateTime(2000), // 과거 선택 가능 시작일을 2000년으로 설정
-                    lastDate: DateTime(today.year + 10), // 오늘부터 10년 후까지 선택 가능
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(today.year + 10),
                     initialDateRange: DateTimeRange(
                       start: today.subtract(const Duration(days: 30)),
-                      // 기본적으로 30일 전부터
-                      end: today, // 오늘 날짜
+                      end: today,
                     ),
                   );
-
                   if (picked != null) {
-                    _showTotalStats(
-                        picked.start, picked.end, '${picked.start.year}/${picked.start.month}/${picked.start.day} ~ ${picked.end.year}/${picked.end.month}/${picked.end.day} 통계');
+                    _showTotalStats(picked.start, picked.end,
+                        '${picked.start.year}/${picked.start.month}/${picked.start.day}\n~\n${picked.end.year}/${picked.end.month}/${picked.end.day}');
                   }
                 },
               ),
@@ -676,36 +730,58 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
 
     double completionRate =
-    totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+        totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
 
     // 팝업창 띄우기
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(
-              child: Text(title)), // 동적으로 제목 설정
+          backgroundColor: Colors.white,
+          title: Text(
+            title,
+            textAlign: TextAlign.center, // 제목 가운데 정렬
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              SizedBox(
+                width: 100,
+                height: 100,
+                child: CircularProgressIndicator(
+                  value: completionRate / 100,
+                  strokeWidth: 10,
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
+                  backgroundColor: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 20),
               Text('완료한 일정: $completedEvents / $totalEvents'),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+                child: const Text(
+                  '확인',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
             ],
           ),
-          actions: [
-            TextButton(
-              child: const Text('확인'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
         );
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -769,9 +845,11 @@ class _CalenderScreenState extends State<CalenderScreen>
             context: context,
             builder: (context) => EventModal(
               selectedDate: _selectedDay ?? _focusedDay,
-              onSave: (event, time, startDate, endDate, repeat, repeatCount, selectedDays, selectedDaysInMonth, selectedMonths) {
+              onSave: (event, time, startDate, endDate, repeat, repeatCount,
+                  selectedDays, selectedDaysInMonth, selectedMonths) {
                 // selectedDaysInMonth 추가
-                _addEvent(event, time, startDate, endDate, repeat, repeatCount, userId, selectedDays, selectedDaysInMonth, selectedMonths);
+                _addEvent(event, time, startDate, endDate, repeat, repeatCount,
+                    userId, selectedDays, selectedDaysInMonth, selectedMonths);
               },
             ),
           );

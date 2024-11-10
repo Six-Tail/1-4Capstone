@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:todobest_home/rank/task_button.dart';
 import '../service/User_Service.dart';
@@ -25,18 +24,17 @@ class _RankMoreState extends State<RankMore> {
   Color levelTextColor = Colors.black; // 초기 색상은 검정색으로 설정
   String userName = '사용자'; // 최신 사용자 이름을 저장할 변수
 
-  // 레벨에 따른 색상 배열 (1~9레벨은 연한 파랑, 10레벨부터 다른 색상 사용)
   final List<Color> levelColors = [
-    Colors.lightBlueAccent,  // 1~9 레벨
-    Colors.deepPurpleAccent,  // 10~19 레벨
-    Colors.orangeAccent,       // 20~29 레벨
-    Colors.redAccent,         // 30~39 레벨
-    Colors.pinkAccent,        // 40~49 레벨
-    Colors.cyanAccent,        // 50~59 레벨
-    Colors.yellowAccent,      // 60~69 레벨
-    Colors.lightGreenAccent,  // 70~79 레벨
-    Colors.deepOrange,        // 80~89 레벨
-    Colors.purpleAccent,      // 90~99 레벨
+    Colors.lightBlueAccent,
+    Colors.deepPurpleAccent,
+    Colors.orangeAccent,
+    Colors.redAccent,
+    Colors.pinkAccent,
+    Colors.cyanAccent,
+    Colors.yellowAccent,
+    Colors.lightGreenAccent,
+    Colors.deepOrange,
+    Colors.purpleAccent,
   ];
 
   @override
@@ -48,18 +46,17 @@ class _RankMoreState extends State<RankMore> {
   Future<void> _loadUserInfo() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      // Firestore에서 사용자 정보 가져오기
       final userInfo = await userService.getUserInfo(user.uid);
       if (userInfo != null) {
         setState(() {
           level = userInfo['level'] ?? 1;
           currentExp = userInfo['currentExp'] ?? 0;
           maxExp = userInfo['maxExp'] ?? 100;
-          userName = userInfo['userName'] ?? '사용자'; // 최신 사용자 이름 설정
+          userName = userInfo['userName'] ?? '사용자';
         });
 
-        _setLevelTextColor(); // 색상 설정
-        _updateLevel(); // 레벨 업데이트 체크
+        _setLevelTextColor();
+        _updateLevel();
       }
     }
   }
@@ -70,18 +67,17 @@ class _RankMoreState extends State<RankMore> {
       level = updatedData['level']!;
       currentExp = updatedData['currentExp']!;
       maxExp = updatedData['maxExp']!;
-      _setLevelTextColor(); // 레벨 텍스트 색상 설정
+      _setLevelTextColor();
     });
     _saveUserLevelAndExp();
   }
 
   void _setLevelTextColor() {
     if (level < 10) {
-      levelTextColor = Colors.black; // 1~9레벨은 검정색
+      levelTextColor = Colors.black;
     } else {
-      // 색상 배열을 반복해서 사용
-      int colorIndex = (level ~/ 10 - 1) % levelColors.length; // 색상 배열 길이로 나눈 나머지 사용
-      levelTextColor = levelColors[colorIndex]; // 색상 설정
+      int colorIndex = (level ~/ 10 - 1) % levelColors.length;
+      levelTextColor = levelColors[colorIndex];
     }
   }
 
@@ -96,35 +92,27 @@ class _RankMoreState extends State<RankMore> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        // Firestore에서 현재 사용자 정보 가져오기
         final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
         if (userDoc.exists) {
           final userImage = userDoc.data()?['userImage'];
           if (userImage != null && userImage is String) {
-            return userImage; // Firestore에서 가져온 userImage URL 반환
+            return userImage;
           }
         }
-        // userImage가 없으면 기본 프로필 이미지 반환
         return user.photoURL ?? 'assets/profile_placeholder.png';
       } catch (e) {
-        if (kDebugMode) {
-          print("프로필 이미지 가져오기 오류: $e");
-        }
-        return 'assets/profile_placeholder.png'; // 오류 시 기본 프로필 이미지
+        return 'assets/profile_placeholder.png';
       }
     }
-    return null; // 로그인하지 않은 경우
+    return null;
   }
 
-
-  // 경험치 포맷팅 함수
   String _formatExperience(int exp) {
     if (exp < 10000) return exp.toString();
     if (exp < 100000000) return '${(exp / 10000).toStringAsFixed(1)}만';
     if (exp < 1000000000000) return '${(exp / 100000000).toStringAsFixed(1)}억';
     return '${(exp / 1000000000000).toStringAsFixed(1)}조';
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -136,10 +124,9 @@ class _RankMoreState extends State<RankMore> {
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
-        scrolledUnderElevation: 0,
         title: Image.asset(
           'assets/images/icon.png',
-          width: screenWidth * 0.12, // 아이콘 크기
+          width: screenWidth * 0.12,
           height: screenHeight * 0.12,
         ),
         centerTitle: true,
@@ -150,87 +137,102 @@ class _RankMoreState extends State<RankMore> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                FutureBuilder<String?>(
-                  future: _getProfileImageUrl(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+            // 프로필 아이콘, 레벨, 이름, 경험치바 감싸는 컨테이너 추가
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.all(screenWidth * 0.04),
+              child: Row(
+                children: [
+                  FutureBuilder<String?>(
+                    future: _getProfileImageUrl(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircleAvatar(
+                          radius: screenWidth * 0.1,
+                          backgroundColor: Colors.white,
+                          child: const CircularProgressIndicator(),
+                        );
+                      }
                       return CircleAvatar(
                         radius: screenWidth * 0.1,
                         backgroundColor: Colors.white,
-                        child: const CircularProgressIndicator(),
+                        backgroundImage: snapshot.data != null
+                            ? NetworkImage(snapshot.data!)
+                            : const AssetImage('assets/profile_placeholder.png')
+                        as ImageProvider,
                       );
-                    }
-                    return CircleAvatar(
-                      radius: screenWidth * 0.1,
-                      backgroundColor: Colors.white,
-                      backgroundImage: snapshot.data != null
-                          ? NetworkImage(snapshot.data!)
-                          : const AssetImage('assets/profile_placeholder.png')
-                      as ImageProvider,
-                    );
-                  },
-                ),
-                SizedBox(width: screenWidth * 0.04),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          'Lv.$level',
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.03,
-                            fontWeight: FontWeight.bold,
-                            color: levelTextColor, // 레벨 텍스트 색상 적용
-                          ),
-                        ),
-                        SizedBox(width: screenWidth * 0.02),
-                        Text(
-                          userName,
-                          style: TextStyle(
-                            fontSize: screenHeight * 0.028,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: screenHeight * 0.01),
-                    SizedBox(
-                      width: screenWidth * 0.6,
-                      child: Stack(
-                        alignment: Alignment.center,
+                    },
+                  ),
+                  SizedBox(width: screenWidth * 0.04),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          LinearProgressIndicator(
-                            value: expRatio,
-                            backgroundColor: Colors.grey[300],
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.greenAccent),
-                            minHeight: screenHeight * 0.02,
-                          ),
                           Text(
-                            '${(expRatio * 100).toStringAsFixed(1)}%',
+                            'Lv.$level',
                             style: TextStyle(
-                              fontSize: screenHeight * 0.018,
+                              fontSize: screenHeight * 0.03,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: levelTextColor,
+                            ),
+                          ),
+                          SizedBox(width: screenWidth * 0.02),
+                          Text(
+                            userName,
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.028,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(height: screenHeight * 0.01),
-                    Text(
-                      '${_formatExperience(currentExp)}/${_formatExperience(maxExp)}', // 포맷팅된 경험치 표시
-                      style: TextStyle(
-                        fontSize: screenHeight * 0.02,
-                        color: Colors.grey[600],
+                      SizedBox(height: screenHeight * 0.01),
+                      SizedBox(
+                        width: screenWidth * 0.58,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            LinearProgressIndicator(
+                              value: expRatio,
+                              backgroundColor: Colors.grey[300],
+                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
+                              minHeight: screenHeight * 0.02,
+                            ),
+                            Text(
+                              '${(expRatio * 100).toStringAsFixed(1)}%',
+                              style: TextStyle(
+                                fontSize: screenHeight * 0.018,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      SizedBox(height: screenHeight * 0.01),
+                      Text(
+                        '${_formatExperience(currentExp)}/${_formatExperience(maxExp)}',
+                        style: TextStyle(
+                          fontSize: screenHeight * 0.02,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: screenHeight * 0.06),
             Expanded(
@@ -246,7 +248,7 @@ class _RankMoreState extends State<RankMore> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const DailyTasksPage()),
-                      ).then((_) => _loadUserInfo()); // 돌아오면 정보 갱신
+                      ).then((_) => _loadUserInfo());
                     },
                     icon: Icons.assignment,
                   ),
