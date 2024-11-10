@@ -73,11 +73,11 @@ class _DailyTasksPageState extends State<DailyTasksPage>
       // 이전에 경험치를 획득하지 않은 경우에만 실행합니다.
       if (taskStatus == null || !(taskStatus['hasClaimedXP'] ?? false)) {
         dailyTasks[0].isCompleted = true;
-        dailyTasks[0].hasClaimedXP = false; // 경험치를 획득하여 true로 설정
+        dailyTasks[0].hasClaimedXP = false;
 
         // 주간 미션 '5일 출석하기' 과제를 weeklyTasks에서 찾습니다.
         var weeklyTask =
-        weeklyTasks.firstWhere((task) => task.name == '5일 출석하기');
+            weeklyTasks.firstWhere((task) => task.name == '5일 출석하기');
         var weeklyTaskStatus = await userService.getWeeklyTaskStatus(
             currentUser!.uid, weeklyTask.name);
 
@@ -89,10 +89,8 @@ class _DailyTasksPageState extends State<DailyTasksPage>
               weeklyTaskStatus['hasClaimedXP'] ?? false; // 기존 상태 유지
         }
 
-        // hasClaimedXP가 true일 경우에만 출석 횟수를 증가시킵니다.
-        if (dailyTasks[0].hasClaimedXP) {
-          weeklyTask.currentAttendance++;
-        }
+        // 출석 횟수를 증가시킵니다.
+        weeklyTask.currentAttendance++;
 
         // 일일 출석 미션 상태를 Firestore에 업데이트
         await userService.updateDailyTaskStatus(
@@ -100,7 +98,7 @@ class _DailyTasksPageState extends State<DailyTasksPage>
           dailyTasks[0].name,
           null,
           isCompleted: true,
-          hasClaimedXP: false, // 경험치 획득 후 상태를 true로 설정
+          hasClaimedXP: false,
         );
 
         // 주간 미션 '5일 출석하기'의 상태 업데이트
@@ -130,6 +128,44 @@ class _DailyTasksPageState extends State<DailyTasksPage>
       }
     }
   }
+
+  /* 전 코드
+  Future<void> completeDailyAttendanceTask() async {
+    if (currentUser != null) {
+      var taskStatus = await userService.getDailyTaskStatus(currentUser!.uid, dailyTasks[0].name);
+
+      if (taskStatus == null || !(taskStatus['hasClaimedXP'] ?? false)) {
+        dailyTasks[0].isCompleted = true;
+        dailyTasks[0].hasClaimedXP = false;
+
+        // 주간 미션의 currentAttendance 값을 증가
+        var weeklyTask = weeklyTasks.firstWhere((task) => task.name == '5일 출석하기');
+        weeklyTask.currentAttendance++;
+
+        await userService.updateDailyTaskStatus(
+          currentUser!.uid,
+          dailyTasks[0].name,
+          null,
+          isCompleted: true,
+          hasClaimedXP: false,
+        );
+
+        await userService.updateWeeklyTaskStatus(
+          currentUser!.uid,
+          weeklyTask.name,
+          null,
+          isCompleted: false,
+          hasClaimedXP: false,
+          currentAttendance: weeklyTask.currentAttendance, // 이 값을 Firebase에 저장해야 합니다.
+        );
+
+        if (kDebugMode) {
+          print('currentAttendance: ${weeklyTask.currentAttendance}');
+        }
+      }
+    }
+  }
+  */
 
   @override
   void initState() {
