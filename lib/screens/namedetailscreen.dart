@@ -196,8 +196,9 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
           const SizedBox(height: 16.0),
           const Divider(),
           ListTile(
-            title: const Text('사용자 이름', style: TextStyle(color: Colors.black)), // 검정색으로 변경
-            trailing: Text(userName, style: const TextStyle(color: Colors.black)),
+            leading: const Icon(Icons.account_circle),
+            title: const Text('사용자 이름', style: TextStyle(fontSize: 16, color: Colors.black ,fontWeight: FontWeight.bold)), // 검정색으로 변경
+            trailing: Text(userName, style: const TextStyle(fontSize:14 , color: Colors.grey)),
             onTap: () async {
               final newUserName = await Navigator.push(
                 context,
@@ -213,8 +214,9 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
           ),
           const Divider(),
           ListTile(
-            title: const Text('생일', style: TextStyle(color: Colors.black)), // 검정색으로 변경
-            trailing: Text(birthday, style: const TextStyle(color: Colors.black)),
+            leading: const Icon(Icons.cake),
+            title: const Text('생일', style: TextStyle(fontSize: 16, color: Colors.black ,fontWeight: FontWeight.bold)), // 검정색으로 변경
+            trailing: Text(birthday, style: const TextStyle(fontSize: 14, color: Colors.grey)),
             onTap: () async {
               final newBirthday = await Navigator.push(
                 context,
@@ -230,8 +232,9 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
           ),
           const Divider(),
           ListTile(
-            title: const Text('성별', style: TextStyle(color: Colors.black)), // 검정색으로 변경
-            trailing: Text(gender, style: const TextStyle(color: Colors.black)),
+            leading: const Icon(Icons.safety_divider),
+            title: const Text('성별', style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold)), // 검정색으로 변경
+            trailing: Text(gender, style: const TextStyle(fontSize: 14,color: Colors.grey)),
             onTap: () async {
               final newGender = await Navigator.push(
                 context,
@@ -247,8 +250,9 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
           ),
           const Divider(),
           ListTile(
-            title: const Text('전화번호', style: TextStyle(color: Colors.black)), // 텍스트를 검정색으로 설정
-            trailing: Text(phoneNumber, style: const TextStyle(color: Colors.black)),
+            leading: const Icon(Icons.call),
+            title: const Text('전화번호', style: TextStyle(fontSize: 16,color: Colors.black, fontWeight: FontWeight.bold)), // 텍스트를 검정색으로 설정
+            trailing: Text(phoneNumber, style: const TextStyle(fontSize: 14, color: Colors.grey)),
             onTap: () async {
               final newPhoneNumber = await _showPhoneNumberDialog(); // 전화번호 입력 대화상자 호출
               if (newPhoneNumber != null) {

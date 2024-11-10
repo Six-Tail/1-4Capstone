@@ -115,7 +115,9 @@ class _AuthSeccessionScreenState extends State<AuthSeccessionScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
+        backgroundColor: const Color(0xffffffff),
         appBar: AppBar(
+          backgroundColor: const Color(0xffffffff),
           title: const Text('회원 탈퇴', style: TextStyle(color: Colors.black)),
         ),
         body: SingleChildScrollView( // <-- 이 부분을 추가하여 스크롤 가능하게 만듭니다.
@@ -135,7 +137,7 @@ class _AuthSeccessionScreenState extends State<AuthSeccessionScreen> {
                       const SizedBox(height: 10),
                       Text(
                         _userInfo!['userName'] ?? 'Unknown',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 10),
                       Container(
