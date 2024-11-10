@@ -77,7 +77,6 @@ class RankingPage extends StatelessWidget {
           List<AppUser> topThreeUsers = users.take(3).toList();
           List<AppUser> remainingUsers = users.skip(3).take(97).toList();
 
-          // 현재 사용자 데이터를 UID를 통해 찾기
           AppUser? currentUserData = users.firstWhere(
                 (user) => user.uid == currentUser?.uid,
             orElse: () => AppUser(
@@ -89,6 +88,20 @@ class RankingPage extends StatelessWidget {
               profileImageUrl: userService.defaultProfileImageUrl,
             ),
           );
+
+          Color getRankColor(int rank) {
+            switch (rank) {
+              case 1:
+                return const Color(0xFFFFD700);  // 금메달 색상
+              case 2:
+                return const Color(0xFFC0C0C0);  // 은메달 색상
+              case 3:
+                return const Color(0xFFCD7F32);  // 동메달 색상
+              default:
+                return Colors.black;  // 일반 색상
+            }
+          }
+
           return Column(
             children: [
               const Padding(
@@ -96,74 +109,34 @@ class RankingPage extends StatelessWidget {
                 child: Center(
                   child: Text(
                     "TOP 3",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
               SizedBox(
-                height: 180,
-                child: Stack(
-                  alignment: Alignment.bottomCenter,
+                height: 200,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Positioned(
-                      left: MediaQuery.of(context).size.width / 3,
-                      child: Container(width: 1, height: 200, color: Colors.grey),
-                    ),
-                    Positioned(
-                      right: MediaQuery.of(context).size.width / 3,
-                      child: Container(width: 1, height: 200, color: Colors.grey),
-                    ),
-                    if (topThreeUsers.length > 2) ...[
-                      Positioned(
-                        bottom: 0,
-                        right: 40,
-                        child: Column(
-                          children: [
-                            CircleAvatar(radius: 20, backgroundColor: Colors.white, backgroundImage: NetworkImage(topThreeUsers[2].profileImageUrl)),
-                            const SizedBox(height: 4),
-                            Text(
-                              topThreeUsers[2].name.length > 4 ? '${topThreeUsers[2].name.substring(0, 4)}...' : topThreeUsers[2].name,
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFCD7F32)),
-                            ),
-                            Text("레벨: ${topThreeUsers[2].level}"),
-                            Text("경험치: ${_formatExperience(topThreeUsers[2].currentExp)}"),
-                          ],
-                        ),
-                      ),
-                    ],
                     if (topThreeUsers.length > 1) ...[
-                      Positioned(
-                        bottom: 20,
-                        left: 40,
-                        child: Column(
-                          children: [
-                            CircleAvatar(radius: 25, backgroundColor: Colors.white, backgroundImage: NetworkImage(topThreeUsers[1].profileImageUrl)),
-                            const SizedBox(height: 4),
-                            Text(
-                              topThreeUsers[1].name.length > 4 ? '${topThreeUsers[1].name.substring(0, 4)}...' : topThreeUsers[1].name,
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFC0C0C0)),
-                            ),
-                            Text("레벨: ${topThreeUsers[1].level}"),
-                            Text("경험치: ${_formatExperience(topThreeUsers[1].currentExp)}"),
-                          ],
-                        ),
+                      _buildPlayerCard(
+                        user: topThreeUsers[1],
+                        color: const Color(0xFFC0C0C0),  // 은메달 색상 (2등)
+                        radius: 25,
                       ),
                     ],
                     if (topThreeUsers.isNotEmpty) ...[
-                      Positioned(
-                        bottom: 40,
-                        child: Column(
-                          children: [
-                            CircleAvatar(radius: 30, backgroundColor: Colors.white, backgroundImage: NetworkImage(topThreeUsers[0].profileImageUrl)),
-                            const SizedBox(height: 4),
-                            Text(
-                              topThreeUsers[0].name.length > 4 ? '${topThreeUsers[0].name.substring(0, 4)}...' : topThreeUsers[0].name,
-                              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFFFD700)),
-                            ),
-                            Text("레벨: ${topThreeUsers[0].level}"),
-                            Text("경험치: ${_formatExperience(topThreeUsers[0].currentExp)}"),
-                          ],
-                        ),
+                      _buildPlayerCard(
+                        user: topThreeUsers[0],
+                        color: const Color(0xFFFFD700),  // 금메달 색상 (1등)
+                        radius: 30,
+                      ),
+                    ],
+                    if (topThreeUsers.length > 2) ...[
+                      _buildPlayerCard(
+                        user: topThreeUsers[2],
+                        color: const Color(0xFFCD7F32),  // 동메달 색상 (3등)
+                        radius: 20,
                       ),
                     ],
                   ],
@@ -177,10 +150,11 @@ class RankingPage extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final user = remainingUsers[index];
                     return Card(
+                      color: const Color(0xffcae1f6),
                       child: ListTile(
                         leading: Text((index + 4).toString(), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                         title: Text(user.name),
-                        subtitle: Text("레벨: ${user.level}, 경험치: ${_formatExperience(user.currentExp)}"),
+                        subtitle: Text("레벨: ${user.level}, EXP: ${_formatExperience(user.currentExp)}"),
                         trailing: const Icon(Icons.emoji_events),
                       ),
                     );
@@ -192,14 +166,22 @@ class RankingPage extends StatelessWidget {
                 padding: EdgeInsets.all(2.0),
                 child: Text(
                   "내 순위",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               Card(
+                color: const Color(0xffcae1f6),
                 child: ListTile(
-                  leading: Text(currentUserData.rank.toString(), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  leading: Text(
+                    currentUserData.rank.toString(),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: getRankColor(currentUserData.rank),
+                    ),
+                  ),
                   title: Text(currentUserData.name),
-                  subtitle: Text("레벨: ${currentUserData.level}, 경험치: ${_formatExperience(currentUserData.currentExp)}"),
+                  subtitle: Text("레벨: ${currentUserData.level}, EXP: ${_formatExperience(currentUserData.currentExp)}"),
                   trailing: const Icon(Icons.person),
                 ),
               ),
@@ -209,6 +191,43 @@ class RankingPage extends StatelessWidget {
       ),
     );
   }
+}
+
+// _buildPlayerCard 메서드 추가
+Widget _buildPlayerCard({required AppUser user, required Color color, required double radius}) {
+  return Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.3),
+          spreadRadius: 2,
+          blurRadius: 5,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    width: 110,
+    padding: const EdgeInsets.all(8),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CircleAvatar(
+          radius: radius,
+          backgroundColor: Colors.white,
+          backgroundImage: NetworkImage(user.profileImageUrl),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          user.name.length > 4 ? '${user.name.substring(0, 4)}...' : user.name,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+        ),
+        Text("레벨: ${user.level}"),
+        Text("EXP: ${_formatExperience(user.currentExp)}"),
+      ],
+    ),
+  );
 }
 
 // 경험치 포맷팅 함수
