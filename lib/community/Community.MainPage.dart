@@ -33,6 +33,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Image.asset(
           'assets/images/icon.png',
           width: screenWidth * 0.12, // 아이콘 크기

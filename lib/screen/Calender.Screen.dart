@@ -428,20 +428,22 @@ class _CalenderScreenState extends State<CalenderScreen>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('통계 선택'),
+          title: const Text('[통계 선택]'),
           backgroundColor: Colors.white,
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center, // 수직 가운데 정렬
+            crossAxisAlignment: CrossAxisAlignment.center, // 수평 가운데 정렬
             children: [
               ListTile(
-                title: const Text('이달의 통계'),
+                title: const Text('- 이달의 통계'),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showMonthlyStats(); // 월 통계 표시
                 },
               ),
               ListTile(
-                title: const Text('전체 통계'),
+                title: const Text('- 전체 통계'),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showTotalStatsDialog(); // 전체 통계 기간 선택
@@ -560,7 +562,8 @@ class _CalenderScreenState extends State<CalenderScreen>
                   Navigator.of(context).pop();
                   _showTotalStats(
                       DateTime.now().subtract(const Duration(days: 90)),
-                      DateTime.now());
+                      DateTime.now(),
+                      '최근 3개월 통계'); // 3개월 통계 제목
                 },
               ),
               ListTile(
@@ -569,7 +572,8 @@ class _CalenderScreenState extends State<CalenderScreen>
                   Navigator.of(context).pop();
                   _showTotalStats(
                       DateTime.now().subtract(const Duration(days: 180)),
-                      DateTime.now());
+                      DateTime.now(),
+                      '최근 6개월 통계'); // 6개월 통계 제목
                 },
               ),
               ListTile(
@@ -578,7 +582,8 @@ class _CalenderScreenState extends State<CalenderScreen>
                   Navigator.of(context).pop();
                   _showTotalStats(
                       DateTime.now().subtract(const Duration(days: 365)),
-                      DateTime.now());
+                      DateTime.now(),
+                      '최근 1년 통계'); // 1년 통계 제목
                 },
               ),
               ListTile(
@@ -646,7 +651,7 @@ class _CalenderScreenState extends State<CalenderScreen>
 
                   if (picked != null) {
                     _showTotalStats(
-                        picked.start, picked.end); // 선택된 날짜 범위로 통계 표시
+                        picked.start, picked.end, '${picked.start.year}/${picked.start.month}/${picked.start.day} ~ ${picked.end.year}/${picked.end.month}/${picked.end.day} 통계');
                   }
                 },
               ),
@@ -657,7 +662,7 @@ class _CalenderScreenState extends State<CalenderScreen>
     );
   }
 
-  void _showTotalStats(DateTime startDate, DateTime endDate) {
+  void _showTotalStats(DateTime startDate, DateTime endDate, String title) {
     int completedEvents = 0;
     int totalEvents = 0;
 
@@ -671,7 +676,7 @@ class _CalenderScreenState extends State<CalenderScreen>
     });
 
     double completionRate =
-        totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
+    totalEvents > 0 ? (completedEvents / totalEvents) * 100 : 0;
 
     // 팝업창 띄우기
     showDialog(
@@ -679,8 +684,7 @@ class _CalenderScreenState extends State<CalenderScreen>
       builder: (BuildContext context) {
         return AlertDialog(
           title: Center(
-              child: Text(
-                  '${startDate.year}/${startDate.month}/${startDate.day} ~ ${endDate.year}/${endDate.month}/${endDate.day} 통계')),
+              child: Text(title)), // 동적으로 제목 설정
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -702,6 +706,7 @@ class _CalenderScreenState extends State<CalenderScreen>
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -709,6 +714,7 @@ class _CalenderScreenState extends State<CalenderScreen>
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Image.asset(
           'assets/images/icon.png',
           width: screenWidth * 0.12, // 아이콘 크기

@@ -164,6 +164,7 @@ class _ManageScreenState extends State<ManageScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Image.asset(
           'assets/images/icon.png',
           width: screenWidth * 0.12, // 아이콘 크기

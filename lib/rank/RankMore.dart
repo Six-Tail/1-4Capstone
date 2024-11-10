@@ -29,7 +29,7 @@ class _RankMoreState extends State<RankMore> {
   final List<Color> levelColors = [
     Colors.lightBlueAccent,  // 1~9 레벨
     Colors.deepPurpleAccent,  // 10~19 레벨
-    Colors.amberAccent,       // 20~29 레벨
+    Colors.orangeAccent,       // 20~29 레벨
     Colors.redAccent,         // 30~39 레벨
     Colors.pinkAccent,        // 40~49 레벨
     Colors.cyanAccent,        // 50~59 레벨
@@ -136,6 +136,7 @@ class _RankMoreState extends State<RankMore> {
     return Scaffold(
       backgroundColor: Theme1Colors.mainColor,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         title: Image.asset(
           'assets/images/icon.png',
           width: screenWidth * 0.12, // 아이콘 크기
