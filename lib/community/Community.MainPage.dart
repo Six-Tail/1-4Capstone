@@ -307,7 +307,7 @@ class _CommunityMainPageState extends State<CommunityMainPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xff73b1e7),
+        backgroundColor: const Color(0xff4496de),
         onPressed: () async {
           Get.to(() => const WritePostScreen());
         },

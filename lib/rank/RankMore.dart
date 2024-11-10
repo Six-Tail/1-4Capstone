@@ -207,7 +207,7 @@ class _RankMoreState extends State<RankMore> {
                             LinearProgressIndicator(
                               value: expRatio,
                               backgroundColor: Colors.grey[300],
-                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
+                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xff73b1e7)),
                               minHeight: screenHeight * 0.02,
                             ),
                             Text(
@@ -243,7 +243,7 @@ class _RankMoreState extends State<RankMore> {
                 children: [
                   TaskButton(
                     label: '일간 미션',
-                    color: const Color(0xff9ad7f8),
+                    color: const Color(0xffcae1f6),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -254,7 +254,7 @@ class _RankMoreState extends State<RankMore> {
                   ),
                   TaskButton(
                     label: '주간 미션',
-                    color: const Color(0xff9ad7f8),
+                    color: const Color(0xffcae1f6),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -265,7 +265,7 @@ class _RankMoreState extends State<RankMore> {
                   ),
                   TaskButton(
                     label: '랭킹',
-                    color: const Color(0xff9ad7f8),
+                    color: const Color(0xffcae1f6),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -276,7 +276,7 @@ class _RankMoreState extends State<RankMore> {
                   ),
                   TaskButton(
                     label: '도전과제',
-                    color: const Color(0xff9ad7f8),
+                    color: const Color(0xffcae1f6),
                     onPressed: () {
                       Navigator.push(
                         context,
