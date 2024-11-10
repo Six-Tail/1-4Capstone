@@ -47,7 +47,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
         backgroundColor: const Color(0xffffffff),
         appBar: AppBar(
           backgroundColor: const Color(0xffffffff),
-          title: const Text('ToDoBest 계정', style: TextStyle(color: Colors.black)),
+          title: const Text('성별 선택', style: TextStyle(color: Colors.black)),
           centerTitle: true,
           actions: [
             IconButton(
