@@ -27,7 +27,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       backgroundColor: const Color(0xffffffff), // 전체 배경색 설정
       appBar: AppBar(
         title: const Text('알림 및 배지'),
-        backgroundColor: const Color(0xff73b1e7), // AppBar 배경색 설정
+        backgroundColor: const Color(0xffffffff), // 전체 배경색 설정
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),

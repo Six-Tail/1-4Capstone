@@ -134,18 +134,19 @@ class _ManageScreenState extends State<ManageScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           title: const Text('로그아웃'),
           content: const Text('로그아웃 하시겠습니까?'),
           actions: [
             TextButton(
-              child: const Text('예', style: TextStyle(color: Colors.black)),
+              child: const Text('예', style: TextStyle(color: Colors.blue)),
               onPressed: () async {
                 Navigator.of(context).pop(); // 다이얼로그 닫기
                 await _signOut(); // 로그아웃 함수 호출
               },
             ),
             TextButton(
-              child: const Text('아니오', style: TextStyle(color: Colors.black)),
+              child: const Text('아니오', style: TextStyle(color: Colors.blue)),
               onPressed: () {
                 Navigator.of(context).pop(); // 다이얼로그 닫기
               },
@@ -217,12 +218,18 @@ class _ManageScreenState extends State<ManageScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.account_circle),
-            title: Text(accountType),
+            title: Text(
+              accountType,
+              style: const TextStyle(fontWeight: FontWeight.bold), // 텍스트를 굵게 설정
+            ),
             subtitle: Text(userEmail),
           ),
           ListTile(
             leading: const Icon(Icons.call),
-            title: const Text('전화번호'),
+            title: const Text(
+              '전화번호',
+              style: TextStyle(fontWeight: FontWeight.bold), // 텍스트를 굵게 설정
+            ),
             subtitle: Text(userPhone),
           ),
           ListTile(
@@ -253,10 +260,14 @@ class _ManageScreenState extends State<ManageScreen> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
+                      backgroundColor: Colors.white,
                       title: const Text('오류'),
                       content: const Text('ToDoBest 계정 이용자만 가능합니다'),
                       actions: [
                         TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.blue, // 버튼 텍스트 색상을 파란색으로 설정
+                          ),
                           child: const Text("확인"),
                           onPressed: () {
                             Navigator.of(context).pop();
@@ -283,10 +294,14 @@ class _ManageScreenState extends State<ManageScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
+                    backgroundColor: Colors.white,
                     title: const Text("알림"),
                     content: const Text("업데이트 중인 서비스입니다"),
                     actions: [
                       TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.blue, // 버튼 텍스트 색상을 파란색으로 설정
+                        ),
                         child: const Text("확인"),
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -342,10 +357,14 @@ class _ManageScreenState extends State<ManageScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
+                    backgroundColor: Colors.white,
                     title: const Text("알림"),
                     content: const Text("아직 준비중인 서비스입니다! 이용해주셔서 감사합니다"),
                     actions: [
                       TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.blue, // 버튼 텍스트 색상을 파란색으로 설정
+                        ),
                         child: const Text("확인"),
                         onPressed: () {
                           Navigator.of(context).pop();
