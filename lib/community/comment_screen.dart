@@ -16,7 +16,8 @@ class CommentedPostsPage extends StatelessWidget {
         scrolledUnderElevation: 0,
         title: Text(
           '댓글 단 글',
-          style: TextStyle(fontSize: 26,
+          style: TextStyle(
+              fontSize: 26,
               fontWeight: FontWeight.bold,
               color: Theme1Colors.textColor),
         ),
@@ -51,13 +52,17 @@ class CommentedPostsPage extends StatelessWidget {
                 final postId = commentedPosts[index].id;
 
                 return FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance.collection('posts').doc(postId).get(),
+                  future: FirebaseFirestore.instance
+                      .collection('posts')
+                      .doc(postId)
+                      .get(),
                   builder: (context, postSnapshot) {
                     if (!postSnapshot.hasData || !postSnapshot.data!.exists) {
                       return const SizedBox.shrink(); // 게시글이 삭제된 경우 빈 공간
                     }
 
-                    final post = postSnapshot.data!.data() as Map<String, dynamic>;
+                    final post =
+                        postSnapshot.data!.data() as Map<String, dynamic>;
 
                     return Card(
                       color: Colors.white,
@@ -83,22 +88,27 @@ class CommentedPostsPage extends StatelessWidget {
                               Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundImage: NetworkImage(post['userImage'] ?? ''),
+                                    backgroundImage:
+                                        NetworkImage(post['userImage'] ?? ''),
                                     radius: 20,
                                   ),
                                   const SizedBox(width: 8),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         post['userName'] ?? '익명',
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
                                       ),
                                       Text(
                                         DateFormat('yyyy-MM-dd HH:mm').format(
-                                          (post['timestamp'] as Timestamp).toDate(),
+                                          (post['timestamp'] as Timestamp)
+                                              .toDate(),
                                         ),
-                                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                        style: const TextStyle(
+                                            color: Colors.grey, fontSize: 12),
                                       ),
                                     ],
                                   ),
@@ -107,27 +117,32 @@ class CommentedPostsPage extends StatelessWidget {
                               const SizedBox(height: 8),
                               Text(
                                 post['title'] ?? '',
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 post['content'] ?? '',
-                                style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.black87),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 12),
                               Row(
                                 children: [
-                                  const Icon(Icons.thumb_up, size: 18, color: Colors.blue),
+                                  const Icon(Icons.thumb_up,
+                                      size: 18, color: Colors.blue),
                                   const SizedBox(width: 4),
                                   Text(post['likes']?.toString() ?? '0'),
                                   const SizedBox(width: 16),
-                                  const Icon(Icons.comment, size: 18, color: Colors.green),
+                                  const Icon(Icons.comment,
+                                      size: 18, color: Colors.green),
                                   const SizedBox(width: 4),
-                                  Text(post['commentsCount']?.toString() ?? '0'),
+                                  Text(
+                                      post['commentsCount']?.toString() ?? '0'),
                                 ],
                               ),
                             ],

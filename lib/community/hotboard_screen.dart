@@ -35,7 +35,8 @@ class HotBoardScreen extends StatelessWidget {
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('posts')
-              .where('likes', isGreaterThanOrEqualTo: 10) // 좋아요가 10 이상인 게시글만 가져오기
+              .where('likes',
+                  isGreaterThanOrEqualTo: 10) // 좋아요가 10 이상인 게시글만 가져오기
               .orderBy('likes', descending: true)
               .snapshots(),
           builder: (context, snapshot) {
@@ -55,7 +56,8 @@ class HotBoardScreen extends StatelessWidget {
                 final postId = posts[index].id;
                 final userId = post['userId']; // 게시글 작성자의 UID
                 final Timestamp timestamp = post['timestamp'];
-                final String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(timestamp.toDate());
+                final String formattedDate =
+                    DateFormat('yyyy-MM-dd HH:mm').format(timestamp.toDate());
 
                 return Card(
                   color: Colors.white,
@@ -69,7 +71,8 @@ class HotBoardScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostDetail(postId: postId), // postId 전달
+                          builder: (context) =>
+                              PostDetail(postId: postId), // postId 전달
                         ),
                       );
                     },
@@ -86,27 +89,33 @@ class HotBoardScreen extends StatelessWidget {
                                   children: [
                                     CircleAvatar(
                                       backgroundColor: Colors.grey,
-                                      child: Icon(Icons.person, color: Colors.white),
+                                      child: Icon(Icons.person,
+                                          color: Colors.white),
                                     ),
                                     SizedBox(width: 8),
-                                    Text("로딩 중...", style: TextStyle(fontWeight: FontWeight.bold)),
+                                    Text("로딩 중...",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
                                   ],
                                 );
                               }
 
                               final userData = userSnapshot.data!;
                               final userName = userData['userName'] ?? '익명';
-                              final userImage = userData['userImage'] ?? userService.defaultProfileImageUrl;
+                              final userImage = userData['userImage'] ??
+                                  userService.defaultProfileImageUrl;
 
                               return Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundImage: NetworkImage(post['userImage'] ?? ''),
+                                    backgroundImage:
+                                        NetworkImage(post['userImage'] ?? ''),
                                     radius: 20,
                                   ),
                                   const SizedBox(width: 8),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         userName,
@@ -150,11 +159,15 @@ class HotBoardScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              const Icon(Icons.thumb_up, size: 18, color: Colors.blue), // 좋아요 아이콘 파란색 설정
+                              const Icon(Icons.thumb_up,
+                                  size: 18, color: Colors.blue),
+                              // 좋아요 아이콘 파란색 설정
                               const SizedBox(width: 4),
                               Text(post['likes'].toString()),
                               const SizedBox(width: 16),
-                              const Icon(Icons.comment, size: 18, color: Colors.green), // 댓글 아이콘 초록색 설정
+                              const Icon(Icons.comment,
+                                  size: 18, color: Colors.green),
+                              // 댓글 아이콘 초록색 설정
                               const SizedBox(width: 4),
                               Text(post['commentsCount'].toString()),
                               const Spacer(),

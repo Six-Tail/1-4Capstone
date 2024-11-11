@@ -102,7 +102,8 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                       final post = posts[index].data() as Map<String, dynamic>;
                       final postId = posts[index].id;
                       final Timestamp timestamp = post['timestamp'];
-                      final formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(timestamp.toDate());
+                      final formattedDate = DateFormat('yyyy-MM-dd HH:mm')
+                          .format(timestamp.toDate());
                       final board = post['board'] ?? '알 수 없음'; // 게시판 이름
 
                       return Card(
@@ -117,7 +118,8 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => PostDetail(postId: postId),
+                                builder: (context) =>
+                                    PostDetail(postId: postId),
                               ),
                             );
                           },
@@ -129,26 +131,31 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                                 Row(
                                   children: [
                                     CircleAvatar(
-                                      backgroundImage: NetworkImage(post['userImage'] ?? ''),
+                                      backgroundImage:
+                                          NetworkImage(post['userImage'] ?? ''),
                                       radius: 20,
                                     ),
                                     const SizedBox(width: 8),
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           post['userName'] ?? '익명',
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           formattedDate,
-                                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                          style: const TextStyle(
+                                              color: Colors.grey, fontSize: 12),
                                         ),
                                       ],
                                     ),
                                     const Spacer(),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
                                         color: Colors.grey[200],
                                         borderRadius: BorderRadius.circular(12),
@@ -163,14 +170,17 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   post['title'] ?? '',
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   post['content'] ?? '',
-                                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                  style: const TextStyle(
+                                      fontSize: 14, color: Colors.black87),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -181,17 +191,22 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                                       Icons.thumb_up,
                                       size: 18,
                                       color: post['likedBy'] != null &&
-                                          (post['likedBy'] as List).contains(
-                                              FirebaseAuth.instance.currentUser?.uid)
+                                              (post['likedBy'] as List)
+                                                  .contains(FirebaseAuth
+                                                      .instance
+                                                      .currentUser
+                                                      ?.uid)
                                           ? Colors.blue
                                           : Colors.grey,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(post['likes']?.toString() ?? '0'),
                                     const SizedBox(width: 16),
-                                    const Icon(Icons.comment, size: 18, color: Colors.green),
+                                    const Icon(Icons.comment,
+                                        size: 18, color: Colors.green),
                                     const SizedBox(width: 4),
-                                    Text(post['commentsCount']?.toString() ?? '0'),
+                                    Text(post['commentsCount']?.toString() ??
+                                        '0'),
                                   ],
                                 ),
                               ],
@@ -218,7 +233,8 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
       // 검색어가 입력된 경우, 해당 조건에 맞춰 필터링
       return collectionRef
           .where(searchType, isGreaterThanOrEqualTo: searchQuery)
-          .where(searchType, isLessThan: '$searchQuery\uf8ff') // 파이어베이스에서 텍스트 필터링을 위해 사용하는 코드
+          .where(searchType,
+              isLessThan: '$searchQuery\uf8ff') // 파이어베이스에서 텍스트 필터링을 위해 사용하는 코드
           .orderBy(searchType)
           .orderBy('timestamp', descending: true)
           .snapshots();
