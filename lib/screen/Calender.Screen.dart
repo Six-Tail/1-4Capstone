@@ -537,22 +537,49 @@ class _CalenderScreenState extends State<CalenderScreen>
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // 원형 게이지 바 크기 조정
+                  // 애니메이션이 적용된 원형 게이지 바
                   SizedBox(
                     width: 100, // 너비
                     height: 100, // 높이
-                    child: CircularProgressIndicator(
-                      value: completionRate / 100,
-                      strokeWidth: 10, // 두께
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.black),
-                      backgroundColor: Colors.grey,
+                    child: TweenAnimationBuilder(
+                      tween: Tween<double>(begin: 0, end: completionRate / 100),
+                      duration: const Duration(seconds: 1),
+                      builder: (context, value, child) {
+                        return CircularProgressIndicator(
+                          value: value,
+                          strokeWidth: 10, // 두께
+                          valueColor:
+                              const AlwaysStoppedAnimation<Color>(Colors.black),
+                          backgroundColor: Colors.grey,
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Text('완료한 일정: $completedEvents / $totalEvents'),
+                  Text(
+                    '완료한 일정: $completedEvents / $totalEvents',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
                   const SizedBox(height: 20),
-                  Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
+                  // 달성률 텍스트에 애니메이션 적용
+                  TweenAnimationBuilder(
+                    tween: Tween<double>(begin: 0, end: completionRate),
+                    duration: const Duration(seconds: 1),
+                    builder: (context, value, child) {
+                      return Text(
+                        '달성률: ${value.toStringAsFixed(2)}%',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: () {
@@ -647,24 +674,61 @@ class _CalenderScreenState extends State<CalenderScreen>
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // 원형 게이지 바 크기 조정
+                            // 애니메이션이 적용된 원형 게이지 바
                             SizedBox(
                               width: 100, // 너비
                               height: 100, // 높이
-                              child: CircularProgressIndicator(
-                                value: completionRate / 100,
-                                strokeWidth: 10, // 두께
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                    Colors.black),
-                                backgroundColor: Colors.grey,
+                              child: TweenAnimationBuilder(
+                                tween: Tween<double>(
+                                    begin: 0, end: completionRate / 100),
+                                duration: const Duration(seconds: 1),
+                                builder: (context, value, child) {
+                                  return CircularProgressIndicator(
+                                    value: value,
+                                    strokeWidth: 10, // 두께
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                            Colors.black),
+                                    backgroundColor: Colors.grey,
+                                  );
+                                },
                               ),
                             ),
                             const SizedBox(height: 20),
-                            Text('전체 일정: $totalEvents'),
+                            Text(
+                              '전체 일정: $totalEvents',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
                             const SizedBox(height: 20),
-                            Text('완료한 일정: $completedEvents / $totalEvents'),
+                            Text(
+                              '완료한 일정: $completedEvents / $totalEvents',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
                             const SizedBox(height: 20),
-                            Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
+                            // 달성률 텍스트에 애니메이션 적용
+                            TweenAnimationBuilder(
+                              tween:
+                                  Tween<double>(begin: 0, end: completionRate),
+                              duration: const Duration(seconds: 1),
+                              builder: (context, value, child) {
+                                return Text(
+                                  '달성률: ${value.toStringAsFixed(2)}%',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                );
+                              },
+                            ),
                             const SizedBox(height: 20),
                             TextButton(
                               onPressed: () {
@@ -745,20 +809,49 @@ class _CalenderScreenState extends State<CalenderScreen>
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // 애니메이션이 적용된 원형 게이지 바
               SizedBox(
-                width: 100,
-                height: 100,
-                child: CircularProgressIndicator(
-                  value: completionRate / 100,
-                  strokeWidth: 10,
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
-                  backgroundColor: Colors.grey,
+                width: 100, // 너비
+                height: 100, // 높이
+                child: TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: completionRate / 100),
+                  duration: const Duration(seconds: 1),
+                  builder: (context, value, child) {
+                    return CircularProgressIndicator(
+                      value: value,
+                      strokeWidth: 10, // 두께
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.black),
+                      backgroundColor: Colors.grey,
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 20),
-              Text('완료한 일정: $completedEvents / $totalEvents'),
+              Text(
+                '완료한 일정: $completedEvents / $totalEvents',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
               const SizedBox(height: 20),
-              Text('달성률: ${completionRate.toStringAsFixed(2)}%'),
+              // 달성률 텍스트에 애니메이션 적용
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: completionRate),
+                duration: const Duration(seconds: 1),
+                builder: (context, value, child) {
+                  return Text(
+                    '달성률: ${value.toStringAsFixed(2)}%',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: 20),
               TextButton(
                 onPressed: () {

@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter  # 이 라인을 추가합니다.
   table_calendar: ^3.1.2
   image_picker: ^0.8.4+4
 

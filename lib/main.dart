@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase; // Firebase Auth에 별칭 부여
 import 'package:todobest_home/Router.dart';
-import 'package:todobest_home/screen/Calender.Screen.dart'; // Main app screen
 import 'package:todobest_home/screen/First.Screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +30,15 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      locale: const Locale('ko', 'KR'),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ko', 'KR'),  // 한국어 추가
+      ],
       debugShowCheckedModeBanner: false,
       title: 'TodoBest',
       home: const AuthWrapper(), // AuthWrapper 로그인 상태를 관리
