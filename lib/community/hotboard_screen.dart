@@ -36,6 +36,7 @@ class HotBoardScreen extends StatelessWidget {
           stream: FirebaseFirestore.instance
               .collection('posts')
               .where('likes', isGreaterThanOrEqualTo: 10) // 좋아요가 10 이상인 게시글만 가져오기
+              .orderBy('likes', descending: true)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {

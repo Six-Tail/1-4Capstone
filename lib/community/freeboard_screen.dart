@@ -36,6 +36,7 @@ class FreeBoardScreen extends StatelessWidget {
           stream: FirebaseFirestore.instance
               .collection('posts')
               .where('board', isEqualTo: '자유 게시판')
+              .orderBy('timestamp', descending: true)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {

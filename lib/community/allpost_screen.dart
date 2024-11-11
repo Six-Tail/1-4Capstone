@@ -220,6 +220,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
           .where(searchType, isGreaterThanOrEqualTo: searchQuery)
           .where(searchType, isLessThan: '$searchQuery\uf8ff') // 파이어베이스에서 텍스트 필터링을 위해 사용하는 코드
           .orderBy(searchType)
+          .orderBy('timestamp', descending: true)
           .snapshots();
     } else {
       // 검색어가 없을 경우 전체 게시글 불러오기

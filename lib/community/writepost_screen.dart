@@ -113,6 +113,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                 controller: titleController,
                 decoration: const InputDecoration(
                   labelText: '제목',
+                  floatingLabelStyle: TextStyle(color: Colors.blue),
                   fillColor: Colors.white, // 배경색을 하얀색으로 설정
                   filled: true,
                   focusedBorder: OutlineInputBorder(
@@ -129,6 +130,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                 controller: contentController,
                 decoration: InputDecoration(
                   labelText: '내용',
+                  floatingLabelStyle: const TextStyle(color: Colors.blue),
                   fillColor: Colors.white, // 배경색을 하얀색으로 설정
                   filled: true,
                   focusedBorder: OutlineInputBorder(

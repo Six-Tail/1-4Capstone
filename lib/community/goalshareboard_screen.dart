@@ -35,7 +35,8 @@ class GoalShareBoardScreen extends StatelessWidget {
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('posts')
-              .where('board', isEqualTo: '목표 공유 게시판') // '목표 공유 게시판' 게시글만 가져오기
+              .where('board', isEqualTo: '목표 공유 게시판')
+              .orderBy('timestamp', descending: true)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {

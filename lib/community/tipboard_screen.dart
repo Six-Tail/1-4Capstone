@@ -35,7 +35,8 @@ class SdTipBoardScreen extends StatelessWidget {
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('posts')
-              .where('board', isEqualTo: '자기계발 팁 게시판') // '자기계발 팁 게시판' 게시글만 필터링
+              .where('board', isEqualTo: '자기계발 팁 게시판')
+              .orderBy('timestamp', descending: true)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
