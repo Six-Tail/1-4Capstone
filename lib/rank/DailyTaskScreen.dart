@@ -261,7 +261,8 @@ class _DailyTasksPageState extends State<DailyTasksPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(scrolledUnderElevation: 0, title: const Text('일간 미션')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(scrolledUnderElevation: 0, title: const Text('일간 미션'), backgroundColor: Colors.white),
       body: Column(
         children: [
           Padding(
@@ -339,7 +340,6 @@ class _DailyTasksPageState extends State<DailyTasksPage>
                     },
                   );
                 }
-
                 return _buildTaskItem(dailyTasks[index], progressValue, index);
               },
             ),
@@ -353,11 +353,11 @@ class _DailyTasksPageState extends State<DailyTasksPage>
   Widget _buildTaskItem(DailyTask task, double progressValue, int index,
       [int? totalEvents, int? totalCompletedEvents]) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: task.isCompleted ? Colors.grey[300] : Colors.grey[800],
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.2),
@@ -377,9 +377,9 @@ class _DailyTasksPageState extends State<DailyTasksPage>
                   children: [
                     Text(
                       task.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white,
+                        color: task.isCompleted ? Colors.black : Colors.white,
                       ),
                     ),
                     if (task.name == '달성률 80% 이상 달성하기') // 달성률 표시
@@ -398,8 +398,8 @@ class _DailyTasksPageState extends State<DailyTasksPage>
                             double achievementRate = snapshot.data ?? 0.0;
                             return Text(
                               '(${(achievementRate * 80).toStringAsFixed(0)}%/80%)',
-                              style: const TextStyle(
-                                color: Colors.amberAccent,
+                              style: TextStyle(
+                                color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                                 fontSize: 10,
                               ),
                             );
@@ -409,8 +409,8 @@ class _DailyTasksPageState extends State<DailyTasksPage>
                     if (task.name == '일정 3개 등록하기' && totalEvents != null)
                       Text(
                         '($totalEvents/3)',
-                        style: const TextStyle(
-                          color: Colors.amberAccent,
+                        style: TextStyle(
+                          color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                           fontSize: 10,
                         ),
                       ),
@@ -418,8 +418,8 @@ class _DailyTasksPageState extends State<DailyTasksPage>
                         totalCompletedEvents != null)
                       Text(
                         '($totalCompletedEvents/3)',
-                        style: const TextStyle(
-                          color: Colors.amberAccent,
+                        style: TextStyle(
+                          color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                           fontSize: 10,
                         ),
                       ),
@@ -430,8 +430,8 @@ class _DailyTasksPageState extends State<DailyTasksPage>
                   children: [
                     Text(
                       '${task.xp} EXP',
-                      style: const TextStyle(
-                        color: Colors.amberAccent,
+                      style: TextStyle(
+                        color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -441,7 +441,7 @@ class _DailyTasksPageState extends State<DailyTasksPage>
                         value: progressValue,
                         // Progress based on the task completion
                         backgroundColor: Colors.grey,
-                        color: Colors.amber,
+                        color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                       ),
                     ),
                   ],

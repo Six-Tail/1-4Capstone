@@ -169,11 +169,11 @@ class _ChallengePageState extends State<ChallengePage> {
   Widget _buildTaskItem(DailyTask task, double progressValue, int index,
       [int? totalEvents, int? totalCompletedEvents]) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: task.isCompleted ? Colors.grey[300] : Colors.grey[800],
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.2),
@@ -193,24 +193,24 @@ class _ChallengePageState extends State<ChallengePage> {
                   children: [
                     Text(
                       task.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white,
+                        color: task.isCompleted ? Colors.black : Colors.white,
                       ),
                     ),
                     if (task.name == '10일 출석하기')
                       Text(
                         '(${task.currentAttendance}/10)',
-                        style: const TextStyle(
-                          color: Colors.amberAccent,
+                        style: TextStyle(
+                          color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                           fontSize: 10,
                         ),
                       ),
                     if (task.name == '일정 50개 등록하기' && totalEvents != null)
                       Text(
                         '($totalEvents/50)',
-                        style: const TextStyle(
-                          color: Colors.amberAccent,
+                        style: TextStyle(
+                          color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                           fontSize: 10,
                         ),
                       ),
@@ -218,8 +218,8 @@ class _ChallengePageState extends State<ChallengePage> {
                         totalCompletedEvents != null)
                       Text(
                         '($totalCompletedEvents/50)',
-                        style: const TextStyle(
-                          color: Colors.amberAccent,
+                        style: TextStyle(
+                          color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                           fontSize: 10,
                         ),
                       ),
@@ -239,8 +239,8 @@ class _ChallengePageState extends State<ChallengePage> {
                                 snapshot.data?['level'] ?? 0; // 현재 레벨 가져오기
                             return Text(
                               '($level/10)',
-                              style: const TextStyle(
-                                color: Colors.amberAccent,
+                              style: TextStyle(
+                                color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                                 fontSize: 10,
                               ),
                             );
@@ -255,8 +255,8 @@ class _ChallengePageState extends State<ChallengePage> {
                   children: [
                     Text(
                       '${task.xp} EXP',
-                      style: const TextStyle(
-                        color: Colors.amberAccent,
+                      style: TextStyle(
+                        color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -267,7 +267,7 @@ class _ChallengePageState extends State<ChallengePage> {
                             ? task.currentAttendance / 10.0
                             : progressValue,
                         backgroundColor: Colors.grey,
-                        color: Colors.amber,
+                        color: task.isCompleted ? const Color(0xff4496de) : Colors.amberAccent,
                       ),
                     ),
                   ],
