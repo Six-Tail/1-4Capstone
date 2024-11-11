@@ -168,9 +168,40 @@ class _PostDetailState extends State<PostDetail> {
       }
     }
   }
+  
+  Future<void> _deleteSubcollections(String collectionPath, String docId, String subcollection) async {
+    final subcollectionRef = FirebaseFirestore.instance
+        .collection(collectionPath)
+        .doc(docId)
+        .collection(subcollection);
+
+    final subcollectionSnapshots = await subcollectionRef.get();
+
+    // comments 하위 컬렉션에 있는 모든 문서를 반복
+    for (var doc in subcollectionSnapshots.docs) {
+      // 각 댓글의 replies 하위 컬렉션 삭제
+      await _deleteReplies(doc.reference);
+      // 댓글 문서 자체 삭제
+      await doc.reference.delete();
+    }
+  }
+
+// replies 하위 컬렉션 삭제 메서드
+  Future<void> _deleteReplies(DocumentReference commentRef) async {
+    final repliesRef = commentRef.collection('replies');
+    final repliesSnapshots = await repliesRef.get();
+
+    // replies 하위 컬렉션에 있는 모든 문서 삭제
+    for (var replyDoc in repliesSnapshots.docs) {
+      await replyDoc.reference.delete();
+    }
+  }
+
 
   Future<void> _deletePost() async {
     try {
+      await _deleteSubcollections('posts', widget.postId, 'comments');
+
       await FirebaseFirestore.instance.collection('posts').doc(widget.postId).delete();
 
       // 위젯이 활성 상태인지 확인 후 화면 닫기
