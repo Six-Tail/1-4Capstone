@@ -1,20 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_naver_login/flutter_naver_login.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../screen/First.Screen.dart';
 import '../service/User_Service.dart';
+import 'PWChange.Screen.dart';
 import 'authsecession_screen.dart';
+import 'calendar_list_screen.dart';
 import 'feedback_screen.dart';
 import 'namedetailscreen.dart';
 import 'notification_settings_screen.dart';
-import 'calendar_list_screen.dart';
-import '../screen/First.Screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'PWChange.Screen.dart';
 
 class ManageScreen extends StatefulWidget {
   const ManageScreen({super.key});
@@ -45,7 +47,10 @@ class _ManageScreenState extends State<ManageScreen> {
       final userInfo = await _userService.getUserInfo(firebaseUser.uid);
 
       // Firestore에서 accountType 불러오기
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).get();
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
       if (userDoc.exists) {
         setState(() {
           accountType = userDoc.data()?['accountType'] ?? 'ToDoBest 계정';
@@ -187,7 +192,7 @@ class _ManageScreenState extends State<ManageScreen> {
                     backgroundImage: userImage.isNotEmpty
                         ? NetworkImage(userImage)
                         : const AssetImage('assets/images/default_profile.png')
-                    as ImageProvider,
+                            as ImageProvider,
                   ),
                   const SizedBox(width: 16),
                   Column(
@@ -225,15 +230,41 @@ class _ManageScreenState extends State<ManageScreen> {
             ],
           ),
           ListTile(
-            leading: const Icon(Icons.account_circle),
+            leading: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // 그림자 색상 및 불투명도
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2), // 그림자의 위치 조정
+                  ),
+                ],
+                shape: BoxShape.circle, // CircleAvatar 형태로 설정
+              ),
+              child: CircleAvatar(
+                radius: 16,
+                backgroundColor: Colors.transparent,
+                child: accountType == 'Naver 계정'
+                    ? SvgPicture.asset('assets/images/naver.svg')
+                    : accountType == 'Google 계정'
+                    ? SvgPicture.asset('assets/images/google.svg')
+                    : accountType == 'Kakao 계정'
+                    ? SvgPicture.asset('assets/images/kakao.svg')
+                    : SvgPicture.asset('assets/images/todobest.svg'),
+              ),
+            ),
             title: Text(
               accountType,
-              style: const TextStyle(fontWeight: FontWeight.bold), // 텍스트를 굵게 설정
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(userEmail),
           ),
           ListTile(
-            leading: const Icon(Icons.call),
+            leading: const Padding(
+              padding: EdgeInsets.only(right: 8.0), // 오른쪽 여백 8px (아이콘과 텍스트 간격)
+              child: Icon(Icons.call),
+            ),
             title: const Text(
               '전화번호',
               style: TextStyle(fontWeight: FontWeight.bold), // 텍스트를 굵게 설정
@@ -250,7 +281,6 @@ class _ManageScreenState extends State<ManageScreen> {
                   builder: (context) => const ProfileDetailScreen(),
                 ),
               );
-
               if (updatedUserInfo != null) {
                 setState(() {
                   userName = updatedUserInfo['userName'];
@@ -288,7 +318,8 @@ class _ManageScreenState extends State<ManageScreen> {
               } else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PWChangeScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const PWChangeScreen()),
                 );
               }
             },
@@ -339,8 +370,7 @@ class _ManageScreenState extends State<ManageScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      const CalendarListScreen(),
+                  builder: (context) => const CalendarListScreen(),
                 ),
               );
             },
@@ -398,7 +428,8 @@ class _ManageScreenState extends State<ManageScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AuthSeccessionScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const AuthSeccessionScreen()),
               );
             },
           ),

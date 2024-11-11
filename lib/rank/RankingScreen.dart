@@ -45,6 +45,7 @@ class RankingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     final userService = UserService();
     final currentUser = FirebaseAuth.instance.currentUser;
 
@@ -144,7 +145,7 @@ class RankingPage extends StatelessWidget {
               ),
               const Divider(),
               SizedBox(
-                height: 280,
+                height: screenHeight * 0.376,
                 child: ListView.builder(
                   itemCount: remainingUsers.length,
                   itemBuilder: (context, index) {
@@ -174,19 +175,37 @@ class RankingPage extends StatelessWidget {
               ),
               Card(
                 color: const Color(0xffcae1f6),
-                child: ListTile(
-                  leading: Text(
-                    currentUserData.rank.toString(),
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: getRankColor(currentUserData.rank),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: getRankColor(currentUserData.rank), // 순위에 맞는 테두리 색상 적용
+                      width: 2,
                     ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: getRankColor(currentUserData.rank).withOpacity(0.7), // 순위에 맞는 그림자 색상 적용
+                        spreadRadius: 2,
+                        blurRadius: 6,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  title: Text(currentUserData.name),
-                  subtitle: Text(
-                      "레벨: ${currentUserData.level}, EXP: ${_formatExperience(currentUserData.currentExp)}"),
-                  trailing: const Icon(Icons.person),
+                  child: ListTile(
+                    leading: Text(
+                      currentUserData.rank.toString(),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: getRankColor(currentUserData.rank),
+                      ),
+                    ),
+                    title: Text(currentUserData.name),
+                    subtitle: Text(
+                        "레벨: ${currentUserData.level}, EXP: ${_formatExperience(currentUserData.currentExp)}"),
+                    trailing: const Icon(Icons.person),
+                  ),
                 ),
               ),
             ],
