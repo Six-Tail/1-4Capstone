@@ -168,7 +168,7 @@ class _PostDetailState extends State<PostDetail> {
       }
     }
   }
-  
+
   Future<void> _deleteSubcollections(String collectionPath, String docId, String subcollection) async {
     final subcollectionRef = FirebaseFirestore.instance
         .collection(collectionPath)
@@ -366,14 +366,14 @@ class _PostDetailState extends State<PostDetail> {
                         builder: (context, snapshot) {
                           // 데이터가 없거나 삭제된 경우
                           if (!snapshot.hasData || snapshot.data == null || !snapshot.data!.exists) {
-                            return const Center(child: Text("이 게시글은 삭제되었습니다.")); // 또는 Navigator.pop(context)로 이전 화면으로 이동
+                            return const Center(child: Text("이 게시글은 삭제되었습니다."));
                           }
 
                           // 정상적으로 데이터가 있는 경우 처리
                           final post = (snapshot.data!.data() ?? {}) as Map<String, dynamic>;
 
                           final likedBy = List<String>.from(post['likedBy'] ?? []);
-                          final isLiked = likedBy.contains(userId); // 현재 사용자가 좋아요를 눌렀는지 확인
+                          final isLiked = likedBy.contains(userId);
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -402,47 +402,68 @@ class _PostDetailState extends State<PostDetail> {
                                   const Spacer(),
                                   IconButton(
                                     icon: Icon(
-                                      isScraped ? Icons.bookmark_border : Icons.bookmark_border_outlined,
+                                      isScraped ? Icons.bookmark : Icons.bookmark_border,
                                       color: isScraped ? Colors.yellow : Colors.grey,
                                     ),
-                                    onPressed: _toggleScrap, // 즐겨찾기 토글 함수
+                                    onPressed: _toggleScrap,
                                   ),
                                   if (post['userId'] == userId)
-                                  Theme(
-                                  data: Theme.of(context).copyWith(
-                                    popupMenuTheme: const PopupMenuThemeData(
-                                    color: Colors.white, // 팝업 메뉴의 배경색을 흰색으로 설정
-                                     ),
-                                    ),
-                                    child: PopupMenuButton<String>(
-                                      onSelected: (value) {
-                                        if (value == 'edit') {
-                                          _showEditPostDialog(post['title'], post['content']);
-                                        } else if (value == 'delete') {
-                                          _deletePost();
-                                        }
-                                      },
-                                      itemBuilder: (context) => [
-                                        const PopupMenuItem(
-                                          value: 'edit',
-                                          child: Text("수정"),
+                                    Theme(
+                                      data: Theme.of(context).copyWith(
+                                        popupMenuTheme: const PopupMenuThemeData(
+                                          color: Colors.white,
                                         ),
-                                        const PopupMenuItem(
-                                          value: 'delete',
-                                          child: Text("삭제"),
-                                        ),
-                                      ],
-                                      icon: const Icon(Icons.more_vert),
+                                      ),
+                                      child: PopupMenuButton<String>(
+                                        onSelected: (value) {
+                                          if (value == 'edit') {
+                                            _showEditPostDialog(post['title'], post['content']);
+                                          } else if (value == 'delete') {
+                                            _deletePost();
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          const PopupMenuItem(
+                                            value: 'edit',
+                                            child: Text("수정"),
+                                          ),
+                                          const PopupMenuItem(
+                                            value: 'delete',
+                                            child: Text("삭제"),
+                                          ),
+                                        ],
+                                        icon: const Icon(Icons.more_vert),
+                                      ),
                                     ),
-                          )],
+                                ],
                               ),
                               const SizedBox(height: 10),
+
+                              // 제목 표시
                               Text(
                                 post['title'] ?? '',
                                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 10),
+
+                              // 이미지 표시 (제목 아래, 내용 위에)
+                              if (post['postImage'] != null && post['postImage'].isNotEmpty)
+                                Container(
+                                  height: 250, // 이미지의 고정 높이
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.only(bottom: 10.0),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    image: DecorationImage(
+                                      image: NetworkImage(post['postImage']),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+
+                              // 내용 표시
                               Text(post['content'] ?? ''),
+
                               Row(
                                 children: [
                                   IconButton(
@@ -463,6 +484,7 @@ class _PostDetailState extends State<PostDetail> {
                           );
                         },
                       ),
+
                       StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('posts')

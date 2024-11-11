@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import '../utils/Themes.Colors.dart';
 import 'post_detail.dart'; // 상세 페이지 import
 import '../service/User_Service.dart'; // UserService import
@@ -19,6 +22,8 @@ class _WritePostScreenState extends State<WritePostScreen> {
   final contentController = TextEditingController();
   String? selectedBoard;
   final UserService userService = UserService();
+  File? _image; // 선택된 이미지 파일
+  String? _imageUrl; // 업로드된 이미지 URL
 
   // 유저 정보 변수
   String? userId;
@@ -46,6 +51,17 @@ class _WritePostScreenState extends State<WritePostScreen> {
     }
   }
 
+  // 이미지 선택 함수
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +82,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
           color: Theme1Colors.textColor,
         ),
       ),
-      body: SingleChildScrollView( // 키보드가 올라올 때 스크롤 가능하게 설정
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -82,16 +98,16 @@ class _WritePostScreenState extends State<WritePostScreen> {
                   });
                 },
                 validator: (value) => value == null ? '게시판을 선택하세요' : null,
-                dropdownColor: Colors.white, // 드롭다운 메뉴의 배경색을 흰색으로 설정
+                dropdownColor: Colors.white,
                 decoration: InputDecoration(
-                  fillColor: Colors.white, // 배경색을 하얀색으로 설정
-                  filled: true, // fillColor 적용을 위해 true로 설정
+                  fillColor: Colors.white,
+                  filled: true,
                   focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
+                    borderSide: const BorderSide(color: Colors.blue),
                     borderRadius: BorderRadius.circular(4.0),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                    borderSide: const BorderSide(color: Colors.grey),
                     borderRadius: BorderRadius.circular(4.0),
                   ),
                 ),
@@ -109,40 +125,69 @@ class _WritePostScreenState extends State<WritePostScreen> {
                     .toList(),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: '제목',
-                  floatingLabelStyle: TextStyle(color: Colors.blue),
-                  fillColor: Colors.white, // 배경색을 하얀색으로 설정
-                  filled: true,
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: '제목',
+                        floatingLabelStyle: TextStyle(color: Colors.blue),
+                        fillColor: Colors.white,
+                        filled: true,
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                      ),
+                      validator: (value) => value!.isEmpty ? '제목을 입력하세요' : null,
+                    ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.add_photo_alternate, color: Colors.blue),
+                    onPressed: _pickImage,
                   ),
-                ),
-                validator: (value) => value!.isEmpty ? '제목을 입력하세요' : null,
+                ],
               ),
               const SizedBox(height: 16),
+              if (_image != null) // 선택된 이미지가 있을 때 미리보기
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "이미지 미리보기",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Image.file(
+                      _image!,
+                      height: 100,
+                      width: 100,
+                      fit: BoxFit.cover,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               TextFormField(
                 controller: contentController,
                 decoration: InputDecoration(
                   labelText: '내용',
                   floatingLabelStyle: const TextStyle(color: Colors.blue),
-                  fillColor: Colors.white, // 배경색을 하얀색으로 설정
+                  fillColor: Colors.white,
                   filled: true,
                   focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.blue), // 포커스 시 줄 색상을 파란색으로 설정
-                    borderRadius: BorderRadius.circular(8.0), // 모서리 둥글게 설정
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.grey), // 기본 줄 색상을 회색으로 설정
+                    borderSide: const BorderSide(color: Colors.blue),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16), // 내부 여백 설정
-                  labelStyle: const TextStyle(color: Colors.black54), // 라벨 텍스트 색상 설정
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  labelStyle: const TextStyle(color: Colors.black54),
                 ),
                 maxLines: 10,
                 validator: (value) => value!.isEmpty ? '내용을 입력하세요' : null,
@@ -152,7 +197,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                 child: ElevatedButton(
                   onPressed: handleComplete,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, // 여기서 배경색을 설정합니다.
+                    backgroundColor: Colors.blue,
                   ),
                   child: const Text('완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
@@ -164,11 +209,9 @@ class _WritePostScreenState extends State<WritePostScreen> {
     );
   }
 
-  Future<void> _addPostToFirestore(
-      String board, String title, String content) async {
+  Future<void> _addPostToFirestore(String board, String title, String content) async {
     try {
       if (userId == null || userName == null || userImage == null) {
-        // 알림 추가: 유저 정보가 없는 경우 사용자에게 경고
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('유저 정보가 누락되었습니다. 다시 로그인해 주세요.')),
@@ -177,10 +220,12 @@ class _WritePostScreenState extends State<WritePostScreen> {
         return;
       }
 
-      // Firestore의 'posts' 컬렉션에 새 문서를 추가
-      DocumentReference postRef = await FirebaseFirestore.instance
-          .collection('posts')
-          .add({
+      // 이미지 업로드
+      if (_image != null) {
+        _imageUrl = await _uploadImageToStorage(_image!);
+      }
+
+      DocumentReference postRef = await FirebaseFirestore.instance.collection('posts').add({
         'board': board,
         'title': title,
         'content': content,
@@ -190,17 +235,12 @@ class _WritePostScreenState extends State<WritePostScreen> {
         'userId': userId,
         'userName': userName,
         'userImage': userImage,
+        'postImage': _imageUrl, // 업로드된 이미지 URL을 Firestore에 저장
       });
 
-      if (kDebugMode) {
-        print('게시글 Firestore에 성공적으로 저장되었습니다. postId: ${postRef.id}');
-      }
-
-      // 게시글 저장 후 텍스트 초기화
       titleController.clear();
       contentController.clear();
 
-      // 위젯이 여전히 활성 상태인지 확인 후 상세 페이지로 이동
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -213,12 +253,25 @@ class _WritePostScreenState extends State<WritePostScreen> {
       if (kDebugMode) {
         print('게시글 Firestore 저장 오류: $e');
       }
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('게시글 저장에 실패했습니다. 다시 시도해 주세요.')),
         );
       }
+    }
+  }
+
+  // 이미지 업로드 함수
+  Future<String?> _uploadImageToStorage(File image) async {
+    try {
+      String fileName = 'posts/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      TaskSnapshot snapshot = await FirebaseStorage.instance.ref(fileName).putFile(image);
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      if (kDebugMode) {
+        print("Image upload error: $e");
+      }
+      return null;
     }
   }
 

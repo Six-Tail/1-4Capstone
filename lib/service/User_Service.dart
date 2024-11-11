@@ -1,11 +1,15 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../rank/RankingScreen.dart';
 
+import 'package:firebase_storage/firebase_storage.dart';
+
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   String defaultProfileImageUrl =
   'https://firebasestorage.googleapis.com/v0/b/to-do-best-72308.firebasestorage.app/o/images%2Fdefault_profile.png?alt=media&token=69822f73-86c6-4da8-a129-83c013a2fcfa';
@@ -268,6 +272,19 @@ class UserService {
 
     for (var doc in snapshots.docs) {
       await doc.reference.delete();
+    }
+  }
+  // 이미지 업로드 함수
+  Future<String?> uploadImage(File imageFile) async {
+    try {
+      String fileName = 'posts/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      TaskSnapshot snapshot = await _storage.ref(fileName).putFile(imageFile);
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      if (kDebugMode) {
+        print("Image upload error: $e");
+      }
+      return null;
     }
   }
 }
