@@ -122,7 +122,7 @@ class RankingPage extends StatelessWidget {
                       _buildPlayerCard(
                         user: topThreeUsers[1],
                         color: const Color(0xFFC0C0C0), // 은메달 색상 (2등)
-                        radius: 25,
+                        radius: 30,
                       ),
                     ],
                     if (topThreeUsers.isNotEmpty) ...[
@@ -136,7 +136,7 @@ class RankingPage extends StatelessWidget {
                       _buildPlayerCard(
                         user: topThreeUsers[2],
                         color: const Color(0xFFCD7F32), // 동메달 색상 (3등)
-                        radius: 20,
+                        radius: 30,
                       ),
                     ],
                   ],
@@ -198,18 +198,22 @@ class RankingPage extends StatelessWidget {
 }
 
 // _buildPlayerCard 메서드 추가
-Widget _buildPlayerCard(
-    {required AppUser user, required Color color, required double radius}) {
+Widget _buildPlayerCard({
+  required AppUser user,
+  required Color color,
+  required double radius,
+}) {
   return Container(
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(10),
       color: Colors.white,
+      border: Border.all(color: color, width: 2), // 테두리 색상을 순위에 맞는 색상으로 설정
       boxShadow: [
         BoxShadow(
-          color: Colors.grey.withOpacity(0.3),
-          spreadRadius: 2,
-          blurRadius: 5,
-          offset: const Offset(0, 2),
+          color: color.withOpacity(0.7), // 그림자 색상을 순위에 맞는 색상으로 설정
+          spreadRadius: 4,
+          blurRadius: 8,
+          offset: const Offset(0, 4),
         ),
       ],
     ),
@@ -227,7 +231,10 @@ Widget _buildPlayerCard(
         Text(
           user.name.length > 4 ? '${user.name.substring(0, 4)}...' : user.name,
           style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: color),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
         Text("레벨: ${user.level}"),
         Text("EXP: ${_formatExperience(user.currentExp)}"),
