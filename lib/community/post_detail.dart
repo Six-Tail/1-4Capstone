@@ -442,7 +442,7 @@ class _PostDetailState extends State<PostDetail> {
                               // 제목 표시
                               Text(
                                 post['title'] ?? '',
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 10),
 

@@ -19,6 +19,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final User? _currentUser = FirebaseAuth.instance.currentUser;
   final UserService _userService = UserService();
+  final ScrollController _scrollController = ScrollController(); // ScrollController 추가
   late Timer _timer;
 
   // 사용자 정보를 캐싱하기 위한 맵
@@ -28,11 +29,17 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _startAutoDeleteOldMessages();
+
+    // 화면이 처음 로드될 때 스크롤을 최하단으로 이동
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 
   @override
   void dispose() {
     _timer.cancel(); // 타이머 해제
+    _scrollController.dispose(); // ScrollController 해제
     super.dispose();
   }
 
@@ -68,6 +75,20 @@ class _ChatScreenState extends State<ChatScreen> {
       'sentAt': FieldValue.serverTimestamp(),
     });
     _controller.clear();
+
+    // 새 메시지가 전송되면 아래로 스크롤
+    _scrollToBottom();
+  }
+
+  // 아래로 스크롤하는 메서드
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0.0, // reverse: true인 경우 최하단으로 이동
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   // Firestore에서 사용자 정보를 가져오고 캐시합니다.
@@ -121,7 +142,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   .collection('chatRooms')
                   .doc('global_chat')
                   .collection('messages')
-                  .orderBy('sentAt', descending: true)
+                  .orderBy('sentAt', descending: true) // 최신 메시지 순서로 정렬 및 reverse 적용
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
@@ -130,7 +151,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 final messages = snapshot.data!.docs;
                 return ListView.builder(
-                  reverse: true,
+                  reverse: true, // reverse 적용
+                  controller: _scrollController, // ScrollController 추가
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
@@ -173,16 +195,21 @@ class _ChatScreenState extends State<ChatScreen> {
                                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                                 ),
                                 const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: isMe ? Colors.blueAccent : Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(8),
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: MediaQuery.of(context).size.width * 0.7,
                                   ),
-                                  child: Text(
-                                    message['messageText'] ?? '',
-                                    style: TextStyle(
-                                      color: isMe ? Colors.white : Colors.black,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: isMe ? Colors.blueAccent : Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      message['messageText'] ?? '',
+                                      style: TextStyle(
+                                        color: isMe ? Colors.white : Colors.black,
+                                      ),
                                     ),
                                   ),
                                 ),
