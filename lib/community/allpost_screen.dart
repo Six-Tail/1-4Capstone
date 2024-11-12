@@ -45,6 +45,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
               children: [
                 // 검색 조건 선택 Dropdown
                 DropdownButton<String>(
+                  dropdownColor: Colors.white, // 드롭다운 메뉴 배경색을 흰색으로 설정
                   value: searchType,
                   items: const [
                     DropdownMenuItem(
