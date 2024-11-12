@@ -126,7 +126,7 @@ class _RankMoreState extends State<RankMore> {
     double expRatio = currentExp / maxExp;
 
     return Scaffold(
-      backgroundColor: Theme1Colors.mainColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Image.asset(
           'assets/images/icon.png',
