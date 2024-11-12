@@ -246,12 +246,22 @@ class _ManageScreenState extends State<ManageScreen> {
                 radius: 16,
                 backgroundColor: Colors.transparent,
                 child: accountType == 'Naver 계정'
-                    ? SvgPicture.asset('assets/images/naver.svg')
+                    ? SvgPicture.asset('assets/images/naver.svg',
+                  width: 40,
+                  height: 40,)
                     : accountType == 'Google 계정'
-                    ? SvgPicture.asset('assets/images/google.svg')
+                    ? SvgPicture.asset('assets/images/google.svg',
+                  width: 40,
+                  height: 40,)
                     : accountType == 'Kakao 계정'
-                    ? SvgPicture.asset('assets/images/kakao.svg')
-                    : SvgPicture.asset('assets/images/todobest.svg'),
+                    ? SvgPicture.asset(
+                  'assets/images/kakao.svg',
+                  width: 40,
+                  height: 40,
+                )
+                    : SvgPicture.asset('assets/images/todobest.svg',
+                  width: 40,
+                  height: 40,),
               ),
             ),
             title: Text(
