@@ -114,7 +114,7 @@ class _ChallengePageState extends State<ChallengePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(scrolledUnderElevation: 0, title: const Text('도전 과제')),
+      appBar: AppBar(scrolledUnderElevation: 0, title: const Text('도전 과제'), backgroundColor: Colors.white),
       body: Column(
         children: [
           Expanded(

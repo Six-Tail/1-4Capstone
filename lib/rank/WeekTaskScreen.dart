@@ -163,7 +163,7 @@ class _WeeklyTasksPageState extends State<WeeklyTasksPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(scrolledUnderElevation: 0, title: const Text('주간 미션')),
+      appBar: AppBar(scrolledUnderElevation: 0, title: const Text('주간 미션'), backgroundColor: Colors.white),
       body: Column(
         children: [
           Padding(
