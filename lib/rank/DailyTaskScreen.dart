@@ -73,7 +73,7 @@ class _DailyTasksPageState extends State<DailyTasksPage>
       // 이전에 경험치를 획득하지 않은 경우에만 실행합니다.
       if (taskStatus == null || !(taskStatus['hasClaimedXP'] ?? false)) {
         dailyTasks[0].isCompleted = true;
-        dailyTasks[0].hasClaimedXP = true; // 경험치를 획득하여 true로 설정
+        dailyTasks[0].hasClaimedXP = false;
 
         // 주간 미션 '5일 출석하기' 과제를 weeklyTasks에서 찾습니다.
         var weeklyTask =
