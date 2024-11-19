@@ -1,5 +1,5 @@
-![header](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1&height=200&text=To%20Do%20Best&fontSize=50&animation=twinkling)
 <div align="center">
+  <img src ="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1&height=200&text=To%20Do%20Best&fontSize=50&animation=twinkling"/>
   <img src="https://github.com/Six-Tail/1-4Capstone/blob/ToDoBest/assets/images/BackGroundIcon.png?raw=true" alt="앱 스크린샷" height="200" width="200"/>
 
   <h1><strong>최고를 향해, 최선을 다해봐!</strong></h1>
