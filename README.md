@@ -77,6 +77,7 @@
 <img src="https://img.shields.io/badge/firebase-%23FFCA28.svg?&style=for-the-badge&logo=firebase&logoColor=black" />
 
 ![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=Six-Tail&layout=compact)
+
 ---
 
 ## 🚀 **Getting Started**
@@ -94,7 +95,19 @@
    ```bash
    flutter run
 
+---
+
 ## 📧 **Contact**
 더 궁금한 사항이 있으시면 아래로 연락 주세요!  
 📩 Email: qowlgh1215@naver.com
-   
+
+---
+
+## 🤝 **Collaborators**
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://github.com/Six-Tail"><img src="https://avatars.githubusercontent.com/u/80028743?v=4" width="100px;" alt=""/><br /><sub><b> 배지호 </b></sub></a><br /></td>
+    </tr>
+  </tbody>
+</table>
