@@ -1,9 +1,13 @@
-<img src="https://github.com/Six-Tail/1-4Capstone/blob/ToDoBest/assets/images/BackGroundIcon.png?raw=true" alt="앱 스크린샷" height="200" width="200"/>
+<div align="center">
+  <img src ="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1&height=200&text=To%20Do%20Best&fontSize=50&animation=twinkling"/>
+  <img src="https://github.com/Six-Tail/1-4Capstone/blob/ToDoBest/assets/images/BackGroundIcon.png?raw=true" alt="앱 스크린샷" height="200" width="200"/>
 
-**최고를 향해, 최선을 다해봐!**  
-**ToDoBest**는 사용자가 하루의 일정을 깔끔하고 체계적으로 관리할 수 있도록 돕는 Flutter 기반 캘린더 애플리케이션입니다.
-
-**개발기간**: 2024-04-17 ~ 2024-11-12 (총210일)
+  <h1><strong>최고를 향해, 최선을 다해봐!</strong></h1>
+  
+  <p><strong>ToDoBest</strong>는 사용자가 하루의 일정을 깔끔하고 체계적으로 관리할 수 있도록 돕는 Flutter 기반 캘린더 애플리케이션입니다.</p>
+  
+  <p><strong>개발기간</strong>: 2024-04-17 ~ 2024-11-12 (총 210일)</p>
+</div>
 
 ---
 
@@ -60,14 +64,19 @@
 ## 🛠 **Tech Stack**
 
 ### **Frontend**
-- **Flutter** (Dart): 빠르고 아름다운 UI 제작
-- **Figma**: 사용자 중심의 디자인 설계
+- **Flutter**,**Dart**: 빠르고 아름다운 UI 제작
+- **Figma**: 사용자 중심의 디자인 설계  
+
+<img src="https://img.shields.io/badge/flutter-%2302569B.svg?&style=for-the-badge&logo=flutter&logoColor=white" />  <img src="https://img.shields.io/badge/dart-%230175C2.svg?&style=for-the-badge&logo=dart&logoColor=white" />  <img src="https://img.shields.io/badge/figma-%23F24E1E.svg?&style=for-the-badge&logo=figma&logoColor=white" />
 
 ### **Backend**
 - **Firebase**
     - Firestore: 데이터베이스
     - Authentication: 사용자 인증
-    - Cloud Functions: 서버리스 백엔드 로직
+    - Cloud Functions: 서버리스 백엔드 로직  
+<img src="https://img.shields.io/badge/firebase-%23FFCA28.svg?&style=for-the-badge&logo=firebase&logoColor=black" />
+
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=Six-Tail&layout=compact)
 
 ---
 
@@ -86,7 +95,23 @@
    ```bash
    flutter run
 
+---
+
 ## 📧 **Contact**
 더 궁금한 사항이 있으시면 아래로 연락 주세요!  
 📩 Email: qowlgh1215@naver.com
-   
+
+---
+
+## 🤝 **Y.H 펜타그램 TEAM**
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://github.com/Six-Tail"><img src="https://avatars.githubusercontent.com/u/80028743?v=4" width="100px;" alt=""/><br /><sub><b> 배지호 </b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/ycs-202007034"><img src="https://avatars.githubusercontent.com/u/80028907?v=4" width="100px;" alt=""/><br /><sub><b> 조희섭 </b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/taegyumlee"><img src=https://avatars.githubusercontent.com/u/127921071?v=4" width="100px;" alt=""/><br /><sub><b> 이태겸 </b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/jxghn"><img src="https://avatars.githubusercontent.com/u/100080284?v=4" width="100px;" alt=""/><br /><sub><b> 노종현 </b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/seun2022"><img src="https://avatars.githubusercontent.com/u/99938900?v=4" width="100px;" alt=""/><br /><sub><b> 정세운 </b></sub></a><br /></td>
+    </tr>
+  </tbody>
+</table>
