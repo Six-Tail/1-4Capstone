@@ -76,6 +76,7 @@
     - Cloud Functions: 서버리스 백엔드 로직  
 <img src="https://img.shields.io/badge/firebase-%23FFCA28.svg?&style=for-the-badge&logo=firebase&logoColor=black" />
 
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=Six-Tail&layout=compact)
 ---
 
 ## 🚀 **Getting Started**
