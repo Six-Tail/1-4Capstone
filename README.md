@@ -11,6 +11,20 @@
 
 ---
 
+## 🤝 **Y.H 펜타그램 TEAM**
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://github.com/Six-Tail"><img src="https://avatars.githubusercontent.com/u/80028743?v=4" width="100px;" alt=""/><br /><sub><b> 배지호 </b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/ycs-202007034"><img src="https://avatars.githubusercontent.com/u/80028907?v=4" width="100px;" alt=""/><br /><sub><b> 조희섭 </b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/taegyumlee"><img src=https://avatars.githubusercontent.com/u/127921071?v=4" width="100px;" alt=""/><br /><sub><b> 이태겸 </b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/jxghn"><img src="https://avatars.githubusercontent.com/u/100080284?v=4" width="100px;" alt=""/><br /><sub><b> 노종현 </b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/seun2022"><img src="https://avatars.githubusercontent.com/u/99938900?v=4" width="100px;" alt=""/><br /><sub><b> 정세운 </b></sub></a><br /></td>
+    </tr>
+  </tbody>
+</table>
+---
+
 ## 🌟 **Features**
 ✔️ **깔끔한 UI/UX**: Figma로 설계된 직관적이고 아름다운 디자인  
 ✔️ **일정 추가 및 수정**: 하루 일정을 손쉽게 관리  
@@ -23,6 +37,14 @@
 ## 📽 **소개 영상**
 **👉 [동영상 다운로드](https://github.com/Six-Tail/1-4Capstone/raw/main/ToDoBest%20%EC%98%81%EC%83%81/ToDoBest.mp4)**
 > 위 링크를 클릭하여 동영상을 다운로드하거나 재생하세요!
+
+---
+
+## 👨🏻‍🤝‍👨🏻 ** 업무 분담
+
+---
+
+## 📝 ** 개발 과정
 
 ---
 
@@ -101,15 +123,4 @@
 
 ---
 
-## 🤝 **Y.H 펜타그램 TEAM**
-<table>
-  <tbody>
-    <tr>
-      <td align="center"><a href="https://github.com/Six-Tail"><img src="https://avatars.githubusercontent.com/u/80028743?v=4" width="100px;" alt=""/><br /><sub><b> 배지호 </b></sub></a><br /></td>
-      <td align="center"><a href="https://github.com/ycs-202007034"><img src="https://avatars.githubusercontent.com/u/80028907?v=4" width="100px;" alt=""/><br /><sub><b> 조희섭 </b></sub></a><br /></td>
-      <td align="center"><a href="https://github.com/taegyumlee"><img src=https://avatars.githubusercontent.com/u/127921071?v=4" width="100px;" alt=""/><br /><sub><b> 이태겸 </b></sub></a><br /></td>
-      <td align="center"><a href="https://github.com/jxghn"><img src="https://avatars.githubusercontent.com/u/100080284?v=4" width="100px;" alt=""/><br /><sub><b> 노종현 </b></sub></a><br /></td>
-      <td align="center"><a href="https://github.com/seun2022"><img src="https://avatars.githubusercontent.com/u/99938900?v=4" width="100px;" alt=""/><br /><sub><b> 정세운 </b></sub></a><br /></td>
-    </tr>
-  </tbody>
-</table>
+
