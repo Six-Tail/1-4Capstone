@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -49,12 +40,23 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyA-w4NoKZG_kdyUheK8wejjZsY6zhQr1z8',
+    appId: '1:49491866019:web:3c9d08bdefedc9a4dd2a16',
+    messagingSenderId: '49491866019',
+    projectId: 'to-do-best-72308',
+    authDomain: 'to-do-best-72308.firebaseapp.com',
+    databaseURL: 'https://to-do-best-72308-default-rtdb.firebaseio.com',
+    storageBucket: 'to-do-best-72308.firebasestorage.app',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyApBJ3XkCBYPSLcc4PugxjWAdeNyqfEWHM',
     appId: '1:49491866019:android:747dc0a50581b5a2dd2a16',
     messagingSenderId: '49491866019',
     projectId: 'to-do-best-72308',
-    storageBucket: 'to-do-best-72308.appspot.com',
+    databaseURL: 'https://to-do-best-72308-default-rtdb.firebaseio.com',
+    storageBucket: 'to-do-best-72308.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -62,7 +64,32 @@ class DefaultFirebaseOptions {
     appId: '1:49491866019:ios:20f1bd3ed94a3e11dd2a16',
     messagingSenderId: '49491866019',
     projectId: 'to-do-best-72308',
-    storageBucket: 'to-do-best-72308.appspot.com',
+    databaseURL: 'https://to-do-best-72308-default-rtdb.firebaseio.com',
+    storageBucket: 'to-do-best-72308.firebasestorage.app',
+    androidClientId: '49491866019-k3v15lk3tlkf1kh8dtqdrthu52rjeol8.apps.googleusercontent.com',
+    iosClientId: '49491866019-4ntd7fb8uc0s6trao9hq37bag1ikgcph.apps.googleusercontent.com',
     iosBundleId: 'com.example.todobestHome',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCZH3iZrSsQMygx9-XbjpSRIj_z8h7dWm4',
+    appId: '1:49491866019:ios:7fe2a59782815144dd2a16',
+    messagingSenderId: '49491866019',
+    projectId: 'to-do-best-72308',
+    databaseURL: 'https://to-do-best-72308-default-rtdb.firebaseio.com',
+    storageBucket: 'to-do-best-72308.firebasestorage.app',
+    androidClientId: '49491866019-k3v15lk3tlkf1kh8dtqdrthu52rjeol8.apps.googleusercontent.com',
+    iosClientId: '49491866019-4op20ipf3jjpkun2c6g587f3bjcsc57v.apps.googleusercontent.com',
+    iosBundleId: 'com.example.latest',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyA-w4NoKZG_kdyUheK8wejjZsY6zhQr1z8',
+    appId: '1:49491866019:web:5f06bf89a590bbdadd2a16',
+    messagingSenderId: '49491866019',
+    projectId: 'to-do-best-72308',
+    authDomain: 'to-do-best-72308.firebaseapp.com',
+    databaseURL: 'https://to-do-best-72308-default-rtdb.firebaseio.com',
+    storageBucket: 'to-do-best-72308.firebasestorage.app',
   );
 }
