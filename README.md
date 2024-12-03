@@ -163,13 +163,20 @@
 <img src="https://img.shields.io/badge/flutter-%2302569B.svg?&style=for-the-badge&logo=flutter&logoColor=white" />  <img src="https://img.shields.io/badge/dart-%230175C2.svg?&style=for-the-badge&logo=dart&logoColor=white" />  <img src="https://img.shields.io/badge/figma-%23F24E1E.svg?&style=for-the-badge&logo=figma&logoColor=white" />
 
 ### **Backend**
-- **Firebase**
-    - Firestore: 데이터베이스
-    - Authentication: 사용자 인증
-    - Cloud Functions: 서버리스 백엔드 로직  
+- **Firebase**  
+    - **Firestore**: 실시간 데이터 동기화를 지원하는 NoSQL 데이터베이스  
+    - **Authentication**: 다양한 인증 방식을 제공하여 손쉬운 사용자 인증 구현  
+    - **Cloud Functions**: 서버리스 환경에서 이벤트 기반의 백엔드 로직 실행  
+    - **Cloud Storage**: 이미지 및 파일 업로드 관리   
 
 
-  <img src="https://img.shields.io/badge/firebase-%23FFCA28.svg?&style=for-the-badge&logo=firebase&logoColor=black" />  
+<img src="https://img.shields.io/badge/firebase-%23FFCA28.svg?&style=for-the-badge&logo=firebase&logoColor=black" />  <img src="https://img.shields.io/badge/Google_Cloud-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white" />
+
+### **Collaboration** 
+- **Notion**: 프로젝트 관리 및 문서화  
+- **Git**: 버전 관리 및 협업
+
+<img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white" />  <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />
 
 ---
 
